@@ -1,0 +1,4 @@
+#!/bin/sh
+export LC_CTYPE=ja_JP.SJIS
+#/home/deuce/java/diablo-jdk1.5.0_06/bin/java -jar QDBUtil.jar
+java -jar QDBUtil.jar

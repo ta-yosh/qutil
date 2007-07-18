@@ -1,0 +1,14 @@
+/jp.co/ {
+          s/saias/ascsystem/g
+          s/ikensyo/qkan/g
+}
+/Ikensyo/ {
+          s/Ikensyo/Qkan/g
+}
+/°å¸«½ñ/ {
+          s/´µ¼Ô//g
+}
+/´µ¼Ô/ {
+          s/´µ¼Ô//g
+}
+
