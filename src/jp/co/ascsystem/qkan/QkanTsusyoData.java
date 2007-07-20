@@ -164,11 +164,11 @@ public class QkanTsusyoData {
         tValue.put("1150104R",(new String[] {"","3\uff5e6時間","6\uff5e8時間"}));
       }
       else {
-        tValue.put("1150104",(new String[] {"","2〜3時間","3〜4時間","4〜6時間e","6〜8時間","8〜9時間","9〜10時間"}));
+        tValue.put("1150104",(new String[] {"","2〜3時間","3〜4時間","4〜6時間","6〜8時間","8〜9時間","9〜10時間"}));
         tValue.put("1150104R",(new String[] {"","3〜6時間","6〜8時間"}));
       }
       tValue.put("1150105",(new String[] {"","無し","有り"}));
-      tValue.put("1150106",(new String[] {"","無し","通常","特別"}));
+      tValue.put("1150106",(new String[] {"","無し","有り","有り"}));
       tValue.put("1150110",(new String[] {"","無し","有り"}));
       tValue.put("1150111",(new String[] {"","無し","有り"}));
       tValue.put("1150112",(new String[] {"","無し","有り"}));
@@ -500,6 +500,12 @@ public class QkanTsusyoData {
           double unitRate;
           if (sbp==11511) {
             unitRate = tunitRate;
+            Hashtable tVal = new Hashtable();
+            tVal.put("1150105","無し");
+            tVal.put("1150106","無し");
+            tVal.put("1150110","無し");
+            tVal.put("1150111","無し");
+            tVal.put("1150112","無し");
             for (int j=0;j<dbm2.Rows;j++){
               System.out.println("Rows start: "+j);
               int sbp0 = Integer.parseInt(dbm2.getData("SYSTEM_BIND_PATH",j).toString());
@@ -526,6 +532,7 @@ public class QkanTsusyoData {
                   timeId = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
                   val = (String[])tValue.get(((kiboId!=3)? "1150104":"1150104R")); 
                   key = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
+                  pline.addElement(val[key]);
                 }
                 else {
                   val = (String[])tValue.get(dbm2.getData("SYSTEM_BIND_PATH",j).toString());
@@ -534,9 +541,14 @@ public class QkanTsusyoData {
                   System.out.println("sbp = "+sbp0+" key = "+key+" add= "+add[key]);
                   addUnit += add[key];
                 }
-                pline.addElement(val[key]);
+                tVal.put(dbm2.getData("SYSTEM_BIND_PATH",j).toString(),val[key]);
               }
             }
+            pline.addElement((String)tVal.get("1150105"));
+            pline.addElement((String)tVal.get("1150106"));
+            pline.addElement((String)tVal.get("1150110"));
+            pline.addElement((String)tVal.get("1150111"));
+            pline.addElement((String)tVal.get("1150112"));
             pline.addElement("");
             pline.addElement("");
             pointCode = inic+rPlus+tPlus+kPlus;
@@ -679,7 +691,7 @@ public class QkanTsusyoData {
       fieldName.addElement("氏名");
       fieldName.addElement("年齢");
       fieldName.addElement("種類");
-      fieldName.addElement("状態区分");
+      fieldName.addElement("要介護度");
       if (td>0) {
         fieldName.addElement("開始時刻");
         fieldName.addElement("終了時刻");

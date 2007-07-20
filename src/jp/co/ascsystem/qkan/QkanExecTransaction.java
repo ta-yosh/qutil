@@ -278,7 +278,8 @@ public class QkanExecTransaction extends Thread {
               if (dNum!=null) {
                 oTable.removeRows(dNum);
               }
-              oTable.addRow(iTable.getPatientByPno(pNos[i][0],patientNo));
+              int nno = patientNo;
+              oTable.addRow(iTable.getPatientByPno(pNos[i][0],-nno));
             }
             progressBar.setValue(++lcount);
             progressBar.setString(String.valueOf(lcount)+"/"+count+"·ï");

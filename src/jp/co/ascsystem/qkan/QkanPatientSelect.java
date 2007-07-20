@@ -248,14 +248,16 @@ public class QkanPatientSelect {
     }
 
     public Vector getPatientByPno(int pno,int nno) {
-      int[] num = new int[] {0,1,2,3,4,5,6,11,12,13};
+      int[] num = new int[] {0,1,2,3,4,5,6,11,12,13,7,8,9,10};
       Vector dat = new Vector();
+      int no = nno;
       for (int i=0;i<usrTbl.getRowCount();i++) {
         if (pno==Integer.parseInt((usrTbl.getValueAt(i,0)).toString())) {
-          dat.addElement(new Integer(nno));
-          for (int j=1;j<10;j++) {
-             //dat.addElement(usrTbl.getValueAt(i,j));
-             dat.addElement(usrTbl.getValueAt(i,num[j]));
+          if (nno<0) dat.addElement(new Integer(-no));
+          else dat.addElement(new Integer(nno));
+          for (int j=1;j<14;j++) {
+             if (nno<0) dat.addElement(usrTbl.getValueAt(i,j));
+             else dat.addElement(usrTbl.getValueAt(i,num[j]));
           }
           return dat;
         }
