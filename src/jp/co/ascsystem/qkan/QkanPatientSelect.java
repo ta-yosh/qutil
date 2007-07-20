@@ -43,6 +43,7 @@ public class QkanPatientSelect {
       try {
         BufferedReader reader = new BufferedReader(new FileReader(csvFile));
         while ((line=reader.readLine()) !=null) {
+          String[] ritems = new String[14];
           String[] items = line.split(",");
           int skip=0;
           int col=0;
@@ -71,7 +72,12 @@ public class QkanPatientSelect {
               Integer age = new Integer(patientAge(rdat.get(5).toString()));
               rdat.addElement(age);
             }
-            else rdat.addElement(item);
+            else if (col<6) rdat.addElement(item);
+            else ritems[col] = item;
+          }
+          for (int i=7;i<14;i++) {
+            if (i<11) rdat.addElement((col==13) ? ritems[i+3]:"");
+            else rdat.addElement(ritems[i-4]);
           }
           this.data.addElement(rdat); 
           Rows++;
@@ -187,13 +193,15 @@ public class QkanPatientSelect {
         }
 
         for (int j=0;j<Rows;j++) {
+          int[] num = new int[] {0,1,2,3,4,5,6,10,11,12,13,7,8,9};
           Vector rdat = new Vector();
           for (int i=0;i<14;i++) {
             if (i==6) {
               String str;
               Integer age;
               try {
-                str = data[i][j].toString();
+                //str = data[i][j].toString();
+                str = data[num[i]][j].toString();
                 age = new Integer(patientAge(str));
               } catch(Exception e) {
                 age = new Integer(0);
@@ -202,7 +210,8 @@ public class QkanPatientSelect {
             }
             else {
               try {
-                String str = data[i][j].toString();
+                //String str = data[i][j].toString();
+                String str = data[num[i]][j].toString();
                 if (i==4) str = "   "+((str.equals("1")) ? "ÃË":"½÷");
                 rdat.addElement(str);
               }catch(Exception e) {
@@ -239,12 +248,14 @@ public class QkanPatientSelect {
     }
 
     public Vector getPatientByPno(int pno,int nno) {
+      int[] num = new int[] {0,1,2,3,4,5,6,11,12,13};
       Vector dat = new Vector();
       for (int i=0;i<usrTbl.getRowCount();i++) {
         if (pno==Integer.parseInt((usrTbl.getValueAt(i,0)).toString())) {
           dat.addElement(new Integer(nno));
           for (int j=1;j<10;j++) {
-             dat.addElement(usrTbl.getValueAt(i,j));
+             //dat.addElement(usrTbl.getValueAt(i,j));
+             dat.addElement(usrTbl.getValueAt(i,num[j]));
           }
           return dat;
         }
@@ -254,12 +265,14 @@ public class QkanPatientSelect {
 
     public String getPatientBasicDataCsv(int pno) {
       StringBuffer csvRecord;
+      int[] num = new int[] {0,1,2,3,4,5,6,11,12,13,7,8,9,10};
       for (int i=0;i<usrTbl.getRowCount();i++) {
         if (pno==Integer.parseInt((usrTbl.getValueAt(i,0)).toString())) {
            csvRecord = new StringBuffer();
            for (int j=1;j<usrTbl.getColumnCount();j++) {
              csvRecord.append("\"");
-             csvRecord.append(usrTbl.getValueAt(i,j).toString().replaceAll("^ +","").replaceAll(" +$",""));
+             //csvRecord.append(usrTbl.getValueAt(i,j).toString().replaceAll("^ +","").replaceAll(" +$",""));
+             csvRecord.append(usrTbl.getValueAt(i,num[j]).toString().replaceAll("^ +","").replaceAll(" +$",""));
              csvRecord.append("\"");
              if (j<usrTbl.getColumnCount()-1) csvRecord.append(",");
            }
@@ -544,13 +557,13 @@ public class QkanPatientSelect {
       fieldName.addElement("À­ÊÌ");
       fieldName.addElement("À¸Ç¯·îÆü");
       fieldName.addElement("Ç¯Îð");
-      fieldName.addElement("Í¹ÊØÈÖ¹æ");
-      fieldName.addElement("½»½ê");
-      fieldName.addElement("Ï¢ÍíÀè(Tel)");
       fieldName.addElement("Í×²ð¸îÅÙ");
       fieldName.addElement("Ç§Äê³«»ÏÆü");
       fieldName.addElement("Ç§Äê½ªÎ»Æü");
       fieldName.addElement("µïÂð²ð¸î»Ù±ç»ö¶È½ê");
+      fieldName.addElement("Í¹ÊØÈÖ¹æ");
+      fieldName.addElement("½»½ê");
+      fieldName.addElement("Ï¢ÍíÀè(Tel)");
         dtm = new DefaultTableModel(data, fieldName);
         sorter = new TableSorter2(dtm);
         usrTbl = new JTable(sorter);
@@ -572,13 +585,13 @@ public class QkanPatientSelect {
         usrTbl.getColumnModel().getColumn(4).setPreferredWidth(45);
         usrTbl.getColumnModel().getColumn(5).setPreferredWidth(85);
         usrTbl.getColumnModel().getColumn(6).setPreferredWidth(45);
-        usrTbl.getColumnModel().getColumn(7).setPreferredWidth(85);
-        usrTbl.getColumnModel().getColumn(8).setPreferredWidth(250);
+        usrTbl.getColumnModel().getColumn(7).setPreferredWidth(80);
+        usrTbl.getColumnModel().getColumn(8).setPreferredWidth(100);
         usrTbl.getColumnModel().getColumn(9).setPreferredWidth(100);
-        usrTbl.getColumnModel().getColumn(10).setPreferredWidth(80);
-        usrTbl.getColumnModel().getColumn(11).setPreferredWidth(100);
-        usrTbl.getColumnModel().getColumn(12).setPreferredWidth(100);
-        usrTbl.getColumnModel().getColumn(13).setPreferredWidth(120);
+        usrTbl.getColumnModel().getColumn(10).setPreferredWidth(120);
+        usrTbl.getColumnModel().getColumn(11).setPreferredWidth(85);
+        usrTbl.getColumnModel().getColumn(12).setPreferredWidth(250);
+        usrTbl.getColumnModel().getColumn(13).setPreferredWidth(100);
         usrTbl.getTableHeader().setReorderingAllowed(false);
         JScrollPane scrPane = new JScrollPane();
         scrPane.getViewport().setView(usrTbl);

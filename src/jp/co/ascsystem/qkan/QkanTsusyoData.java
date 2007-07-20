@@ -48,7 +48,10 @@ public class QkanTsusyoData {
     private int timePlus[][]= new int[4][];
     private int kiboPlus[][]= new int[4][];
     private int initCode[]= new int[4];
+    private int yinitCode[]= new int[4];
     private int ddata[];
+    private double tunitRate;
+    private double yunitRate;
     public int Rows;
     private DngGenericCombo cBox,ymBox,dBox;
     private JComboBox ymbox,dbox;
@@ -66,6 +69,8 @@ public class QkanTsusyoData {
 
     private Hashtable tValue = new Hashtable();
     private Hashtable yValue = new Hashtable();
+    private Hashtable taUnit = new Hashtable();
+    private Hashtable yaUnit = new Hashtable();
     private Hashtable careRate = new Hashtable();
     private Hashtable ratePlus = new Hashtable();
 
@@ -97,9 +102,30 @@ public class QkanTsusyoData {
         }
         cBox = new DngGenericCombo(data);
         currentProvider = data[0][1];
+
+        buf.delete(0,buf.length());
+        buf.append("select service_unit from m_service_code ");
+        buf.append("where service_code_item in (5001,5002,5003,5004,5005,");
+        buf.append("5050,5301,5605,5606,5607)");
+        buf.append(" and system_service_kind_detail in (11511,16511) ");
+        buf.append("order by service_code_item");
+        if (dbm.connect()) {
+          dbm.execQuery(buf.toString());
+          dbm.Close();
+          yaUnit.put("1650103",(new int[] {0,0,Integer.parseInt(dbm.getData(0,0).toString())}));
+          yaUnit.put("1650104",(new int[] {0,0,Integer.parseInt(dbm.getData(0,1).toString())}));
+          yaUnit.put("1650105",(new int[] {0,0,Integer.parseInt(dbm.getData(0,2).toString())}));
+          yaUnit.put("1650106",(new int[] {0,0,Integer.parseInt(dbm.getData(0,3).toString())}));
+          yaUnit.put("1650107",(new int[] {0,0,Integer.parseInt(dbm.getData(0,4).toString())}));
+          taUnit.put("1150105",(new int[] {0,0,Integer.parseInt(dbm.getData(0,5).toString())}));
+          taUnit.put("1150106",(new int[] {0,0,Integer.parseInt(dbm.getData(0,6).toString()),Integer.parseInt(dbm.getData(0,6).toString())}));
+          taUnit.put("1150110",(new int[] {0,0,Integer.parseInt(dbm.getData(0,9).toString())}));
+          taUnit.put("1150111",(new int[] {0,0,Integer.parseInt(dbm.getData(0,7).toString())}));
+          taUnit.put("1150112",(new int[] {0,0,Integer.parseInt(dbm.getData(0,8).toString())}));
+        }
       }
       else Rows=-1;
-      careRate.put("01","非該当"); 
+      careRate.put("1","非該当"); 
       careRate.put("11","経過的要介護");
       careRate.put("12","要支援1");
       careRate.put("13","要支援2");
@@ -130,8 +156,10 @@ public class QkanTsusyoData {
       kiboPlus[3] = new int[] {0,0,100,300};
       System.out.println("set initCode start");
       initCode = new int[]  {1140,1140,8400,9400};
+      yinitCode = new int[]  {1111,1111,8001,9001};
       //tValue.put("1150103",(new String[] {"","小規模型","通常型","療養"}));
-      if (System.getProperty("os.name").substring(0,3)=="Win") {
+      String osn = System.getProperty("os.name").substring(0,3);
+      if (osn.equals("Win")) {
         tValue.put("1150104",(new String[] {"","2\uff5e3時間","3\uff5e4時間","4\uff5e6時間","6\uff5e8時間","8\uff5e9時間","9\uff5e10時間"}));
         tValue.put("1150104R",(new String[] {"","3\uff5e6時間","6\uff5e8時間"}));
       }
@@ -148,6 +176,7 @@ public class QkanTsusyoData {
       yValue.put("1650104",(new String[] {"","無し","有り"}));
       yValue.put("1650105",(new String[] {"","無し","有り"}));
       yValue.put("1650106",(new String[] {"","無し","有り"}));
+      yValue.put("1650107",(new String[] {"","無し","有り"}));
     }
 
     public JPanel searchCondition() {
@@ -166,8 +195,8 @@ public class QkanTsusyoData {
       YMCondition();
       pn.add(pn1);
       tPanel.add(pn,BorderLayout.NORTH);
-      JLabel lab1 = new JLabel(" ");
-      lab1.setFont(new Font("Dialog",Font.PLAIN,12));
+      JLabel lab1 = new JLabel("費用、負担額について：月間では実績確定分のみ表示され、1日単位では、概算が表示されます。(実際の金額とは違う場合が有ります) ");
+      lab1.setFont(new Font("Dialog",Font.PLAIN,10));
       tPanel.add(lab1,BorderLayout.CENTER);
       tPanel.add(pn2,BorderLayout.SOUTH);
       return tPanel;
@@ -178,7 +207,10 @@ public class QkanTsusyoData {
         pn1.setVisible(false);
         pn1.removeAll();
         StringBuffer buf = new StringBuffer();
-        buf.append("select distinct extract(YEAR from SERVICE_DATE),extract(MONTH from SERVICE_DATE) from SERVICE where PROVIDER_ID='");
+        buf.append("select distinct extract(YEAR from SERVICE_DATE),");
+        buf.append("extract(MONTH from SERVICE_DATE) from SERVICE ");
+        buf.append("inner join PATIENT on (SERVICE.PATIENT_ID=");
+        buf.append("PATIENT.PATIENT_ID and DELETE_FLAG=0) where PROVIDER_ID='");
         buf.append(currentProvider);
         buf.append("' and SYSTEM_SERVICE_KIND_DETAIL in (11511,16511) ");
         buf.append(" and SERVICE_DATE is not NULL");
@@ -226,8 +258,24 @@ public class QkanTsusyoData {
           pn1.add(ymbox);
           dayCondition();
           pn1.add(pn3);
+          dbm.connect();
+          dbm.execQuery("select provider_area_type from provider where provider_id='"+currentProvider+"'");
+          dbm.Close();
+          buf.delete(0,buf.length());
+          buf.append("select unit_price_value from m_area_unit_price ");
+          buf.append("where unit_price_type=");
+          buf.append(dbm.getData(0,0).toString());
+          buf.append(" and system_service_kind_detail in (11511,16511) ");
+          buf.append("order by system_service_kind_detail");
+          dbm.connect();
+          dbm.execQuery(buf.toString());
+          dbm.Close();
+          tunitRate = Float.parseFloat(dbm.getData(0,0).toString());
+          yunitRate = Float.parseFloat(dbm.getData(0,1).toString());
+          System.out.println("trate = "+tunitRate+" yrate = "+yunitRate);
 
           setTsusyoPanel(ymdata[0][0],ymdata[0][1],targetDay);
+          
         } else {
           JLabel nodata = new JLabel("←該当するデータが有りません他の事業所があれば選択しなおして下さい。");
           nodata.setFont(new Font("Dialog",Font.PLAIN,12));
@@ -243,7 +291,9 @@ public class QkanTsusyoData {
       pn3.setVisible(false);
       pn3.removeAll();
       StringBuffer buf = new StringBuffer();
-      buf.append("select distinct extract(DAY from SERVICE_DATE) from SERVICE where PROVIDER_ID='");
+      buf.append("select distinct extract(DAY from SERVICE_DATE) from SERVICE");
+      buf.append(" inner join PATIENT on (PATIENT.PATIENT_ID");
+      buf.append("=SERVICE.PATIENT_ID and DELETE_FLAG=0) where PROVIDER_ID='");
       buf.append(currentProvider);
       buf.append("' and extract(YEAR from SERVICE_DATE)='");
       buf.append(targetYear);
@@ -300,7 +350,7 @@ public class QkanTsusyoData {
         buf.append("select PATIENT_FIRST_NAME,PATIENT_FAMILY_NAME,");
         buf.append("SERVICE.PATIENT_ID,max(SERVICE_ID) as SID,");
         buf.append("SYSTEM_SERVICE_KIND_DETAIL,JOTAI_CODE,PATIENT_BIRTHDAY,");
-        buf.append("count(SERVICE.SERVICE_ID)");
+        buf.append("count(SERVICE.SERVICE_ID),INSURE_RATE");
         buf.append(" from SERVICE ");
         buf.append(" inner join PATIENT on ");
         buf.append("(PATIENT.PATIENT_ID=SERVICE.PATIENT_ID and DELETE_FLAG=0)");
@@ -321,7 +371,8 @@ public class QkanTsusyoData {
         buf.append(" and SERVICE.PROVIDER_ID='");
         buf.append(currentProvider);
         buf.append("' group by SERVICE.PATIENT_ID,PATIENT_FIRST_NAME,");
-        buf.append("PATIENT_FAMILY_NAME,PATIENT_BIRTHDAY,JOTAI_CODE,SYSTEM_SERVICE_KIND_DETAIL");
+        buf.append("PATIENT_FAMILY_NAME,PATIENT_BIRTHDAY,JOTAI_CODE,");
+        buf.append("INSURE_RATE,SYSTEM_SERVICE_KIND_DETAIL");
         buf.append(" order by SYSTEM_SERVICE_KIND_DETAIL");
 
         String sql = buf.toString();
@@ -333,6 +384,7 @@ public class QkanTsusyoData {
         for (int i=0;i<dbm.Rows;i++){
           int pointCode=0;
           int sCount = Integer.parseInt(dbm.getData("COUNT",i).toString());
+          int insRate = Integer.parseInt(dbm.getData("INSURE_RATE",i).toString());
           Vector pline = new Vector();
           int pNo = new Integer(dbm.getData(2,i).toString()).intValue();
           //pline.addElement(dbm.getData(2,i).toString());
@@ -343,15 +395,25 @@ public class QkanTsusyoData {
           String nam =nam1+nam2;
           pline.addElement(new Integer(i+1));
           pline.addElement(nam);
-          int age =patientAge(dbm.getData("PATIENT_BIRTHDAY",i).toString());
-          pline.addElement(new Integer(age));
+          if (dbm.getData("PATIENT_BIRTHDAY",i)!=null) {
+            int age =patientAge(dbm.getData("PATIENT_BIRTHDAY",i).toString());
+            pline.addElement(new Integer(age));
+          } else {
+            pline.addElement("");
+          }
           int sbp = Integer.parseInt(dbm.getData(4,i).toString());
           String kind = (sbp==11511) ? 
                         "":"予防";
           pline.addElement(kind);
-          String cRate = (String)careRate.get(dbm.getData("JOTAI_CODE",i).toString());
-          int rPlus = Integer.parseInt((String)ratePlus.get(dbm.getData("JOTAI_CODE",i).toString()));
+          String cR="1";
+          if (dbm.getData("JOTAI_CODE",i)!=null) {
+          cR = dbm.getData("JOTAI_CODE",i).toString();
+          String cRate = (String)careRate.get(cR);
           pline.addElement(cRate);
+          } else {
+            pline.addElement("");
+          }
+          int rPlus = Integer.parseInt((String)ratePlus.get(cR));
 /*
           if (targetDay==0) {
             String y = dbm.getData(5,i).toString();
@@ -389,17 +451,26 @@ public class QkanTsusyoData {
             dbm2.connect();
             dbm2.execQuery(sql);
             dbm2.Close();
-            String hou = dbm2.getData(2,0).toString();
-            String min = dbm2.getData(3,0).toString();
-            if (hou.length()==1) hou = "0"+hou;
-            if (min.length()==1) min = "0"+min;
-            String ti = hou+":"+min;
+            String ti,hou,min;
+            if (dbm2.getData(2,0)!=null) {
+              hou = dbm2.getData(2,0).toString();
+              min = dbm2.getData(3,0).toString();
+              if (hou.length()==1) hou = "0"+hou;
+              if (min.length()==1) min = "0"+min;
+              ti = hou+":"+min;
+            } else {
+              ti = "";
+            }
             pline.addElement(ti);
-            hou = dbm2.getData(2,1).toString();
-            min = dbm2.getData(3,1).toString();
-            if (hou.length()==1) hou = "0"+hou;
-            if (min.length()==1) min = "0"+min;
-            ti = hou+":"+min;
+            if (dbm2.getData(2,1)!=null) {
+              hou = dbm2.getData(2,1).toString();
+              min = dbm2.getData(3,1).toString();
+              if (hou.length()==1) hou = "0"+hou;
+              if (min.length()==1) min = "0"+min;
+              ti = hou+":"+min;
+            } else {
+              ti = "";
+            }
             pline.addElement(ti);
           }
           buf.delete(0,buf.length());
@@ -410,7 +481,7 @@ public class QkanTsusyoData {
           buf.append(" where SERVICE_ID=");
           buf.append(sNo);
           buf.append(" and SYSTEM_BIND_PATH");
-          buf.append(" in (1150103,1150104,1150105,1150106,1150108,1150109,1150110,1150111,1150112,1650102,1650103,1650104,1650105,1650106)");
+          buf.append(" in (1150103,1150104,1150105,1150106,1150108,1150109,1150110,1150111,1150112,1650101,1650102,1650103,1650104,1650105,1650106,1650107)");
           buf.append(" order by SYSTEM_BIND_PATH;");
           sql = buf.toString();
           System.out.println(sql);
@@ -419,13 +490,16 @@ public class QkanTsusyoData {
           dbm2.Close();
 
           System.out.println("dbm2:"+dbm2.Rows);
-          if (dbm2.Rows==9 || dbm2.Rows==8) {
-            int inic=0;
-            int hId=0;
-            int kiboId=0;
-            int timeId=0;
-            int kPlus=0;
-            int tPlus=0;
+          int inic=0;
+          int hId=0;
+          int kiboId=0;
+          int timeId=0;
+          int kPlus=0;
+          int tPlus=0;
+          int addUnit=0;
+          double unitRate;
+          if (sbp==11511) {
+            unitRate = tunitRate;
             for (int j=0;j<dbm2.Rows;j++){
               System.out.println("Rows start: "+j);
               int sbp0 = Integer.parseInt(dbm2.getData("SYSTEM_BIND_PATH",j).toString());
@@ -441,17 +515,25 @@ public class QkanTsusyoData {
                 System.out.println("inic : "+inic+"+"+kPlus+"+"+tPlus);
               } 
               else if (sbp0==1150109) {
-                if (dbm2.getData("DETAIL_VALUE",j).toString()=="2") kPlus = kPlus* 2;
+                if (dbm2.getData("DETAIL_VALUE",j).toString().equals("2")) kPlus = kPlus* 2;
               }
               else {
                 System.out.println("num"+sbp0+"num");
                 String[] val;
+                int[] add;
+                int key;
                 if (sbp0==1150104) {
                   timeId = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
-                  val = (String[])tValue.get(((kiboId==3)? "1150104":"1150104R")); 
+                  val = (String[])tValue.get(((kiboId!=3)? "1150104":"1150104R")); 
+                  key = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
                 }
-                else val = (String[])tValue.get(dbm2.getData("SYSTEM_BIND_PATH",j).toString());
-                int key = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
+                else {
+                  val = (String[])tValue.get(dbm2.getData("SYSTEM_BIND_PATH",j).toString());
+                  add = (int[]) taUnit.get(dbm2.getData("SYSTEM_BIND_PATH",j).toString());
+                  key = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
+                  System.out.println("sbp = "+sbp0+" key = "+key+" add= "+add[key]);
+                  addUnit += add[key];
+                }
                 pline.addElement(val[key]);
               }
             }
@@ -461,51 +543,72 @@ public class QkanTsusyoData {
             System.out.println("pointCode : "+pointCode);
           }
           else {
+            unitRate = yunitRate;
             for (int j=0;j<4;j++) pline.addElement("");
             Hashtable yoVal = new Hashtable();
             yoVal.put("1650103","無し");
             yoVal.put("1650104","無し");
             yoVal.put("1650105","無し");
             yoVal.put("1650106","無し");
-            for (int j=1;j<dbm2.Rows;j++) {
-              yoVal.put(dbm2.getData("SYSTEM_BIND_PATH",j),dbm2.getData("DETAIL_VALUE",j));
+            for (int j=0;j<dbm2.Rows;j++) {
+              int sbp0 = Integer.parseInt(dbm2.getData("SYSTEM_BIND_PATH",j).toString());
+              if (sbp0==1650101) {
+                hId = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
+                inic= yinitCode[hId];
+                if (cR.equals("13")) inic +=10;
+              } 
+              else if (sbp0==1650102) {
+                if(Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString())==2) inic = inic+1;
+                else inic=0;
+              } 
+              else {
+
+                String[] val = (String[])yValue.get(dbm2.getData("SYSTEM_BIND_PATH",j).toString());
+                int[] add = (int[]) yaUnit.get(dbm2.getData("SYSTEM_BIND_PATH",j).toString());
+                int key = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
+                yoVal.put(dbm2.getData("SYSTEM_BIND_PATH",j).toString(),val[key]);
+                addUnit += add[key];
+              }
             }
             pline.addElement((String)yoVal.get("1650105"));
             pline.addElement((String)yoVal.get("1650106"));
             pline.addElement((String)yoVal.get("1650103"));
             pline.addElement((String)yoVal.get("1650104"));
+            pointCode = inic;
           }
 
-          buf.delete(0,buf.length());
-          buf.append("select CLAIM_ID,SYSTEM_BIND_PATH,");
-          buf.append("DETAIL_VALUE");
-          buf.append(" from CLAIM_DETAIL_TEXT_");
-          buf.append(detYear);
-          buf.append(" where CLAIM_ID = (select CLAIM_ID from CLAIM");
-          buf.append(" where PATIENT_ID=");
-          buf.append(pNo);
-          buf.append(" and extract(YEAR from CLAIM_DATE)=");
-          buf.append(targetYear);
-          buf.append(" and extract(MONTH from CLAIM_DATE)=");
-          buf.append(targetMonth);
-          buf.append(" and CATEGORY_NO=7 and PROVIDER_ID='");
-          buf.append(currentProvider);
-          buf.append("') and SYSTEM_BIND_PATH");
-          buf.append(" in (701008,701014,701015,701016,701017)");
-          buf.append(" order by SYSTEM_BIND_PATH;");
-          sql = buf.toString();
-          System.out.println(sql);
-          dbm2.connect();
-          dbm2.execQuery(sql);
-          dbm2.Close();
-          if (dbm2.Rows>0) {
-          pline.addElement(new Integer(dbm2.getData("DETAIL_VALUE",0).toString()));
-          int hiyou = (int)(Float.parseFloat(dbm2.getData("DETAIL_VALUE",1).toString())*Float.parseFloat(dbm2.getData("DETAIL_VALUE",2).toString()));
-          pline.addElement(new Integer(hiyou));
-          pline.addElement(new Integer(dbm2.getData("DETAIL_VALUE",4).toString()));
+          if (targetDay==0) {
+            buf.delete(0,buf.length());
+            buf.append("select CLAIM_ID,SYSTEM_BIND_PATH,");
+            buf.append("DETAIL_VALUE");
+            buf.append(" from CLAIM_DETAIL_TEXT_");
+            buf.append(detYear);
+            buf.append(" where CLAIM_ID = (select CLAIM_ID from CLAIM");
+            buf.append(" where PATIENT_ID=");
+            buf.append(pNo);
+            buf.append(" and extract(YEAR from CLAIM_DATE)=");
+            buf.append(targetYear);
+            buf.append(" and extract(MONTH from CLAIM_DATE)=");
+            buf.append(targetMonth);
+            buf.append(" and CATEGORY_NO=7 and PROVIDER_ID='");
+            buf.append(currentProvider);
+            buf.append("') and SYSTEM_BIND_PATH");
+            buf.append(" in (701008,701014,701015,701016,701017)");
+            buf.append(" order by SYSTEM_BIND_PATH;");
+            sql = buf.toString();
+            System.out.println(sql);
+            dbm2.connect();
+            dbm2.execQuery(sql);
+            dbm2.Close();
+            if (dbm2.Rows>0) {
+              pline.addElement(new Integer(dbm2.getData("DETAIL_VALUE",0).toString()));
+              int hiyou = (int)(Float.parseFloat(dbm2.getData("DETAIL_VALUE",1).toString())*Float.parseFloat(dbm2.getData("DETAIL_VALUE",2).toString()));
+              pline.addElement(new Integer(hiyou));
+              pline.addElement(new Integer(dbm2.getData("DETAIL_VALUE",4).toString()));
+            }
+            else pline.addElement(new Integer(sCount));
           }
           else {
-            pline.addElement(new Integer(sCount));
             buf.delete(0,buf.length());
             buf.append("select service_unit from m_service_code ");
             buf.append("where system_service_kind_detail='");
@@ -518,7 +621,14 @@ public class QkanTsusyoData {
             dbm2.execQuery(buf.toString());
             dbm2.Close();
             if (dbm2.Rows>0) {
-              pline.addElement(dbm2.getData(0,0).toString());
+              int p = Integer.parseInt(dbm2.getData(0,0).toString());
+              p += addUnit;
+              int hiyou =(int)((double) p * unitRate);
+              int futan = hiyou - (int)((double)hiyou/100.0*(double)insRate);
+              //if (hiyou%10>0) futan +=1;
+              System.out.println("p = "+p+" add = "+addUnit+" hiyou = "+hiyou+" futan = "+futan);
+              pline.addElement(new Integer(hiyou));
+              pline.addElement(new Integer(futan));
             }
           }
           pdata.addElement(pline);
@@ -582,7 +692,9 @@ public class QkanTsusyoData {
       fieldName.addElement("口腔");
       fieldName.addElement("アク");
       fieldName.addElement("運動");
-      fieldName.addElement("回数");
+      if (td==0) {
+        fieldName.addElement("回数");
+      }
       fieldName.addElement("費用");
       fieldName.addElement("負担額");
       dtm = new DefaultTableModel(data, fieldName);
@@ -625,9 +737,11 @@ public class QkanTsusyoData {
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32);
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(40);
       System.out.println("cid : "+cid);
-      //sorter.setColumnClass(cid,Integer.class);
-      usrTbl.getColumnModel().getColumn(cid).setCellRenderer(ren);
-      usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32);
+      if (td==0) {
+        //sorter.setColumnClass(cid,Integer.class);
+        usrTbl.getColumnModel().getColumn(cid).setCellRenderer(ren);
+        usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32);
+      }
       //sorter.setColumnClass(cid,Integer.class);
       usrTbl.getColumnModel().getColumn(cid).setCellRenderer(ren);
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(70);
