@@ -194,10 +194,15 @@ public class QkanTsusyoData {
       pn.add(cbx);
       YMCondition();
       pn.add(pn1);
+      JPanel pnl = new JPanel(new BorderLayout());
       tPanel.add(pn,BorderLayout.NORTH);
-      JLabel lab1 = new JLabel("費用、負担額について：月間では実績確定分のみ表示され、1日単位では、概算が表示されます。(実際の金額とは違う場合が有ります) ");
-      lab1.setFont(new Font("Dialog",Font.PLAIN,10));
-      tPanel.add(lab1,BorderLayout.CENTER);
+      JLabel lab1 = new JLabel("＊費用、負担額について：月間では実際の請求金額、日単位では概算金が表示されます。");
+      lab1.setFont(new Font("Dialog",Font.PLAIN,11));
+      JLabel lab2 = new JLabel(" ");
+      lab2.setFont(new Font("Dialog",Font.PLAIN,5));
+      pnl.add(lab1,BorderLayout.NORTH);
+      pnl.add(lab2,BorderLayout.CENTER);
+      tPanel.add(pnl,BorderLayout.CENTER);
       tPanel.add(pn2,BorderLayout.SOUTH);
       return tPanel;
     }
@@ -518,7 +523,7 @@ public class QkanTsusyoData {
                 inic= initCode[hId];
                 kPlus = kiboPlus[hId][kiboId];
                 tPlus = (kiboId==3 && timeId==2) ? 1 : timePlus[hId][timeId];
-                System.out.println("inic : "+inic+"+"+kPlus+"+"+tPlus);
+                if (kiboId==3) rPlus = 0;
               } 
               else if (sbp0==1150109) {
                 if (dbm2.getData("DETAIL_VALUE",j).toString().equals("2")) kPlus = kPlus* 2;
@@ -551,11 +556,13 @@ public class QkanTsusyoData {
             pline.addElement((String)tVal.get("1150112"));
             pline.addElement("");
             pline.addElement("");
+            System.out.println("inic : "+inic+"+"+rPlus+"+"+kPlus+"+"+tPlus);
             pointCode = inic+rPlus+tPlus+kPlus;
             System.out.println("pointCode : "+pointCode);
           }
           else {
             unitRate = yunitRate;
+            boolean hiwari = false;
             for (int j=0;j<4;j++) pline.addElement("");
             Hashtable yoVal = new Hashtable();
             yoVal.put("1650103","無し");
@@ -570,8 +577,10 @@ public class QkanTsusyoData {
                 if (cR.equals("13")) inic +=10;
               } 
               else if (sbp0==1650102) {
-                if(Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString())==2) inic = inic+1;
-                else inic=0;
+                if(Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString())==2) {
+                   inic = inic+1;
+                   hiwari = true;
+                }
               } 
               else {
 
@@ -579,7 +588,7 @@ public class QkanTsusyoData {
                 int[] add = (int[]) yaUnit.get(dbm2.getData("SYSTEM_BIND_PATH",j).toString());
                 int key = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
                 yoVal.put(dbm2.getData("SYSTEM_BIND_PATH",j).toString(),val[key]);
-                addUnit += add[key];
+                if (!hiwari) addUnit += add[key];
               }
             }
             pline.addElement((String)yoVal.get("1650105"));
@@ -595,16 +604,24 @@ public class QkanTsusyoData {
             buf.append("DETAIL_VALUE");
             buf.append(" from CLAIM_DETAIL_TEXT_");
             buf.append(detYear);
-            buf.append(" where CLAIM_ID = (select CLAIM_ID from CLAIM");
+            //buf.append(" where CLAIM_ID = (select CLAIM_ID from CLAIM");
+
+            buf.append(" where CLAIM_ID = (select CLAIM_ID from CLAIM_DETAIL_TEXT_");
+            buf.append(detYear);
+            buf.append(" where CLAIM_ID in (select CLAIM_ID from CLAIM");
+
             buf.append(" where PATIENT_ID=");
             buf.append(pNo);
-            buf.append(" and extract(YEAR from CLAIM_DATE)=");
+            buf.append(" and extract(YEAR from TARGET_DATE)=");
             buf.append(targetYear);
-            buf.append(" and extract(MONTH from CLAIM_DATE)=");
+            buf.append(" and extract(MONTH from TARGET_DATE)=");
             buf.append(targetMonth);
             buf.append(" and CATEGORY_NO=7 and PROVIDER_ID='");
             buf.append(currentProvider);
-            buf.append("') and SYSTEM_BIND_PATH");
+            buf.append("') and SYSTEM_BIND_PATH=701007 ");
+            if (sbp==11511) buf.append("and DETAIL_VALUE='15')");
+            else buf.append("and DETAIL_VALUE='65')");
+            buf.append(" and SYSTEM_BIND_PATH");
             buf.append(" in (701008,701014,701015,701016,701017)");
             buf.append(" order by SYSTEM_BIND_PATH;");
             sql = buf.toString();
@@ -613,10 +630,37 @@ public class QkanTsusyoData {
             dbm2.execQuery(sql);
             dbm2.Close();
             if (dbm2.Rows>0) {
+              int other=0;
               pline.addElement(new Integer(dbm2.getData("DETAIL_VALUE",0).toString()));
               int hiyou = (int)(Float.parseFloat(dbm2.getData("DETAIL_VALUE",1).toString())*Float.parseFloat(dbm2.getData("DETAIL_VALUE",2).toString()));
+              int futan = Integer.parseInt(dbm2.getData("DETAIL_VALUE",4).toString());
+            
+              buf.delete(0,buf.length());
+              buf.append("select * from CLAIM_PATIENT_DETAIL where CLAIM_ID=");
+              buf.append("(select CLAIM_ID from CLAIM where PATIENT_ID=");
+              buf.append(pNo);
+              buf.append(" and extract(YEAR from TARGET_DATE)=");
+              buf.append(targetYear);
+              buf.append(" and extract(MONTH from TARGET_DATE)=");
+              buf.append(targetMonth);
+              buf.append(" and CATEGORY_NO=16 and PROVIDER_ID='");
+              buf.append(currentProvider);
+              buf.append("')");
+              System.out.println(buf.toString());
+              dbm2.connect();
+              dbm2.execQuery(buf.toString());
+              dbm2.Close();
+              if (dbm2.Rows>0) {
+                 for (int j=1;j<16;j=j+2) {
+                   if (dbm2.getData(j,0)!=null) 
+                     other += Integer.parseInt(dbm2.getData(j+1,0).toString());
+                 }
+              }
+
               pline.addElement(new Integer(hiyou));
-              pline.addElement(new Integer(dbm2.getData("DETAIL_VALUE",4).toString()));
+              pline.addElement(new Integer(futan));
+              pline.addElement(new Integer(other));
+              pline.addElement(new Integer(other+futan));
             }
             else pline.addElement(new Integer(sCount));
           }
@@ -709,6 +753,10 @@ public class QkanTsusyoData {
       }
       fieldName.addElement("費用");
       fieldName.addElement("負担額");
+      if (td==0) {
+        fieldName.addElement("その他負担額");
+        fieldName.addElement("負担額合計");
+      }
       dtm = new DefaultTableModel(data, fieldName);
       sorter = new TableSorter2(dtm);
       usrTbl = new JTable(sorter);
@@ -726,6 +774,16 @@ public class QkanTsusyoData {
       ren.setHorizontalAlignment(SwingConstants.RIGHT);
       sorter.setColumnClass(0,Integer.class);
       sorter.setColumnClass(2,Integer.class);
+      if (td==0) {
+        sorter.setColumnClass(13,Integer.class);
+        sorter.setColumnClass(14,Integer.class);
+        sorter.setColumnClass(15,Integer.class);
+        sorter.setColumnClass(16,Integer.class);
+        sorter.setColumnClass(17,Integer.class);
+      } else {
+        sorter.setColumnClass(15,Integer.class);
+        sorter.setColumnClass(16,Integer.class);
+      }
       usrTbl.getColumnModel().getColumn(0).setCellRenderer(ren);
       usrTbl.getColumnModel().getColumn(2).setCellRenderer(ren);
 
@@ -750,16 +808,20 @@ public class QkanTsusyoData {
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(40);
       System.out.println("cid : "+cid);
       if (td==0) {
-        //sorter.setColumnClass(cid,Integer.class);
         usrTbl.getColumnModel().getColumn(cid).setCellRenderer(ren);
         usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32);
       }
       //sorter.setColumnClass(cid,Integer.class);
       usrTbl.getColumnModel().getColumn(cid).setCellRenderer(ren);
-      usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(70);
-      //sorter.setColumnClass(cid,Integer.class);
+      usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(60);
       usrTbl.getColumnModel().getColumn(cid).setCellRenderer(ren);
-      usrTbl.getColumnModel().getColumn(cid).setPreferredWidth(70);
+      usrTbl.getColumnModel().getColumn(cid).setPreferredWidth(60);
+      if (td==0) {
+        usrTbl.getColumnModel().getColumn(++cid).setCellRenderer(ren);
+        usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(80);
+        usrTbl.getColumnModel().getColumn(cid).setCellRenderer(ren);
+        usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(60);
+      }
       //usrTbl.getTableHeader().setReorderingAllowed(false);
       JScrollPane scrPane = new JScrollPane();
       scrPane.getViewport().setView(usrTbl);

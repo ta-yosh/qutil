@@ -154,7 +154,7 @@ public class QkanTsusyoUtil extends QkanPatientImport {
       }
     };
     fr.addWindowListener(AppCloser);
-    fr.setSize(725,630);
+    fr.setSize(725,640);
     //fr.pack();
     Dimension sc = Toolkit.getDefaultToolkit().getScreenSize();
     Dimension sz = fr.getSize();

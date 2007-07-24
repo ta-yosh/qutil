@@ -90,7 +90,7 @@ public class QkanPatientSelect {
 
     public QkanPatientSelect(String dbUri,String dbUser,String dbPass) {
       careRate.put("01","Èó³ºÅö");
-      careRate.put("11","Í×»Ù±ç(·Ð²áÅªÍ×²ð¸î)");
+      careRate.put("11","·Ð²áÅªÍ×²ð¸î");
       careRate.put("12","Í×»Ù±ç1");
       careRate.put("13","Í×»Ù±ç2");
       careRate.put("21","Í×²ð¸î1");
