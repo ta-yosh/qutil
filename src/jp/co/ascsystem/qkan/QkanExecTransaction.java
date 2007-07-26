@@ -103,6 +103,19 @@ public class QkanExecTransaction extends Thread {
           interrupt();
           return;
         }
+        if (tTable!=null) {
+          String rec = tTable.getTsusyoDataCsv(-1);
+          System.out.println("fileld: "+rec);
+          try {
+            fos.write(rec);
+            fos.write("\r\n");
+          } catch(IOException ex) {
+            stat=STATE_ERROR;
+            errMessage = "書き出し用CSVファイルに書き込めません。"+ex.toString();
+            try{ fos.close();} catch(IOException ex2){} 
+            return;
+          }
+        }
       }
       for (int i=0;i<pNos.length;i++) {
         if (pNos[i]==null) continue;

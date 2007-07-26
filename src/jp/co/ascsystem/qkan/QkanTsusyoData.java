@@ -15,6 +15,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
+import javax.swing.BorderFactory;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JDialog;
@@ -62,6 +63,7 @@ public class QkanTsusyoData {
     private JPanel pn1 = new JPanel();
     private JPanel pn2 = new JPanel();
     private JPanel pn3 = new JPanel();
+    private JPanel pnl = new JPanel(new BorderLayout()); 
     private JTable usrTbl;
     private boolean isSelectable=true;
     private DefaultTableModel dtm;
@@ -194,14 +196,7 @@ public class QkanTsusyoData {
       pn.add(cbx);
       YMCondition();
       pn.add(pn1);
-      JPanel pnl = new JPanel(new BorderLayout());
       tPanel.add(pn,BorderLayout.NORTH);
-      JLabel lab1 = new JLabel("＊費用、負担額について：月間では実際の請求金額、日単位では概算金が表示されます。");
-      lab1.setFont(new Font("Dialog",Font.PLAIN,11));
-      JLabel lab2 = new JLabel(" ");
-      lab2.setFont(new Font("Dialog",Font.PLAIN,5));
-      pnl.add(lab1,BorderLayout.NORTH);
-      pnl.add(lab2,BorderLayout.CENTER);
       tPanel.add(pnl,BorderLayout.CENTER);
       tPanel.add(pn2,BorderLayout.SOUTH);
       return tPanel;
@@ -346,6 +341,8 @@ public class QkanTsusyoData {
     public void setTsusyoPanel(int targetYear,int targetMonth,int targetDay) {
       pn2.setVisible(false);      
       pn2.removeAll();
+      pnl.setVisible(false);      
+      pnl.removeAll();
       int detYear = (targetMonth>3) ? targetYear:targetYear-1;
       if (dbm.connect()) {
         StringBuffer buf = new StringBuffer();
@@ -664,6 +661,14 @@ public class QkanTsusyoData {
             }
             else pline.addElement(new Integer(sCount));
           }
+          else if ( sbp==11511 && (cR.equals("12") || cR.equals("13"))) {
+              int hiyou =(int)((double) addUnit * unitRate);
+              int futan = hiyou - (int)((double)hiyou/100.0*(double)insRate);
+              //if (hiyou%10>0) futan +=1;
+              System.out.println("add = "+addUnit+" hiyou = "+hiyou+" futan = "+futan);
+              pline.addElement(new Integer(hiyou));
+              pline.addElement(new Integer(futan));
+          } 
           else {
             buf.delete(0,buf.length());
             buf.append("select service_unit from m_service_code ");
@@ -692,6 +697,27 @@ public class QkanTsusyoData {
         scp = getScrollList(pdata,targetDay);
         pn2.add(scp);
       }
+      if (dbm.Rows>0) {
+        if (targetDay>0) {
+          JLabel lab1 = new JLabel("＊日単位での金額について：負担金額は端数処理の関係で月間金額とは異なる場合があります。 ");
+          lab1.setFont(new Font("Dialog",Font.PLAIN,11));
+          JLabel lab2 = new JLabel("　　　　　　　　　　　　　予防サービスの場合は月間の金額を表示、日割の場合は基本単位数のみの金額を表示しています。");
+          lab2.setFont(new Font("Dialog",Font.PLAIN,11));
+          pnl.add(lab1,BorderLayout.NORTH);
+          pnl.add(lab2,BorderLayout.CENTER);
+        } else {
+          JLabel lab1 = new JLabel("＊月間での金額について：実績確定分のみ表示されます。 ");
+          lab1.setFont(new Font("Dialog",Font.PLAIN,11));
+          pnl.add(lab1,BorderLayout.CENTER);
+        }
+        pnl.setBorder(BorderFactory.createLineBorder(Color.black));
+      } else {
+        JLabel lab1 = new JLabel(" ");
+        lab1.setFont(new Font("Dialog",Font.PLAIN,11));
+        pnl.add(lab1,BorderLayout.CENTER);
+        pnl.setBorder(null);
+      }
+      pnl.setVisible(true);
       pn2.setVisible(true);
 /*
  select CLAIM_ID,SYSTEM_BIND_PATH,substring(DETAIL_VALUE from 1 for 10) from CLAIM_DETAIL_TEXT_2007 where CLAIM_ID = (select CLAIM_ID from CLAIM  where extract(YEAR from CLAIM_DATE)=2007 and extract(MONTH from CLAIM_DATE)=6 and CATEGORY_NO=7) and SYSTEM_BIND_PATH in (701008,701014,101015,701016,701017) order by SYSTEM_BIND_PATH;
@@ -713,10 +739,12 @@ public class QkanTsusyoData {
         //if (pno==Integer.parseInt((usrTbl.getValueAt(i,2)).toString())) {
            csvRecord = new StringBuffer();
            for (int j=0;j<usrTbl.getColumnCount();j++) {
+             Object value;
              csvRecord.append("\"");
-             Object value=usrTbl.getValueAt(pno,j);
+             if (pno<0) value=(Object)usrTbl.getColumnName(j);
+             else value=usrTbl.getValueAt(pno,j);
              if (value!=null) {
-               csvRecord.append(usrTbl.getValueAt(pno,j).toString().replaceAll("^ +","").replaceAll(" +$",""));
+               csvRecord.append(value.toString().replaceAll("^ +","").replaceAll(" +$",""));
              }
              csvRecord.append("\"");
              if (j<usrTbl.getColumnCount()-1) csvRecord.append(",");
@@ -820,7 +848,7 @@ public class QkanTsusyoData {
         usrTbl.getColumnModel().getColumn(++cid).setCellRenderer(ren);
         usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(80);
         usrTbl.getColumnModel().getColumn(cid).setCellRenderer(ren);
-        usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(60);
+        usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(63);
       }
       //usrTbl.getTableHeader().setReorderingAllowed(false);
       JScrollPane scrPane = new JScrollPane();
@@ -830,7 +858,7 @@ public class QkanTsusyoData {
       scrPane.getHorizontalScrollBar();
       scrPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
       scrPane.getVerticalScrollBar();
-      scrPane.setPreferredSize(new Dimension(720,410));
+      scrPane.setPreferredSize(new Dimension(795,410));
       return scrPane;
     }
 

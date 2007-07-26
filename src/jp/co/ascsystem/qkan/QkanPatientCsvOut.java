@@ -341,7 +341,7 @@ public class QkanPatientCsvOut extends QkanPatientImport {
 
   private String getExportDBPath(String outPath) {
     String path = null;
-    String ext[] = {"fdb"};
+    String ext[] = {"csv","CSV"};
     String fname = null; 
     if (outPath==null) outPath=realInPath;
     else fname = (new File(outPath)).getName();

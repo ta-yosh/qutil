@@ -154,7 +154,7 @@ public class QkanTsusyoUtil extends QkanPatientImport {
       }
     };
     fr.addWindowListener(AppCloser);
-    fr.setSize(725,640);
+    fr.setSize(800,650);
     //fr.pack();
     Dimension sc = Toolkit.getDefaultToolkit().getScreenSize();
     Dimension sz = fr.getSize();
@@ -349,7 +349,7 @@ public class QkanTsusyoUtil extends QkanPatientImport {
 
   private String getExportDBPath(String outPath) {
     String path = null;
-    String ext[] = {"fdb"};
+    String ext[] = {"csv","CSV"};
     String fname = null; 
     System.out.println(tTable.targetMonth+":"+tTable.targetDay);
     if (outPath==null) outPath=realInPath;
