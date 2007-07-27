@@ -67,8 +67,8 @@ public class QkanExecTransaction extends Thread {
       stat = STATE_SUCCESS;
       DngDBAccess dbm=null; 
       FileWriter fos=null;
-      Calendar c = Calendar.getInstance();
-      int nextYear = c.get(c.YEAR)+1;
+      //Calendar c = Calendar.getInstance();
+      //int nextYear = c.get(c.YEAR)+1;
       try {
         synchronized(this) {
           while(!runStat0) wait();
@@ -104,8 +104,23 @@ public class QkanExecTransaction extends Thread {
           return;
         }
         if (tTable!=null) {
+          StringBuffer sb = new StringBuffer(); 
+          sb.append("\"\",\"");
+          sb.append(tTable.curProviderName);
+          sb.append("\",\"\",\"\",\"通所介護情報\",\"");
+          sb.append(tTable.targetYear);
+          sb.append("年\",\"");
+          sb.append(tTable.targetMonth);
+          sb.append("月\",\"");
+          if (tTable.targetDay==0) 
+            sb.append("月間");
+          else {
+               sb.append(tTable.targetDay);
+               sb.append("日");
+          }
+          sb.append("\"\r\n");
           String rec = tTable.getTsusyoDataCsv(-1);
-          System.out.println("fileld: "+rec);
+          rec = sb.toString() + rec;
           try {
             fos.write(rec);
             fos.write("\r\n");
@@ -175,6 +190,8 @@ public class QkanExecTransaction extends Thread {
 
               for (int j=0;j<type.length;j++) {
                 if (type[j]=="SERVICE" || type[j]=="CLAIM") {
+                  int minYear = (type[j]=="SERVICE") ? iTable.sdMinYear:iTable.cdMinYear;
+                  int maxYear = (type[j]=="SERVICE") ? iTable.sdMaxYear:iTable.cdMaxYear;
                   String wh = (type[j]=="SERVICE") ? "SERVICE_ID":"CLAIM_ID";
                   sql = "select "+wh+" from "+type[j]+" where PATIENT_ID in ("+sb.toString()+")";
                   dbm.execQuery(sql);
@@ -185,11 +202,12 @@ public class QkanExecTransaction extends Thread {
                       sbd.append(dbm.getData(0,l).toString());
                     }
                     for (int l=0;l<detail.length-1;l++) {
-                      for (int n=2006;n<=nextYear;n++) {
+                      for (int n=minYear;n<=maxYear;n++) {
                         sql = "delete from "+type[j]+detail[l]+"_"+n+" where "+wh+" in ("+sbd.toString()+")";
                         try {dbm.execUpdate(sql); 
-                          System.out.println("[DELETE detail]"+sql);
-                        } catch (Exception e) {};
+                        } catch (Exception e) {
+                          System.out.println("[DELETE Error detail]"+sql+"\r\n"+e);
+                        };
                       }
                     }
                     if (type[j]=="CLAIM") {
@@ -237,8 +255,11 @@ public class QkanExecTransaction extends Thread {
                     StringBuffer sb1= new StringBuffer();
                     sb1.append("select max(");
                     sb1.append(type[j]);
-                    sb1.append("_ID");
-                    sb1.append(") from ");
+                    sb1.append("_ID),max(");
+                    sb1.append(type[j]);
+                    sb1.append("_DATE),min(");
+                    sb1.append(type[j]);
+                    sb1.append("_DATE) from ");
                     sb1.append(type[j]);
                     dbm.execQuery(sb1.toString());
                     String newId = dbm.getData(0,0).toString();
@@ -253,6 +274,7 @@ public class QkanExecTransaction extends Thread {
                         if (sql0!=null)  {
                           System.out.println(sql0);
                           if (dbm.execUpdate(sql0)!=-1) dbm.commit();
+                          else System.out.println(sql0);
                           if (dbm.execUpdate(sql)!=-1) continue;
                         }
                         System.out.println("[FAILED]");

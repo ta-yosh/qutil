@@ -40,6 +40,7 @@ public class QkanTsusyoData {
     private String dbUser;
     private String dbPass;
     public String currentProvider=null;
+    public String curProviderName=null;
     public int targetYear=0;
     public int targetMonth=0;
     public int targetDay=0;
@@ -104,6 +105,7 @@ public class QkanTsusyoData {
         }
         cBox = new DngGenericCombo(data);
         currentProvider = data[0][1];
+        curProviderName = data[0][2];
 
         buf.delete(0,buf.length());
         buf.append("select service_unit from m_service_code ");
@@ -188,6 +190,7 @@ public class QkanTsusyoData {
           JComboBox cb = (JComboBox)e.getSource();
           int pvInd = cb.getSelectedIndex();
           currentProvider = getData(pvInd,1);
+          curProviderName = getData(pvInd,2);
           targetDay=0;
           YMCondition();
         }

@@ -36,6 +36,10 @@ public class QkanPatientSelect {
     private DefaultTableModel dtm;
     private TableSorter2 sorter;
     private Hashtable careRate = new Hashtable();
+    public int sdMaxYear=0;
+    public int sdMinYear=0;
+    public int cdMaxYear=0;
+    public int cdMinYear=0;
     String osType;
 
     public QkanPatientSelect(String csvFile) {
@@ -123,12 +127,12 @@ public class QkanPatientSelect {
       buf.append("where PATIENT.DELETE_FLAG=0 and PATIENT.SHOW_FLAG=1 ");
       buf.append("order by PATIENT_FAMILY_KANA");
       String sql = buf.toString(); 
-      System.out.println(sql);
+      //System.out.println(sql);
       if (dbm.connect()) {
         dbm.execQuery(sql);
         dbm.Close();
         Rows = dbm.Rows;
-        System.out.println("Rows = "+Rows);
+        //System.out.println("Rows = "+Rows);
         Object data[][] = new Object[14][Rows];
         for (int i=0;i<Rows;i++) {
           StringBuffer sb = new StringBuffer();
@@ -190,6 +194,8 @@ public class QkanPatientSelect {
           data[12][i] = dbm.getData("INSURE_VALID_END",i);
           if (dbm.getData("PLANNER",i)!=null)
           data[13][i] = (Integer.parseInt(dbm.getData("PLANNER",i).toString())==1) ? dbm.getData("PROVIDER_NAME",i):"";
+
+          
         }
 
         for (int j=0;j<Rows;j++) {
@@ -221,6 +227,26 @@ public class QkanPatientSelect {
           }
           this.data.addElement(rdat);
         }
+        dbm.connect();
+        dbm.execQuery("select max(SERVICE_DATE),min(SERVICE_DATE) from SERVICE");
+        dbm.Close();
+        String wk[] = new String[3];
+        wk = dbm.getData("MAX",0).toString().split("-",3);
+        sdMaxYear = Integer.parseInt(wk[0]);
+        if (Integer.parseInt(wk[1])<4) sdMaxYear--;
+        wk = dbm.getData("MIN",0).toString().split("-",3);
+        sdMinYear = Integer.parseInt(wk[0]);
+        if (Integer.parseInt(wk[1])<4) sdMinYear--;
+        dbm.connect();
+        dbm.execQuery("select max(CLAIM_DATE),min(CLAIM_DATE) from CLAIM");
+        dbm.Close();
+        wk = dbm.getData("MAX",0).toString().split("-",3);
+        cdMaxYear = Integer.parseInt(wk[0]);
+        if (Integer.parseInt(wk[1])<4) cdMaxYear--;
+        wk = dbm.getData("MIN",0).toString().split("-",3);
+        cdMinYear = Integer.parseInt(wk[0]);
+        if (Integer.parseInt(wk[1])<4) cdMinYear--;
+        System.out.println(sdMinYear+":"+sdMaxYear+":"+cdMinYear+":"+cdMaxYear);
       }
       else Rows=-1;
     }
@@ -287,8 +313,19 @@ public class QkanPatientSelect {
     public String[][] getPatientDataSql(String type,int pno,int newpno,String[] subtype) {
       if (!dbm.connect()) return null;
 
-      Calendar c = Calendar.getInstance();
-      int nextYear = c.get(c.YEAR)+1; 
+      //Calendar c = Calendar.getInstance();
+      //int nextYear = c.get(c.YEAR)+1; 
+      int minYear=2006;
+      int maxYear=2006;
+      if (type.matches("^CLAIM_.*DETAIL.*")) {
+         minYear = cdMinYear;
+         maxYear = cdMaxYear;
+      }
+      if (type.matches("^SERVICE_D.*")) {
+         minYear = sdMinYear;
+         maxYear = sdMaxYear;
+      }
+      
       String rsql[][] = getDataSql(type,pno,(new Integer(newpno)).toString());
       System.out.println("[GET OK]");
 
@@ -302,10 +339,17 @@ public class QkanPatientSelect {
       for (int i=0;i<rsql.length;i++) {
         ArrayList sqlist = new ArrayList();
         for (int j=0;j<subtype.length-1;j++) {
-          for (int k=2006;k<=nextYear;k++) {
-            String rsql2[][] = getDataSql(type+subtype[j]+"_"+k,Integer.parseInt(rsql[i][1]),"NEW_ID");
+          if (rsql[i][2]!=null) {
+            String rsql2[][] = getDataSql(type+subtype[j]+"_"+rsql[i][2],Integer.parseInt(rsql[i][1]),"NEW_ID");
             if (rsql2==null) continue;
             for (int l=0;l<rsql2.length;l++) sqlist.add(rsql2[l][0]);
+          }
+          else {
+            for (int k=minYear;k<=maxYear;k++) {
+              String rsql2[][] = getDataSql(type+subtype[j]+"_"+k,Integer.parseInt(rsql[i][1]),"NEW_ID");
+              if (rsql2==null) continue;
+              for (int l=0;l<rsql2.length;l++) sqlist.add(rsql2[l][0]);
+            }
           }
         }
         if (type=="CLAIM") {
@@ -364,12 +408,20 @@ public class QkanPatientSelect {
       if (dbm.Rows<1) return null;
       Object fieldName[] = dbm.getFieldNames();
       int ii=0;
-      String dsql[][]= new String[dbm.Rows][2];
+      String dsql[][]= new String[dbm.Rows][3];
       Object dat[] = new Object[fieldName.length];
       for (int j=0;j<dbm.Rows;j++) {
         dat = dbm.fetchRow();
         if (type.matches("^SERVICE") || type.matches("^CLAIM")) {
+          String wk[] = new String[3];
           dsql[ii][1] = dat[0].toString();
+          if ( (type.matches("^SERVICE") && dat[5]!=null) ||
+               (type.matches("^CLAIM") && dat[6]!=null) ) {
+            wk = ((type.matches("^SERVICE")) ? dat[5].toString():dat[6].toString()).split("-",3);
+            int y = Integer.parseInt(wk[0]);
+            if (Integer.parseInt(wk[1])<4) y--; 
+            dsql[ii][2] = new Integer(y).toString();
+          }
         }
         StringBuffer sb1 = new StringBuffer();
         sb1.append("insert into ");
@@ -388,6 +440,8 @@ public class QkanPatientSelect {
             sb1.append(" (select case when MAX(CLAIM_ID) is null then 1 else max(CLAIM_ID)+1 end from CLAIM)");
           } else if (fieldName[i].toString().equals("SERVICE_ID") && type.matches("^SERVICE")) {
             sb1.append(" (select case when MAX(SERVICE_ID) is null then 1 else max(SERVICE_ID)+1 end from SERVICE)");
+          } else if (fieldName[i].toString().equals("CLAIM_PATIENT_MEDICAL_ID") && type.matches("^CLAIM_PATIENT_MEDICAL")) {
+            sb1.append(" (select case when MAX(CLAIM_PATIENT_MEDICAL_ID) is null then 1 else max(CLAIM_PATIENT_MEDICAL_ID)+1 end from CLAIM_PATIENT_MEDICAL)");
           } else {
             if (dat[i]!=null && dat[i].toString().length()>0) {
               sb1.append("'");

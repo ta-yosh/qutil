@@ -460,8 +460,8 @@ public class QkanPatientExport extends QkanPatientImport {
         String dbUser = getProperty("DBConfig/UserName");
         String dbPass = getProperty("DBConfig/Password");
         String dbUri = dbServer+"/"+dbPort+":"+path0;
-        Calendar c =  Calendar.getInstance();
-        int nextYear = c.get(c.YEAR)+1; 
+        //Calendar c =  Calendar.getInstance();
+        //int nextYear = c.get(c.YEAR)+1; 
         DngDBAccess dbm = new DngDBAccess("firebird",dbUri,dbUser,dbPass);
         dbm.execUpdate("CREATE DATABASE 'locahost/3050:"+path+"' USER '"+dbUser+"' PASSWORD '"+dbPass+"'");
         System.out.println("CREATE DATABASE 'locahost/3050:"+path+"' USER '"+dbUser+"' PASSWORD '"+dbPass+"'");
@@ -496,7 +496,7 @@ public class QkanPatientExport extends QkanPatientImport {
                          ,"PROVIDER_SERVICE_DETAIL_DATE"
                          ,"PROVIDER_SERVICE_DETAIL_INTEGER"
                          ,"PROVIDER_SERVICE_DETAIL_TEXT"
-                         ,"RECEIPT_ACCESS_SPACE","SERVICE_DETAIL_DATE"
+                         ,"SERVICE_DETAIL_DATE"
                          ,"SERVICE_DETAIL_INTEGER","SERVICE_DETAIL_TEXT"
                          ,"STAFF","TAX","CLAIM_DETAIL_DATE"
                          ,"CLAIM_DETAIL_INTEGER","CLAIM_DETAIL_TEXT"};
@@ -512,8 +512,8 @@ public class QkanPatientExport extends QkanPatientImport {
         String dbUser = getProperty("DBConfig/UserName");
         String dbPass = getProperty("DBConfig/Password");
         String dbUri = dbServer+"/"+dbPort+":"+path;
-        Calendar c =  Calendar.getInstance();
-        int nextYear = c.get(c.YEAR)+1; 
+        //Calendar c =  Calendar.getInstance();
+        //int nextYear = c.get(c.YEAR)+1; 
         DngDBAccess dbm = new DngDBAccess("firebird",dbUri,dbUser,dbPass);
         if (!dbm.connect()) {
           statMessage(STATE_ERROR,"書き出し用データベースに接続できません。\nDB:"+dbUri);
@@ -525,7 +525,10 @@ public class QkanPatientExport extends QkanPatientImport {
           //System.out.println(sql);
           dbm.execUpdate(sql);
           if (tables[i].matches("^[^M][^_]*_DETAIL.*")) {
-            for (int y=2006;y<=nextYear;y++) {
+            int minYear = (tables[i].matches("^S.*")) ? iTable.sdMinYear:iTable.cdMinYear;
+            int maxYear = (tables[i].matches("^S.*")) ? iTable.sdMaxYear:iTable.cdMaxYear;
+
+            for (int y=minYear;y<=maxYear;y++) {
               sql = "delete from "+tables[i]+"_"+y;        
               //System.out.println(sql);
               try {dbm.execUpdate(sql);} catch(Exception e){};
