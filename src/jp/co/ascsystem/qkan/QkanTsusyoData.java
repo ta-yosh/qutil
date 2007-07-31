@@ -503,6 +503,7 @@ public class QkanTsusyoData {
           int tPlus=0;
           int addUnit=0;
           double unitRate;
+          boolean hiwari = false;
           if (sbp==11511) {
             unitRate = tunitRate;
             Hashtable tVal = new Hashtable();
@@ -562,7 +563,6 @@ public class QkanTsusyoData {
           }
           else {
             unitRate = yunitRate;
-            boolean hiwari = false;
             for (int j=0;j<4;j++) pline.addElement("");
             Hashtable yoVal = new Hashtable();
             yoVal.put("1650103","Ìµ¤·");
@@ -631,7 +631,30 @@ public class QkanTsusyoData {
             dbm2.Close();
             if (dbm2.Rows>0) {
               int other=0;
-              pline.addElement(new Integer(dbm2.getData("DETAIL_VALUE",0).toString()));
+              if (!hiwari) pline.addElement(new Integer(dbm2.getData("DETAIL_VALUE",0).toString()));
+              else {
+                DngDBAccess dbm3 = new DngDBAccess("firebird",dbUri,dbUser,dbPass);
+                if (dbm3.connect()) {
+                  buf.delete(0,buf.length());
+                  buf.append("select count(service_id) from service");
+                  buf.append(" where PATIENT_ID=");
+                  buf.append(pNo);
+                  buf.append(" and SYSTEM_SERVICE_KIND_DETAIL in (11511,16511)");
+                  buf.append(" and SERVICE_USE_TYPE>5");
+                  buf.append(" and extract(YEAR from SERVICE_DATE)=");
+                  buf.append(targetYear);
+                  buf.append(" and extract(MONTH from SERVICE_DATE)=");
+                  buf.append(targetMonth);
+                  buf.append(" and SERVICE.PROVIDER_ID='");
+                  buf.append(currentProvider);
+                  buf.append("'");
+                  System.out.println(buf.toString());
+                  dbm3.execQuery(buf.toString());
+                  dbm3.Close();
+                  if (dbm3.getData(0,0)!=null);
+                    pline.addElement(new Integer(dbm3.getData(0,0).toString()));
+                }
+              }
               int hiyou = (int)(Float.parseFloat(dbm2.getData("DETAIL_VALUE",1).toString())*Float.parseFloat(dbm2.getData("DETAIL_VALUE",2).toString()));
               int futan = Integer.parseInt(dbm2.getData("DETAIL_VALUE",4).toString());
             
@@ -662,7 +685,31 @@ public class QkanTsusyoData {
               pline.addElement(new Integer(other));
               pline.addElement(new Integer(other+futan));
             }
-            else pline.addElement(new Integer(sCount));
+            else { 
+              DngDBAccess dbm3 = new DngDBAccess("firebird",dbUri,dbUser,dbPass);
+              if (dbm3.connect()) {
+                buf.delete(0,buf.length());
+                buf.append("select count(service_id) from service");
+                buf.append(" where PATIENT_ID=");
+                buf.append(pNo);
+                buf.append(" and SYSTEM_SERVICE_KIND_DETAIL in (11511,16511)");
+                buf.append(" and SERVICE_USE_TYPE>5");
+                buf.append(" and extract(YEAR from SERVICE_DATE)=");
+                buf.append(targetYear);
+                buf.append(" and extract(MONTH from SERVICE_DATE)=");
+                buf.append(targetMonth);
+                buf.append(" and SERVICE.PROVIDER_ID='");
+                buf.append(currentProvider);
+                buf.append("'");
+                System.out.println(buf.toString());
+                dbm3.execQuery(buf.toString());
+                dbm3.Close();
+                if (dbm3.getData(0,0)!=null)
+                  pline.addElement(new Integer(dbm3.getData(0,0).toString()));
+                else
+                  pline.addElement(new Integer(sCount));
+              }
+            }
           }
           else if ( sbp==11511 && (cR.equals("12") || cR.equals("13"))) {
               int hiyou =(int)((double) addUnit * unitRate);

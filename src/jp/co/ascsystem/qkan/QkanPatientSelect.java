@@ -127,12 +127,12 @@ public class QkanPatientSelect {
       buf.append("where PATIENT.DELETE_FLAG=0 and PATIENT.SHOW_FLAG=1 ");
       buf.append("order by PATIENT_FAMILY_KANA");
       String sql = buf.toString(); 
-      //System.out.println(sql);
+      System.out.println(sql);
       if (dbm.connect()) {
         dbm.execQuery(sql);
         dbm.Close();
         Rows = dbm.Rows;
-        //System.out.println("Rows = "+Rows);
+        System.out.println("Rows = "+Rows);
         Object data[][] = new Object[14][Rows];
         for (int i=0;i<Rows;i++) {
           StringBuffer sb = new StringBuffer();
@@ -231,22 +231,30 @@ public class QkanPatientSelect {
         dbm.execQuery("select max(SERVICE_DATE),min(SERVICE_DATE) from SERVICE");
         dbm.Close();
         String wk[] = new String[3];
-        wk = dbm.getData("MAX",0).toString().split("-",3);
-        sdMaxYear = Integer.parseInt(wk[0]);
-        if (Integer.parseInt(wk[1])<4) sdMaxYear--;
-        wk = dbm.getData("MIN",0).toString().split("-",3);
-        sdMinYear = Integer.parseInt(wk[0]);
-        if (Integer.parseInt(wk[1])<4) sdMinYear--;
+        if (dbm.getData("MAX",0)!=null) {
+          wk = dbm.getData("MAX",0).toString().split("-",3);
+          sdMaxYear = Integer.parseInt(wk[0]);
+          if (Integer.parseInt(wk[1])<4) sdMaxYear--;
+        }
+        if (dbm.getData("MIN",0)!=null) {
+          wk = dbm.getData("MIN",0).toString().split("-",3);
+          sdMinYear = Integer.parseInt(wk[0]);
+          if (Integer.parseInt(wk[1])<4) sdMinYear--;
+        }
         dbm.connect();
         dbm.execQuery("select max(CLAIM_DATE),min(CLAIM_DATE) from CLAIM");
         dbm.Close();
-        wk = dbm.getData("MAX",0).toString().split("-",3);
-        cdMaxYear = Integer.parseInt(wk[0]);
-        if (Integer.parseInt(wk[1])<4) cdMaxYear--;
-        wk = dbm.getData("MIN",0).toString().split("-",3);
-        cdMinYear = Integer.parseInt(wk[0]);
-        if (Integer.parseInt(wk[1])<4) cdMinYear--;
-        System.out.println(sdMinYear+":"+sdMaxYear+":"+cdMinYear+":"+cdMaxYear);
+        if (dbm.getData("MAX",0)!=null) {
+          wk = dbm.getData("MAX",0).toString().split("-",3);
+          cdMaxYear = Integer.parseInt(wk[0]);
+          if (Integer.parseInt(wk[1])<4) cdMaxYear--;
+        }
+        if (dbm.getData("MIN",0)!=null) {
+          wk = dbm.getData("MIN",0).toString().split("-",3);
+          cdMinYear = Integer.parseInt(wk[0]);
+          if (Integer.parseInt(wk[1])<4) cdMinYear--;
+          System.out.println(sdMinYear+":"+sdMaxYear+":"+cdMinYear+":"+cdMaxYear);
+        }
       }
       else Rows=-1;
     }
