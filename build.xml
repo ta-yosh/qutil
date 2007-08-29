@@ -6,7 +6,7 @@
   <target name="compile"> 
     <delete dir="${ClassDir}" /> 
     <mkdir dir="${ClassDir}" /> 
-    <javac srcdir="src" destdir="${ClassDir}" nowarn="on"> 
+    <javac srcdir="src" destdir="${ClassDir}" nowarn="on" source="1.4"> 
       <include name="jp/co/ascsystem/**/*" /> 
       <exclude name="jp/co/ascsystem/lib/DngPreviewHtml.java" /> 
     </javac> 

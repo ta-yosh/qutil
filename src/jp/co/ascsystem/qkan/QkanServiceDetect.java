@@ -5,22 +5,42 @@ import jp.co.ascsystem.util.*;
 
 public class QkanServiceDetect {
   
+  QkanPatientImport qpi;
+  String dbUri, dbUser, dbPass;
+
   public QkanServiceDetect() {
+    qpi = new QkanPatientImport();
+    dbUri = qpi.dbServer + "/" + qpi.dbPort + ":" + qpi.dbPath;
+    dbUser = qpi.getProperty("DBConfig/UserName");
+    dbPass = qpi.getProperty("DBConfig/Password");
   }
 
   public boolean tsusyoDetect() {
   
-    QkanPatientImport qpi = new QkanPatientImport();
-    String dbUri = qpi.dbServer + "/" + qpi.dbPort + ":" + qpi.dbPath;
-    String dbUser = qpi.getProperty("DBConfig/UserName");
-    String dbPass = qpi.getProperty("DBConfig/Password");
-
     DngDBAccess dbm = new DngDBAccess("firebird",dbUri,dbUser,dbPass);
     StringBuffer buf = new StringBuffer();
     buf.append("select PROVIDER_ID,PROVIDER_NAME from PROVIDER ");
     buf.append("where PROVIDER_ID in (");
     buf.append("   select PROVIDER_ID from PROVIDER_SERVICE");
     buf.append("    where SYSTEM_SERVICE_KIND_DETAIL in (11511,16511)");
+    buf.append(")");
+    String sql = buf.toString();
+    if (dbm.connect()) {
+      dbm.execQuery(sql);
+      dbm.Close();
+      return (dbm.Rows>0) ? true:false;
+    }
+    return false;
+  }
+
+  public boolean kyotakuDetect() {
+  
+    DngDBAccess dbm = new DngDBAccess("firebird",dbUri,dbUser,dbPass);
+    StringBuffer buf = new StringBuffer();
+    buf.append("select PROVIDER_ID,PROVIDER_NAME from PROVIDER ");
+    buf.append("where PROVIDER_ID in (");
+    buf.append("   select PROVIDER_ID from PROVIDER_SERVICE");
+    buf.append("    where SYSTEM_SERVICE_KIND_DETAIL in (13111,13411)");
     buf.append(")");
     String sql = buf.toString();
     if (dbm.connect()) {

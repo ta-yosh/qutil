@@ -34,6 +34,7 @@ public class QkanExecTransaction extends Thread {
     QkanPatientSelect iTable;
     QkanPatientSelect oTable;
     QkanTsusyoData tTable;
+    QkanKyotakuData kTable;
     public String dbOutPath;
 
     public void setPnos(int pNo[][]) {
@@ -60,6 +61,11 @@ public class QkanExecTransaction extends Thread {
       this.iTable=null;
       this.oTable=null;
       this.tTable=tTable;
+    }
+    public void setTable(QkanKyotakuData kTable) {
+      this.iTable=null;
+      this.oTable=null;
+      this.kTable=kTable;
     }
     
     public void run() {
@@ -103,23 +109,41 @@ public class QkanExecTransaction extends Thread {
           interrupt();
           return;
         }
-        if (tTable!=null) {
+        if (tTable!=null || kTable!=null) {
           StringBuffer sb = new StringBuffer(); 
-          sb.append("\"\",\"");
-          sb.append(tTable.curProviderName);
-          sb.append("\",\"\",\"\",\"通所介護情報\",\"");
-          sb.append(tTable.targetYear);
-          sb.append("年\",\"");
-          sb.append(tTable.targetMonth);
-          sb.append("月\",\"");
-          if (tTable.targetDay==0) 
-            sb.append("月間");
+          if (tTable!=null) {
+            sb.append("\"\",\"");
+            sb.append(tTable.curProviderName);
+            sb.append("\",\"\",\"\",\"通所介護情報\",\"");
+            sb.append(tTable.targetYear);
+            sb.append("年\",\"");
+            sb.append(tTable.targetMonth);
+            sb.append("月\",\"");
+            if (tTable.targetDay==0)  
+              sb.append("月間");
+            else {
+                 sb.append(tTable.targetDay);
+                 sb.append("日");
+            }
+          }
           else {
-               sb.append(tTable.targetDay);
-               sb.append("日");
+            sb.append("\"\",\"");
+            sb.append(kTable.curProviderName);
+            sb.append(" \",\"居宅療養管理指導情報\",\"\",\"\",\"");
+            sb.append(kTable.targetYear);
+            sb.append("年\",\"");
+            sb.append(kTable.targetMonth);
+            sb.append("月\",\"");
+            if (kTable.targetDay==0)  
+              sb.append("月間");
+            else {
+                 sb.append(kTable.targetDay);
+                 sb.append("日");
+            }
           }
           sb.append("\"\r\n");
-          String rec = tTable.getTsusyoDataCsv(-1);
+          String rec = (tTable!=null) ? tTable.getTsusyoDataCsv(-1):
+                                        kTable.getKyotakuDataCsv(-1);
           rec = sb.toString() + rec;
           try {
             fos.write(rec);
@@ -153,7 +177,8 @@ public class QkanExecTransaction extends Thread {
             System.out.println(pNos[i][0]+" try get data");
             bsql = (pfile!=null) ? iTable.getPatientBasicDataSql(pNos[i][0]) :
                   ((iTable!=null) ? iTable.getPatientBasicDataCsv(pNos[i][0]):
-                                    tTable.getTsusyoDataCsv(pNos[i][0]) );
+                  ((tTable!=null) ? tTable.getTsusyoDataCsv(pNos[i][0]):
+                                    kTable.getKyotakuDataCsv(pNos[i][0])));
             if (bsql.equals("CON0")) {
               System.out.println("DB server has been busy. I try to connect again 20sec. after.... please wait.");
               try {sleep(20000);} catch(Exception ie){};

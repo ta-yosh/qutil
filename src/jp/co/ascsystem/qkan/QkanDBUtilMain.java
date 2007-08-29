@@ -35,7 +35,7 @@ public class QkanDBUtilMain {
 
     final QkanDBUtilMain idm = new QkanDBUtilMain();
     final JFrame fr = new JFrame();
-    fr.setTitle("給管鳥 データユーティリティ Ver1.0");
+    fr.setTitle("給管鳥 データユーティリティ Ver1.1");
     fr.setIconImage(idm.icon);
     final Container contentPane = fr.getContentPane();
     contentPane.setLayout(new BorderLayout());
@@ -84,6 +84,16 @@ public class QkanDBUtilMain {
     };
     tdb.addActionListener(triggerTsusyo);
 
+    final JButton kdb = new JButton("居宅療養管理指導情報CSV書き出し");
+    kdb.setFont(new Font("SanSerif",Font.PLAIN,14));
+    ActionListener triggerKyotaku= new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        execThread it = new execThread(fr,5);
+        it.start();
+        //it.restart();
+      }
+    };
+    kdb.addActionListener(triggerKyotaku);
 /*
     final JButton web = new JButton("給管鳥ウェブサイト");
     web.setFont(new Font("SanSerif",Font.PLAIN,14));
@@ -111,7 +121,11 @@ public class QkanDBUtilMain {
     int ysiz=200;
     if ((new QkanServiceDetect()).tsusyoDetect()==true) {
       pn.add(tdb);
-      ysiz=250;
+      ysiz=ysiz+50;
+    }
+    if ((new QkanServiceDetect()).kyotakuDetect()==true) {
+      pn.add(kdb);
+      ysiz=ysiz+50;
     }
     JLabel sysTitle = new JLabel("給管鳥 データユーティリティ");
     sysTitle.setFont(new Font("SanSerif",Font.BOLD,15));
@@ -239,6 +253,27 @@ class execThread extends Thread {
       }
       catch(Exception ex) {
         itu.statMessage(itu.STATE_FATAL,ex.getMessage());
+      }
+    }
+    else if(type==5) {
+      QkanKyotakuUtil iku = new QkanKyotakuUtil();
+      if (!iku.vStat) {
+        iku.statMessage(iku.STATE_FATAL,"正しくないデータベース設定です。給管鳥を起動してデータベースの設定を確認してください。");
+        System.exit(1);
+      }
+      iku.setParent(frm);
+      try {
+        while(iku.runStat!=iku.STATE_FATAL) {
+          //System.out.println("STAT = "+iku.runStat); 
+          if (iku.runStat==iku.STATE_COMPLETE) {
+            iku.destroy();
+            break;
+          }
+          iku.execCsvOut();
+        }
+      }
+      catch(Exception ex) {
+        iku.statMessage(iku.STATE_FATAL,ex.getMessage());
       }
     }
     //else  {

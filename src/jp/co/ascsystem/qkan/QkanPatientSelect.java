@@ -701,7 +701,7 @@ public class QkanPatientSelect {
         frame.getContentPane().add("Center", cont.getScrollList());
         frame.pack();
         frame.setSize(650, 600);
-        frame.show();
+        frame.setVisible(true);
     }
 
 }
