@@ -24,6 +24,6 @@
         <attribute name="Class-Path" value=". lib/firebirdsql-full.jar" /> 
       </manifest> 
     </jar> 
-    <!--delete dir="${ClassDir}" /--> 
+    <delete dir="${ClassDir}"> 
   </target> 
 </project>

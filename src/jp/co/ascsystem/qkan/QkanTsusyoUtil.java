@@ -76,7 +76,7 @@ public class QkanTsusyoUtil extends QkanPatientImport {
           if ( JOptionPane.showConfirmDialog(
                 fr,
                 "現在設定されているデータベースにはデータが存在しません。\n別のデータベースを選択しますか？",
-                "利用者基本情報CSV書き出し",JOptionPane.YES_NO_OPTION
+                "通所介護利用者情報CSV書き出し",JOptionPane.YES_NO_OPTION
                )==JOptionPane.NO_OPTION) {
               runStat = STATE_COMPLETE;
               fr.dispose();
@@ -166,8 +166,8 @@ public class QkanTsusyoUtil extends QkanPatientImport {
   public void execCsvOut() {
   
     final JProgressBar pb = new JProgressBar();
-    final JLabel tit1 = new JLabel("【基本情報CSV書き出し】");
-    final JLabel tit = new JLabel("基本情報をCSVファイルに書き出しています。");
+    final JLabel tit1 = new JLabel("【通所介護情報CSV書き出し】");
+    final JLabel tit = new JLabel("情報をCSVファイルに書き出しています。");
     tit.setHorizontalAlignment(JLabel.LEFT);
     int stat = STATE_SUCCESS;
 

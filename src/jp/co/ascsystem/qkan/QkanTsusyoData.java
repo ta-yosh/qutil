@@ -216,6 +216,7 @@ public class QkanTsusyoData {
         buf.append("PATIENT.PATIENT_ID and DELETE_FLAG=0) where PROVIDER_ID='");
         buf.append(currentProvider);
         buf.append("' and SYSTEM_SERVICE_KIND_DETAIL in (11511,16511) ");
+        buf.append("and SERVICE_USE_TYPE in (4,6) ");
         buf.append(" and SERVICE_DATE is not NULL");
         //buf.append("and WEEK_DAY>0 ");
         buf.append(" order by SERVICE_DATE desc ");
@@ -303,6 +304,7 @@ public class QkanTsusyoData {
       buf.append("' and extract(MONTH from SERVICE_DATE)='");
       buf.append(targetMonth);
       buf.append("' and SYSTEM_SERVICE_KIND_DETAIL in (11511,16511) ");
+      buf.append("and SERVICE_USE_TYPE in (4,6) ");
       buf.append("order by SERVICE_DATE desc ");
       String sql = buf.toString(); 
       System.out.println(sql);
@@ -640,7 +642,7 @@ public class QkanTsusyoData {
                   buf.append(" where PATIENT_ID=");
                   buf.append(pNo);
                   buf.append(" and SYSTEM_SERVICE_KIND_DETAIL in (11511,16511)");
-                  buf.append(" and SERVICE_USE_TYPE>5");
+                  buf.append(" and SERVICE_USE_TYPE=6");
                   buf.append(" and extract(YEAR from SERVICE_DATE)=");
                   buf.append(targetYear);
                   buf.append(" and extract(MONTH from SERVICE_DATE)=");
@@ -693,7 +695,7 @@ public class QkanTsusyoData {
                 buf.append(" where PATIENT_ID=");
                 buf.append(pNo);
                 buf.append(" and SYSTEM_SERVICE_KIND_DETAIL in (11511,16511)");
-                buf.append(" and SERVICE_USE_TYPE>5");
+                buf.append(" and SERVICE_USE_TYPE=6");
                 buf.append(" and extract(YEAR from SERVICE_DATE)=");
                 buf.append(targetYear);
                 buf.append(" and extract(MONTH from SERVICE_DATE)=");
