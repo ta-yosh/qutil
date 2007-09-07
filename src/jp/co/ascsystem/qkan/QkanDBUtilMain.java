@@ -140,7 +140,7 @@ public class QkanDBUtilMain {
     };
     fr.addWindowListener(AppCloser);
 
-    fr.setSize(320,ysiz);
+    fr.setSize(350,ysiz);
     Dimension sc = Toolkit.getDefaultToolkit().getScreenSize();
     Dimension sz = fr.getSize();
     fr.setLocation((sc.width-sz.width)/2,(sc.height-sz.height)/2);

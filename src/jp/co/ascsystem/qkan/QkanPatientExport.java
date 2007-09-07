@@ -215,6 +215,7 @@ public class QkanPatientExport extends QkanPatientImport {
               pb.setValue(0);
               pb.setString("0/"+String.valueOf(pNos.length)+"件");
               dbOutPath = getExportDBPath(dbOutPath);
+              System.out.println("Output to "+dbOutPath);
               if (dbOutPath==null) return;
               if (dbOutPath.compareToIgnoreCase(realInPath)==0) {
                  statMessage(STATE_ERROR,"書き出し元と同一ファイルに書き出す事はできません。\n処理を中止します。");
@@ -548,10 +549,12 @@ public class QkanPatientExport extends QkanPatientImport {
  
     public void finalizeExportDB() {
 
+      boolean is20 = false;
       String dbUser = getProperty("DBConfig/UserName");
       String dbPass = getProperty("DBConfig/Password");
       String dbTmpPath = dbOutPath+".fbak";
       String[] envp= new String[1];
+      String gbak;
 
       String cmd[] = new String[8];
       String quot = "";
@@ -572,11 +575,20 @@ public class QkanPatientExport extends QkanPatientImport {
         } catch (Exception e) {
           return;
         }
+        System.out.println(cmd[0]);
         if (cmd[0].equals(null)) return;
       }
       if (osn.equals("Win")) {
         quot = "\"";
-        cmd[0] = quot+cmd[0]+"\\Firebird\\Firebird_1_5\\bin\\gbak.exe"+quot;
+        gbak = cmd[0]+"\\Firebird\\Firebird_1_5\\bin\\gbak.exe";
+        File gf = new File(gbak);
+        if (! gf.exists()) {
+          cmd[0] = quot+cmd[0]+"\\Firebird\\Firebird_2_0\\bin\\gbak.exe"+quot;
+          is20 = true;
+        }
+        else {
+          cmd[0] = quot+gbak+quot;
+        }
       //  rmc = "cmd.exe /c del "+quot+dbTmpPath+quot;
       }
      // else rmc = "rm "+dbTmpPath;
@@ -592,17 +604,31 @@ public class QkanPatientExport extends QkanPatientImport {
       try {
           Runtime runtime = Runtime.getRuntime();
           Process process = runtime.exec(cmd,null);
-        //InputStream is = process.getInputStream();
-        //BufferedReader br = new BufferedReader(new InputStreamReader(is));
-        //String line;
-        //while((line=br.readLine())!=null) {
-        //  System.out.println(line);
-        //}
+          //InputStream is = process.getInputStream();
+          //BufferedReader br = new BufferedReader(new InputStreamReader(is));
+          //String line;
+          //while((line=br.readLine())!=null) {
+          //  System.out.println(line);
+          //}
           int tmpI = process.waitFor();
           if (tmpI==0) {
-             cmd[1] = "-r";
-             cmd[6] = quot+dbTmpPath+quot;
-             cmd[7] = quot+dbOutPath+quot;
+             if (is20) {
+               gbak = cmd[0];
+               cmd = new String[9];
+               cmd[0] = gbak;
+               cmd[1] = "-r";
+               cmd[2] = "-REP";
+               cmd[3] = "-user";
+               cmd[4] = dbUser;
+               cmd[5] = "-pass";
+               cmd[6] = dbPass;
+               cmd[7] = quot+dbTmpPath+quot;
+               cmd[8] = quot+dbOutPath+quot;
+             } else {
+               cmd[1] = "-r";
+               cmd[6] = quot+dbTmpPath+quot;
+               cmd[7] = quot+dbOutPath+quot;
+             }
              process = runtime.exec(cmd,null);
              tmpI = process.waitFor();
              if (!osn.equals("Win") && !osn.equals("Mac")) new DngFileUtil().chMod("666",cmd[7]);
