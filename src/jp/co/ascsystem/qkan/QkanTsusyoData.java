@@ -294,16 +294,40 @@ public class QkanTsusyoData {
       if (!dbm.connect()) return;
       pn3.setVisible(false);
       pn3.removeAll();
+      int nextMonth = targetMonth+1;
+      int nextYear = targetYear;
+      if (nextMonth==13) {
+        nextMonth=1;
+        nextYear++;
+      }
+      String nStart = (new Integer(targetYear).toString())+"-"+(new Integer(targetMonth).toString())+"-01";
+      String nEnd = (new Integer(nextYear).toString())+"-"+(new Integer(nextMonth).toString())+"-01";
+
       StringBuffer buf = new StringBuffer();
       buf.append("select distinct extract(DAY from SERVICE_DATE) from SERVICE");
       buf.append(" inner join PATIENT on (PATIENT.PATIENT_ID");
-      buf.append("=SERVICE.PATIENT_ID and DELETE_FLAG=0) where PROVIDER_ID='");
+      buf.append("=SERVICE.PATIENT_ID and DELETE_FLAG=0)");
+      buf.append(" inner join PATIENT_NINTEI_HISTORY on");
+      buf.append(" (PATIENT_NINTEI_HISTORY.PATIENT_ID=SERVICE.PATIENT_ID");
+      buf.append(" and INSURE_VALID_END>=SERVICE.SERVICE_DATE");
+      buf.append(" and NINTEI_HISTORY_ID in ");
+      buf.append("(select NINTEI_HISTORY_ID from ");
+      buf.append("PATIENT_NINTEI_HISTORY where PATIENT_ID=SERVICE.PATIENT_ID ");
+      buf.append(" and INSURE_VALID_END>='");
+      buf.append(nStart);
+      buf.append("' and INSURE_VALID_START<'");
+      buf.append(nEnd);
+      buf.append("')) where SERVICE.PROVIDER_ID='");
       buf.append(currentProvider);
       buf.append("' and extract(YEAR from SERVICE_DATE)='");
       buf.append(targetYear);
       buf.append("' and extract(MONTH from SERVICE_DATE)='");
       buf.append(targetMonth);
-      buf.append("' and SYSTEM_SERVICE_KIND_DETAIL in (11511,16511) ");
+      //buf.append("' and SYSTEM_SERVICE_KIND_DETAIL in (11511,16511) ");
+      buf.append("' and ((SYSTEM_SERVICE_KIND_DETAIL=11511 and ");
+      buf.append("substring(JOTAI_CODE from 1 for 1)=2) or ");
+      buf.append("(SYSTEM_SERVICE_KIND_DETAIL=16511 and ");
+      buf.append("substring(JOTAI_CODE from 1 for 1)=1)) ");
       buf.append("and SERVICE_USE_TYPE in (4,6) ");
       buf.append("order by SERVICE_DATE desc ");
       String sql = buf.toString(); 
@@ -349,24 +373,52 @@ public class QkanTsusyoData {
       pnl.setVisible(false);      
       pnl.removeAll();
       int detYear = (targetMonth>3) ? targetYear:targetYear-1;
+      int nextMonth = targetMonth+1;
+      int nextYear = targetYear;
+      if (nextMonth==13) {
+        nextMonth=1;
+        nextYear++;
+      }
+      String nStart = (new Integer(targetYear).toString())+"-"+(new Integer(targetMonth).toString())+"-01";
+      String nEnd = (new Integer(nextYear).toString())+"-"+(new Integer(nextMonth).toString())+"-01";
+      if (targetDay>0)
+        nStart = (new Integer(targetYear).toString())+"-"+(new Integer(targetMonth).toString())+"-"+(new Integer(targetDay).toString());
+
       if (dbm.connect()) {
         StringBuffer buf = new StringBuffer();
 
-// select patient.patient_first_name,patient_family_name,service.PATIENT_ID,max(SERVICE_ID) as SID,SYSTEM_SERVICE_KIND_DETAIL,jotai_code,count(SERVICE_ID),patient_birthday from SERVICE left outer join patient on (patient.patient_id=service.patient_id) inner join patient_nintei_history on (patient_nintei_history.patient_id=patient.patient_id) and nintei_history_id=(select max(nintei_history_id) from patient_nintei_history where patient_id=service.patient_id) where system_service_kind_detail in (11511,16511) and service_date is not null group by patient.patient_id,service.patient_id,patient_first_name,patient_family_name,patient_birthday,jotai_code,system_service_kind_detail order by SYSTEM_SERVICE_KIND_DETAIL;
-
         buf.append("select PATIENT_FIRST_NAME,PATIENT_FAMILY_NAME,");
         buf.append("SERVICE.PATIENT_ID,max(SERVICE_ID) as SID,");
-        buf.append("SYSTEM_SERVICE_KIND_DETAIL,JOTAI_CODE,PATIENT_BIRTHDAY,");
-        buf.append("count(SERVICE.SERVICE_ID),INSURE_RATE");
+        buf.append("SYSTEM_SERVICE_KIND_DETAIL,max(JOTAI_CODE) as JOTAI_CODE,PATIENT_BIRTHDAY,");
+        buf.append("count(SERVICE.SERVICE_ID),INSURE_RATE,");
+        buf.append("min(INSURE_VALID_START) as INSURE_VALID_START,");
+        buf.append("max(INSURE_VALID_END) as INSURE_VALID_END");
         buf.append(" from SERVICE ");
         buf.append(" inner join PATIENT on ");
         buf.append("(PATIENT.PATIENT_ID=SERVICE.PATIENT_ID and DELETE_FLAG=0)");
         buf.append(" inner join PATIENT_NINTEI_HISTORY on ");
         buf.append("(PATIENT_NINTEI_HISTORY.PATIENT_ID=SERVICE.PATIENT_ID and");
-        buf.append(" NINTEI_HISTORY_ID=");
-        buf.append("(select max(NINTEI_HISTORY_ID) from ");
-        buf.append("PATIENT_NINTEI_HISTORY where PATIENT_ID=SERVICE.PATIENT_ID)");
-        buf.append(") where SYSTEM_SERVICE_KIND_DETAIL in (11511,16511)");
+        buf.append(" NINTEI_HISTORY_ID in ");
+        buf.append("(select NINTEI_HISTORY_ID from ");
+        buf.append("PATIENT_NINTEI_HISTORY where PATIENT_ID=SERVICE.PATIENT_ID");
+        buf.append(" and INSURE_VALID_END>='");
+        buf.append(nStart);
+        if (targetDay>0) {
+          buf.append("' and INSURE_VALID_START<='");
+          buf.append(nStart);
+          //buf.append("'");
+        }
+        if (targetDay==0) {
+          buf.append("' and INSURE_VALID_START<'");
+          buf.append(nEnd);
+        }
+
+        //buf.append("')) where SYSTEM_SERVICE_KIND_DETAIL in (11511,16511)");
+        buf.append("')) where ((SYSTEM_SERVICE_KIND_DETAIL=11511 and ");
+        buf.append("substring(JOTAI_CODE from 1 for 1)=2) or ");
+        buf.append("(SYSTEM_SERVICE_KIND_DETAIL=16511 and ");
+        buf.append("substring(JOTAI_CODE from 1 for 1)=1)) ");
+
         buf.append(" and SERVICE_USE_TYPE in (4,6) ");
         buf.append(" and extract(YEAR from SERVICE_DATE)=");
         buf.append(targetYear);
@@ -379,7 +431,7 @@ public class QkanTsusyoData {
         buf.append(" and SERVICE.PROVIDER_ID='");
         buf.append(currentProvider);
         buf.append("' group by SERVICE.PATIENT_ID,PATIENT_FIRST_NAME,");
-        buf.append("PATIENT_FAMILY_NAME,PATIENT_BIRTHDAY,JOTAI_CODE,");
+        buf.append("PATIENT_FAMILY_NAME,PATIENT_BIRTHDAY,");
         buf.append("INSURE_RATE,SYSTEM_SERVICE_KIND_DETAIL");
         buf.append(" order by SYSTEM_SERVICE_KIND_DETAIL");
 
@@ -393,6 +445,9 @@ public class QkanTsusyoData {
           int pointCode=0;
           int sCount = Integer.parseInt(dbm.getData("COUNT",i).toString());
           int insRate = Integer.parseInt(dbm.getData("INSURE_RATE",i).toString());
+          String insStart = dbm.getData("INSURE_VALID_START",i).toString();
+          String insEnd = dbm.getData("INSURE_VALID_END",i).toString();
+
           Vector pline = new Vector();
           int pNo = new Integer(dbm.getData(2,i).toString()).intValue();
           //pline.addElement(dbm.getData(2,i).toString());
@@ -412,37 +467,43 @@ public class QkanTsusyoData {
           int sbp = Integer.parseInt(dbm.getData(4,i).toString());
           String kind = (sbp==11511) ? 
                         "":"予防";
-          pline.addElement(kind);
           String cR="1";
-          if (dbm.getData("JOTAI_CODE",i)!=null) {
-          cR = dbm.getData("JOTAI_CODE",i).toString();
-          String cRate = (String)careRate.get(cR);
-          pline.addElement(cRate);
-          } else {
-            pline.addElement("");
-          }
-          int rPlus = Integer.parseInt((String)ratePlus.get(cR));
-/*
+
           if (targetDay==0) {
-            String y = dbm.getData(5,i).toString();
-            String m = dbm.getData(6,i).toString();
-            String d = dbm.getData(7,i).toString();
-            int yi = new Integer(y).intValue()-1988;
-            if (m.length()==1) m = "0"+m;
-            if (d.length()==1) d = "0"+d;
-            String ymd = "平成"+(new Integer(yi)).toString()+"年"+m+"月"+d+"日";
-            pline.addElement(ymd);
-            y = dbm.getData(8,i).toString();
-            m = dbm.getData(9,i).toString();
-            d = dbm.getData(10,i).toString();
-            yi = new Integer(y).intValue()-1988;
-            if (m.length()==1) m = "0"+m;
-            if (d.length()==1) d = "0"+d;
-            ymd = "平成"+(new Integer(yi)).toString()+"年"+m+"月"+d+"日";
-            pline.addElement(ymd);
-          } else {
-*/
-          if (targetDay>0) {
+            buf.delete(0,buf.length());
+            buf.append("select JOTAI_CODE from PATIENT_NINTEI_HISTORY ");
+            buf.append("where PATIENT_ID=");
+            buf.append(pNo);
+            buf.append(" and NINTEI_HISTORY_ID=(select");
+            buf.append(" max(NINTEI_HISTORY_ID) from PATIENT_NINTEI_HISTORY ");
+            buf.append("where INSURE_VALID_END='");
+            buf.append(insEnd);
+            buf.append("' and PATIENT_ID=");
+            buf.append(pNo);
+            buf.append(")");
+            System.out.println(buf.toString());
+            DngDBAccess dbm4 = new DngDBAccess("firebird",dbUri,dbUser,dbPass);
+            dbm4.connect();
+            dbm4.execQuery(buf.toString());
+            dbm4.Close();
+            if (dbm4.Rows>0 && dbm4.getData("JOTAI_CODE",0)!=null) {
+              cR = dbm4.getData("JOTAI_CODE",0).toString();
+              String cRate = (String)careRate.get(cR);
+              pline.addElement(cRate);
+            } else {
+              pline.addElement("");
+            }
+            pline.addElement(kind);
+          }
+          else if (targetDay>0) {
+            if (dbm.getData("JOTAI_CODE",i)!=null) {
+            cR = dbm.getData("JOTAI_CODE",i).toString();
+            String cRate = (String)careRate.get(cR);
+            pline.addElement(cRate);
+            } else {
+              pline.addElement("");
+            }
+            pline.addElement(kind);
             buf.delete(0,buf.length());
             buf.append("select SERVICE_ID,SYSTEM_BIND_PATH,");
             buf.append("extract(HOUR from DETAIL_VALUE),");
@@ -481,6 +542,7 @@ public class QkanTsusyoData {
             }
             pline.addElement(ti);
           }
+          int rPlus = Integer.parseInt((String)ratePlus.get(cR));
           buf.delete(0,buf.length());
           buf.append("select SERVICE_ID,SYSTEM_BIND_PATH,");
           buf.append("DETAIL_VALUE");
@@ -603,17 +665,8 @@ public class QkanTsusyoData {
 
           if (targetDay==0) {
             buf.delete(0,buf.length());
-            buf.append("select CLAIM_ID,SYSTEM_BIND_PATH,");
-            buf.append("DETAIL_VALUE");
-            buf.append(" from CLAIM_DETAIL_TEXT_");
-            buf.append(detYear);
-            //buf.append(" where CLAIM_ID = (select CLAIM_ID from CLAIM");
-
-            buf.append(" where CLAIM_ID = (select CLAIM_ID from CLAIM_DETAIL_TEXT_");
-            buf.append(detYear);
-            buf.append(" where CLAIM_ID in (select CLAIM_ID from CLAIM");
-
-            buf.append(" where PATIENT_ID=");
+            buf.append("select distinct extract(YEAR from CLAIM_DATE),");
+            buf.append("extract(MONTH from CLAIM_DATE) from CLAIM where PATIENT_ID=");
             buf.append(pNo);
             buf.append(" and extract(YEAR from TARGET_DATE)=");
             buf.append(targetYear);
@@ -621,18 +674,48 @@ public class QkanTsusyoData {
             buf.append(targetMonth);
             buf.append(" and CATEGORY_NO=7 and PROVIDER_ID='");
             buf.append(currentProvider);
-            buf.append("') and SYSTEM_BIND_PATH=701007 ");
-            if (sbp==11511) buf.append("and DETAIL_VALUE='15')");
-            else buf.append("and DETAIL_VALUE='65')");
-            buf.append(" and SYSTEM_BIND_PATH");
-            buf.append(" in (701008,701014,701015,701016,701017)");
-            buf.append(" order by SYSTEM_BIND_PATH;");
-            sql = buf.toString();
-            System.out.println(sql);
-            dbm2.connect();
-            dbm2.execQuery(sql);
-            dbm2.Close();
-            if (dbm2.Rows>0) {
+            buf.append("'");
+            DngDBAccess dbm5 = new DngDBAccess("firebird",dbUri,dbUser,dbPass);
+            dbm5.connect();
+            dbm5.execQuery(buf.toString());
+            dbm5.Close();
+            int cRows;
+            if (dbm5.Rows>0) { 
+              int cYear = Integer.parseInt(dbm5.getData(0,0).toString());
+              if (Integer.parseInt(dbm5.getData(1,0).toString())<4) cYear--; 
+              buf.delete(0,buf.length());
+              buf.append("select CLAIM_ID,SYSTEM_BIND_PATH,");
+              buf.append("DETAIL_VALUE");
+              buf.append(" from CLAIM_DETAIL_TEXT_");
+              buf.append(cYear);
+              //buf.append(" where CLAIM_ID = (select CLAIM_ID from CLAIM");
+  
+              buf.append(" where CLAIM_ID = (select CLAIM_ID from CLAIM_DETAIL_TEXT_");
+              buf.append(cYear);
+              buf.append(" where CLAIM_ID in (select CLAIM_ID from CLAIM");
+              buf.append(" where PATIENT_ID=");
+              buf.append(pNo);
+              buf.append(" and extract(YEAR from TARGET_DATE)=");
+              buf.append(targetYear);
+              buf.append(" and extract(MONTH from TARGET_DATE)=");
+              buf.append(targetMonth);
+              buf.append(" and CATEGORY_NO=7 and PROVIDER_ID='");
+              buf.append(currentProvider);
+              buf.append("') and SYSTEM_BIND_PATH=701007 ");
+              if (sbp==11511) buf.append("and DETAIL_VALUE='15')");
+              else buf.append("and DETAIL_VALUE='65')");
+              buf.append(" and SYSTEM_BIND_PATH");
+              buf.append(" in (701008,701014,701015,701016,701017)");
+              buf.append(" order by SYSTEM_BIND_PATH;");
+              sql = buf.toString();
+              System.out.println(sql);
+              dbm2.connect();
+              dbm2.execQuery(sql);
+              dbm2.Close();
+              cRows = dbm2.Rows;
+            }
+            else cRows=0;
+            if (cRows>0) {
               int other=0;
               if (!hiwari) pline.addElement(new Integer(dbm2.getData("DETAIL_VALUE",0).toString()));
               else {
@@ -640,15 +723,31 @@ public class QkanTsusyoData {
                 if (dbm3.connect()) {
                   buf.delete(0,buf.length());
                   buf.append("select count(service_id) from service");
-                  buf.append(" where PATIENT_ID=");
+                  buf.append(" inner join PATIENT_NINTEI_HISTORY on ");
+                  buf.append("(PATIENT_NINTEI_HISTORY.PATIENT_ID=");
                   buf.append(pNo);
-                  buf.append(" and SYSTEM_SERVICE_KIND_DETAIL in (11511,16511)");
-                  buf.append(" and SERVICE_USE_TYPE=6");
+                  buf.append(" and NINTEI_HISTORY_ID in ");
+                  buf.append("(select NINTEI_HISTORY_ID from ");
+                  buf.append("PATIENT_NINTEI_HISTORY where PATIENT_ID=");
+                  buf.append(pNo);
+                  buf.append(" and INSURE_VALID_END>=SERVICE.SERVICE_DATE");
+                  buf.append(" and INSURE_VALID_START<=SERVICE.SERVICE_DATE");
+                  buf.append(")) where SERVICE.PATIENT_ID=");
+                  buf.append(pNo);
+                  buf.append(" and ((SYSTEM_SERVICE_KIND_DETAIL=11511 and ");
+                  buf.append("substring(JOTAI_CODE from 1 for 1)=2) or ");
+                  buf.append("(SYSTEM_SERVICE_KIND_DETAIL=16511 and ");
+                  buf.append("substring(JOTAI_CODE from 1 for 1)=1))");
+                  buf.append(" and SERVICE_USE_TYPE in (4,6)");
                   buf.append(" and extract(YEAR from SERVICE_DATE)=");
                   buf.append(targetYear);
                   buf.append(" and extract(MONTH from SERVICE_DATE)=");
                   buf.append(targetMonth);
-                  buf.append(" and SERVICE.PROVIDER_ID='");
+                  buf.append(" and SERVICE_DATE<='");
+                  buf.append(insEnd);
+                  buf.append("' and SERVICE_DATE>='");
+                  buf.append(insStart);
+                  buf.append("' and SERVICE.PROVIDER_ID='");
                   buf.append(currentProvider);
                   buf.append("'");
                   System.out.println(buf.toString());
@@ -693,15 +792,31 @@ public class QkanTsusyoData {
               if (dbm3.connect()) {
                 buf.delete(0,buf.length());
                 buf.append("select count(service_id) from service");
-                buf.append(" where PATIENT_ID=");
+                buf.append(" inner join PATIENT_NINTEI_HISTORY on ");
+                buf.append("(PATIENT_NINTEI_HISTORY.PATIENT_ID=");
                 buf.append(pNo);
-                buf.append(" and SYSTEM_SERVICE_KIND_DETAIL in (11511,16511)");
-                buf.append(" and SERVICE_USE_TYPE=6");
+                buf.append(" and NINTEI_HISTORY_ID in ");
+                buf.append("(select NINTEI_HISTORY_ID from ");
+                buf.append("PATIENT_NINTEI_HISTORY where PATIENT_ID=");
+                buf.append(pNo);
+                buf.append(" and INSURE_VALID_END>=SERVICE.SERVICE_DATE");
+                buf.append(" and INSURE_VALID_START<=SERVICE.SERVICE_DATE");
+                buf.append(")) where SERVICE.PATIENT_ID=");
+                buf.append(pNo);
+                buf.append(" and ((SYSTEM_SERVICE_KIND_DETAIL=11511 and ");
+                buf.append("substring(JOTAI_CODE from 1 for 1)=2) or ");
+                buf.append("(SYSTEM_SERVICE_KIND_DETAIL=16511 and ");
+                buf.append("substring(JOTAI_CODE from 1 for 1)=1))");
+                buf.append(" and SERVICE_USE_TYPE in (4,6)");
                 buf.append(" and extract(YEAR from SERVICE_DATE)=");
                 buf.append(targetYear);
                 buf.append(" and extract(MONTH from SERVICE_DATE)=");
                 buf.append(targetMonth);
-                buf.append(" and SERVICE.PROVIDER_ID='");
+                buf.append(" and SERVICE_DATE<='");
+                buf.append(insEnd);
+                buf.append("' and SERVICE_DATE>='");
+                buf.append(insStart);
+                buf.append("' and SERVICE.PROVIDER_ID='");
                 buf.append(currentProvider);
                 buf.append("'");
                 System.out.println(buf.toString());
@@ -761,7 +876,10 @@ public class QkanTsusyoData {
         } else {
           JLabel lab1 = new JLabel("＊月間での金額について：実績確定分のみ表示されます。 ");
           lab1.setFont(new Font("Dialog",Font.PLAIN,11));
-          pnl.add(lab1,BorderLayout.CENTER);
+          JLabel lab2 = new JLabel("＊月途中で要介護度が変わっている場合、変更後の要介護度が表示されます。また、要支援←→要介護の場合は別行となります。");
+          lab2.setFont(new Font("Dialog",Font.PLAIN,11));
+          pnl.add(lab1,BorderLayout.NORTH);
+          pnl.add(lab2,BorderLayout.CENTER);
         }
         pnl.setBorder(BorderFactory.createLineBorder(Color.black));
       } else {
@@ -815,8 +933,8 @@ public class QkanTsusyoData {
       fieldName.addElement("No.");
       fieldName.addElement("氏名");
       fieldName.addElement("年齢");
-      fieldName.addElement("種類");
       fieldName.addElement("要介護度");
+      fieldName.addElement("種類");
       if (td>0) {
         fieldName.addElement("開始時刻");
         fieldName.addElement("終了時刻");
@@ -873,8 +991,8 @@ public class QkanTsusyoData {
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32);
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(90);
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32);
-      usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32);
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(60);
+      usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32);
       if (td>0) {
         usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(60);
         usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(60);

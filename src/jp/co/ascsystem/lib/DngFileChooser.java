@@ -147,6 +147,8 @@ public class DngFileChooser {
               filePath = System.getProperty("user.home")+"\\AppData\\Local\\VirtualStore"+filePath.substring(filePath.indexOf("\\Program Files"));
               file = null;
               file = new File(filePath);
+              File dir = new File(file.getParent());
+              if (! dir.isDirectory()) dir.mkdirs();
             }
 
             if (!mbPath) { 

@@ -154,7 +154,7 @@ public class QkanKyotakuUtil extends QkanPatientImport {
       }
     };
     fr.addWindowListener(AppCloser);
-    fr.setSize(750,650);
+    fr.setSize(750,660);
     //fr.pack();
     Dimension sc = Toolkit.getDefaultToolkit().getScreenSize();
     Dimension sz = fr.getSize();
