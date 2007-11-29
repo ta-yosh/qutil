@@ -2,6 +2,7 @@ package jp.co.ascsystem.qkan;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Vector;
 import java.util.Calendar;
 import java.util.Hashtable;
@@ -1071,6 +1072,96 @@ public class QkanTsusyoData {
       usrTbl.repaint();
     }
 
+    public String PDFout() {
+      int cid=0;
+      int num=0;
+      if (targetDay==0) {
+        num=18;
+      } else {
+        num=17;
+      }
+      float width[] = new float[num];
+      int ctype[] = new int[num];
+      Arrays.fill(ctype,0);
+      ctype[cid] = 2; // 0 - normal 1 - add comma 2 - align right
+      width[cid++] = 3; //No.
+      width[cid++] = 14; //»áÌ¾
+      ctype[cid] = 2; // 0 - normal 1 - add comma 2 - align right
+      width[cid++] = Float.parseFloat("3.5"); //Ç¯Îð
+      width[cid++] = Float.parseFloat("6.5"); //Í×²ð¸îÅÙ
+      width[cid++] = 4; //¼ïÎà
+      if (targetDay>0) {
+        width[cid++] = 6; //³«»Ï»þ¹ï
+        width[cid++] = 6; //½ªÎ»»þ¹ï
+      } 
+      width[cid++] = Float.parseFloat("6.5"); //»þ´Ö¶èÊ¬
+      width[cid++] = Float.parseFloat("3.5"); //¸ÄÊÌ
+      width[cid++] = Float.parseFloat("3.5"); //ÆþÍá
+      width[cid++] = Float.parseFloat("3.5"); //¼ãÇ¯
+      width[cid++] = Float.parseFloat("3.5"); //±ÉÍÜ
+      width[cid++] = Float.parseFloat("3.5"); //¸ý¹Ð
+      width[cid++] = Float.parseFloat("3.5"); //¥¢¥¯
+      width[cid++] = Float.parseFloat("3.5"); //±¿Æ°
+      if (targetDay==0) {
+        ctype[cid] = 2; // 0 - normal 1 - add comma 2 - align right
+        width[cid++] = Float.parseFloat("3.5"); //²ó¿ô
+      }
+      ctype[cid] = 1; // 0 - normal 1 - add comma 2 - align right
+      width[cid++] = 6; //ÈñÍÑ
+      ctype[cid] = 1; // 0 - normal 1 - add comma 2 - align right
+      width[cid++] = 6; //ÉéÃ´³Û
+      if (targetDay==0) {
+        ctype[cid] = 1; // 0 - normal 1 - add comma 2 - align right
+        width[cid++] = 6; //¤½¤ÎÂ¾ÉéÃ´³Û
+        ctype[cid] = 1; // 0 - normal 1 - add comma 2 - align right
+        width[cid++] = Float.parseFloat("7.5"); //ÉéÃ´³Û¹ç·×
+      }
+      //Calendar cal = Calendar.getInstance();
+      //String date=cal.get(Calendar.YEAR)+""+(cal.get(Calendar.MONTH) + 1)
+      //            +""+cal.get(Calendar.DATE);
+      //String fname = "TSUSYO"+date+".pdf";
+      StringBuffer sb = new StringBuffer();
+      sb.append("TSUSYO-");
+      sb.append(currentProvider);
+      sb.append("_");
+      sb.append(targetYear);
+      if (targetMonth<10) sb.append("0");
+      sb.append(targetMonth);
+      if (targetDay>0) {
+        if (targetDay<10) sb.append("0");
+        sb.append(targetDay);
+      } else {
+        sb.append("M");
+      }
+      sb.append(".pdf");
+      String fname = sb.toString();
+
+      DngPdfTable pdf = new DngPdfTable(fname,1);
+      if (pdf.openPDF("ÄÌ½ê²ð¸î¾ðÊó")) {
+        sb.delete(0,sb.length());
+        sb.append(curProviderName);
+        sb.append(" ");
+        sb.append(targetYear);
+        sb.append("Ç¯");
+        if (targetMonth<10) sb.append("0");
+        sb.append(targetMonth);
+        sb.append("·î");
+        if (targetDay>0) {
+          if (targetDay<10) sb.append("0");
+          sb.append(targetDay);
+          sb.append("Æü");
+        } 
+        sb.append(" Äó¶¡Ê¬");
+        pdf.setParagraph(-1,sb.toString());
+        pdf.setTable(usrTbl,width,ctype,0);
+        pdf.flush();
+        return fname;
+      }
+      else {
+        return null;
+      }
+    }
+
     int patientAge(String birthday) {
        String bd[] = new String[3];
        if (birthday.matches("[0-9]+-[0-9]+-[0-9]+")) bd = birthday.split("-");
@@ -1085,6 +1176,5 @@ public class QkanTsusyoData {
        else if (mm==mon && dd - c.get(c.DATE) > 0) age--;
        return age;
     }
-
 
 }

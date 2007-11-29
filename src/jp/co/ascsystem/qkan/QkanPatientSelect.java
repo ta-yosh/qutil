@@ -2,6 +2,7 @@ package jp.co.ascsystem.qkan;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Vector;
 import java.util.Calendar;
 import java.util.Hashtable;
@@ -687,6 +688,75 @@ public class QkanPatientSelect {
     public void addRow(Vector dat) {
       dtm.insertRow(0,dat);
       usrTbl.repaint();
+    }
+
+    public String PDFout() {
+      int cid=0;
+      int num=0;
+      float width[] = new float[9];
+      int ctype[] = new int[13];
+      Arrays.fill(ctype,0);
+      width[cid++] = 7; //ID
+      ctype[cid] = 6; // 0 - normal 1 - add comma 2 - align right
+      width[cid++] = 22; //ふりがな
+      ctype[cid] = 5; //生年月日
+      width[cid++] = Float.parseFloat("3.5"); //生年月日
+      width[cid] = Float.parseFloat("3.5"); //生年月日
+      ctype[cid++] = 3; //郵便番号
+      width[cid++] = 8; //郵便番号
+      width[cid++] = 22; //住所
+      width[cid] = 6; //要介護度
+      ctype[cid++] = 4; // 0 - normal 1 - add comma 2 - align right
+      width[cid++] = 7; //認定開始日
+      width[cid] = 20; //居宅介護支援事業所
+      ctype[cid++] = 4; //氏名
+      //width[cid++] = 15; //氏名
+      ctype[cid++] = 3; //性別
+      ctype[cid++] = 3; //年齢 
+      ctype[cid++] = 3; //連絡先(Tel)
+      ctype[cid] = 4; //認定終了日
+      //width[cid] = 10; //認定終了日
+      Calendar cal = Calendar.getInstance();
+      StringBuffer sb = new StringBuffer();
+      sb.append("QKANUSER");
+      sb.append(cal.get(Calendar.YEAR));
+      if (cal.get(Calendar.MONTH)+1<10) sb.append("0");
+      sb.append(cal.get(Calendar.MONTH)+1);
+      if (cal.get(Calendar.DATE)<10) sb.append("0");
+      sb.append(cal.get(Calendar.DATE));
+      sb.append(".pdf");
+      String fname = sb.toString();
+
+      DngPdfTable pdf = new DngPdfTable(fname,1);
+      if (pdf.openPDF("利用者基本情報一覧")) {
+        sb.delete(0,sb.length());
+        sb.append(cal.get(Calendar.YEAR));
+        sb.append("年");
+        if (cal.get(Calendar.MONTH)+1<10) sb.append("0");
+        sb.append(cal.get(Calendar.MONTH)+1);
+        sb.append("月");
+        if (cal.get(Calendar.DATE)<10) sb.append("0");
+        sb.append(cal.get(Calendar.DATE));
+        sb.append("日");
+        sb.append(" 現在");
+        pdf.setParagraph(-1,sb.toString());
+        int[] cnum = new int[] {0,1,3,5,11,12,7,8,10,2,4,6,13,9};
+        Object[][] pdfDat = new Object[usrTbl.getRowCount()][usrTbl.getColumnCount()-1];
+        Object[] pdfColName = new Object[usrTbl.getColumnCount()-1];
+        for (int i=0;i<usrTbl.getRowCount();i++) {
+           for (int j=1;j<usrTbl.getColumnCount();j++) {
+             pdfDat[i][j-1] = usrTbl.getValueAt(i,cnum[j]).toString().replaceAll("^ +","").replaceAll(" +$","");
+             if (i==0) pdfColName[j-1] = usrTbl.getColumnName(cnum[j]);
+           }
+        }
+        JTable pdfTbl = new JTable(pdfDat,pdfColName);
+        pdf.setTable(pdfTbl,width,ctype,9);
+        pdf.flush();
+        return fname;
+      }
+      else {
+        return null;
+      }
     }
 
     public static void main(String args[]){

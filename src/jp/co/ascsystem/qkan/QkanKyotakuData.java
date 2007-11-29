@@ -2,6 +2,7 @@ package jp.co.ascsystem.qkan;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Vector;
 import java.util.Calendar;
 import java.util.Hashtable;
@@ -868,6 +869,79 @@ public class QkanKyotakuData {
     public void addRow(Vector dat) {
       dtm.insertRow(0,dat);
       usrTbl.repaint();
+    }
+
+    public String PDFout() {
+      int cid=0;
+      int num=0;
+      float width[] = new float[10];
+      int ctype[] = new int[10];
+      Arrays.fill(ctype,0);
+      ctype[cid] = 2; // 0 - normal 1 - add comma 2 - align right
+      width[cid++] = 4; //No.
+      width[cid++] = 8; //ÈïÊÝ¸±¼ÔÈÖ¹æ
+      width[cid++] = 17; //»áÌ¾
+      ctype[cid] = 2; // 0 - normal 1 - add comma 2 - align right
+      width[cid++] = 4; //Ç¯Îð
+      width[cid++] = 6; //Í×²ð¸îÅÙ
+      width[cid++] = 3; //¼ïÎà
+      if (targetDay>0) {
+        width[cid++] = 6; //³«»Ï»þ¹ï
+        width[cid++] = 6; //½ªÎ»»þ¹ï
+      } 
+      if (targetDay==0) {
+        ctype[cid] = 2; // 0 - normal 1 - add comma 2 - align right
+        width[cid++] = 3; //²ó¿ô
+        width[cid++] = 14; //Ë¬ÌäÆü
+      }
+      ctype[cid] = 1; // 0 - normal 1 - add comma 2 - align right
+      width[cid++] = 7; //ÈñÍÑ
+      ctype[cid] = 1; // 0 - normal 1 - add comma 2 - align right
+      width[cid++] = 7; //ÉéÃ´³Û
+      //Calendar cal = Calendar.getInstance();
+      //String date=cal.get(Calendar.YEAR)+""+(cal.get(Calendar.MONTH) + 1)
+      //            +""+cal.get(Calendar.DATE);
+      //String fname = "TSUSYO"+date+".pdf";
+      StringBuffer sb = new StringBuffer();
+      sb.append("KYOTAKU-");
+      sb.append(currentProvider);
+      sb.append("_");
+      sb.append(targetYear);
+      if (targetMonth<10) sb.append("0");
+      sb.append(targetMonth);
+      if (targetDay>0) {
+        if (targetDay<10) sb.append("0");
+        sb.append(targetDay);
+      } else {
+        sb.append("M");
+      }
+      sb.append(".pdf");
+      String fname = sb.toString();
+
+      DngPdfTable pdf = new DngPdfTable(fname,1);
+      if (pdf.openPDF("µïÂðÎÅÍÜ´Ç¸î»ØÆ³¾ðÊó")) {
+        sb.delete(0,sb.length());
+        sb.append(curProviderName);
+        sb.append(" ");
+        sb.append(targetYear);
+        sb.append("Ç¯");
+        if (targetMonth<10) sb.append("0");
+        sb.append(targetMonth);
+        sb.append("·î");
+        if (targetDay>0) {
+          if (targetDay<10) sb.append("0");
+          sb.append(targetDay);
+          sb.append("Æü");
+        } 
+        sb.append(" Äó¶¡Ê¬");
+        pdf.setParagraph(-1,sb.toString());
+        pdf.setTable(usrTbl,width,ctype,0);
+        pdf.flush();
+        return fname;
+      }
+      else {
+        return null;
+      }
     }
 
     int patientAge(String birthday) {
