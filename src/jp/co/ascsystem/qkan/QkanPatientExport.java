@@ -612,23 +612,23 @@ public class QkanPatientExport extends QkanPatientImport {
           //}
           int tmpI = process.waitFor();
           if (tmpI==0) {
-             if (is20) {
-               gbak = cmd[0];
-               cmd = new String[9];
-               cmd[0] = gbak;
-               cmd[1] = "-r";
-               cmd[2] = "-REP";
-               cmd[3] = "-user";
-               cmd[4] = dbUser;
-               cmd[5] = "-pass";
-               cmd[6] = dbPass;
-               cmd[7] = quot+dbTmpPath+quot;
-               cmd[8] = quot+dbOutPath+quot;
-             } else {
-               cmd[1] = "-r";
+             //if (is20) {
+             //  gbak = cmd[0];
+             //  cmd = new String[9];
+             //  cmd[0] = gbak;
+             //  cmd[1] = "-r";
+             //  cmd[2] = "-REP";
+             //  cmd[3] = "-user";
+             //  cmd[4] = dbUser;
+             //  cmd[5] = "-pass";
+             //  cmd[6] = dbPass;
+             //  cmd[7] = quot+dbTmpPath+quot;
+             //  cmd[8] = quot+dbOutPath+quot;
+             //} else {
+               cmd[1] = "-rep";
                cmd[6] = quot+dbTmpPath+quot;
                cmd[7] = quot+dbOutPath+quot;
-             }
+             //}
              process = runtime.exec(cmd,null);
              tmpI = process.waitFor();
              if (!osn.equals("Win") && !osn.equals("Mac")) new DngFileUtil().chMod("666",cmd[7]);
