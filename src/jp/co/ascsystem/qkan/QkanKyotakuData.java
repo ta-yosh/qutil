@@ -919,7 +919,6 @@ public class QkanKyotakuData {
       String fname = sb.toString();
 
       DngPdfTable pdf = new DngPdfTable(fname,1);
-      if (pdf.openPDF("µïÂğÎÅÍÜ´Ç¸î»ØÆ³¾ğÊó")) {
         sb.delete(0,sb.length());
         sb.append(curProviderName);
         sb.append(" ");
@@ -934,7 +933,8 @@ public class QkanKyotakuData {
           sb.append("Æü");
         } 
         sb.append(" Äó¶¡Ê¬");
-        pdf.setParagraph(-1,sb.toString());
+        pdf.setSubTitle(sb.toString());
+      if (pdf.openPDF("µïÂğÎÅÍÜ´Ç¸î»ØÆ³¾ğÊó")) {
         pdf.setTable(usrTbl,width,ctype,0);
         pdf.flush();
         return fname;

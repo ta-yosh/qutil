@@ -12,7 +12,7 @@ public class DngAppProperty {
   public String getProperty(String key) {
     String[] keys = key.split("/");
     String val = xml.getValue(keys);
-    if (val=="" || val.matches(".*?<.*>.*")) val=null;
+    //if (val=="" || val.matches(".*?<.*>.*")) val=null;
     return val;
   }
 }

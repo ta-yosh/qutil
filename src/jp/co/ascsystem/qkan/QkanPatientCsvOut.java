@@ -39,9 +39,9 @@ public class QkanPatientCsvOut extends QkanPatientImport {
 
     public QkanPatientCsvOut() {
         propertyFile = getPropertyFile(); 
-        dbServer = getProperty("DBConfig/Server");
-        dbPath = getProperty("DBConfig/Path");
-        dbPort = getProperty("DBConfig/Port");
+        dbServer = getProperty("doc/DBConfig/Server");
+        dbPath = getProperty("doc/DBConfig/Path");
+        dbPort = getProperty("doc/DBConfig/Port");
     }
 
     public JDialog  dbUpdate(JButton execBtn,final QkanExecTransaction dbexec) throws Exception {
@@ -62,7 +62,7 @@ public class QkanPatientCsvOut extends QkanPatientImport {
             cancel(); 
           }
           String uri = dbServer + "/" + dbPort + ":" + dbPath;
-          iTable = new QkanPatientSelect(uri,getProperty("DBConfig/UserName"),getProperty("DBConfig/Password"));
+          iTable = new QkanPatientSelect(uri,getProperty("doc/DBConfig/UserName"),getProperty("doc/DBConfig/Password"));
           if (iTable.Rows<0) {
             statMessage(STATE_ERROR,"データベースに接続できません。\n給管鳥が問題なく起動する状態かどうかご確認ください。");
             return null;
@@ -103,20 +103,26 @@ public class QkanPatientCsvOut extends QkanPatientImport {
       public void actionPerformed(ActionEvent e) {
         String fname = iTable.PDFout();
         if (fname!=null) {
-          File pr = new File(getProperty("Acrobat/Path"));
+          File pr = new File(getProperty("doc/Acrobat/Path"));
           File f = new File(fname);
           if (!pr.exists() && !System.getProperty("os.name").substring(0,3).equals("Mac")) {
             statMessage(STATE_ERROR,"PDF設定が不正であるため、印刷できません。給管鳥本体でPDF設定を確認してください。");
             f.delete();
             return;
           }
-          String cmd[] = {getProperty("Acrobat/Path"),fname};
+          String cmd[] = {getProperty("doc/Acrobat/Path"),fname};
           if ( System.getProperty("os.name").substring(0,3).equals("Mac") ) {
             cmd[0] = "open";
           }
           try {
             Process ps = Runtime.getRuntime().exec(cmd,null);
             ps.waitFor();
+            if (System.getProperty("os.name").substring(0,3).equals("Mac")) {
+              cmd[0] = "sleep";
+              cmd[1] = "5";
+              ps = Runtime.getRuntime().exec(cmd,null);
+              ps.waitFor();
+            }
             f.delete();
           } catch (Exception ex) {
             return;

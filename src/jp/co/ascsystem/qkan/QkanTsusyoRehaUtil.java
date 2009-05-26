@@ -31,7 +31,7 @@ import javax.swing.JLabel;
 import jp.co.ascsystem.lib.*;
 import jp.co.ascsystem.util.*;
 
-public class QkanKyotakuUtil extends QkanPatientImport {
+public class QkanTsusyoRehaUtil extends QkanPatientImport {
 
   String dbOutPath=null;
   String realOutPath=null;
@@ -40,9 +40,9 @@ public class QkanKyotakuUtil extends QkanPatientImport {
   public JComboBox ymbox;
   public JLabel nodata;
 
-  QkanKyotakuData tTable;
+  QkanTsusyoRehaData tTable;
 
-  public QkanKyotakuUtil() {
+  public QkanTsusyoRehaUtil() {
     propertyFile = getPropertyFile(); 
     dbServer = getProperty("doc/DBConfig/Server");
     dbPath = getProperty("doc/DBConfig/Path");
@@ -67,7 +67,7 @@ public class QkanKyotakuUtil extends QkanPatientImport {
           cancel(); 
         }
         String uri = dbServer + "/" + dbPort + ":" + dbPath;
-        tTable = new QkanKyotakuData(uri,getProperty("doc/DBConfig/UserName"),getProperty("doc/DBConfig/Password"));
+        tTable = new QkanTsusyoRehaData(uri,getProperty("doc/DBConfig/UserName"),getProperty("doc/DBConfig/Password"));
         if (tTable.Rows<0) {
           statMessage(STATE_ERROR,"データベースに接続できません。\n給管鳥が問題なく起動する状態かどうかご確認ください。");
           return null;
@@ -76,7 +76,7 @@ public class QkanKyotakuUtil extends QkanPatientImport {
           if ( JOptionPane.showConfirmDialog(
                 fr,
                 "現在設定されているデータベースにはデータが存在しません。\n別のデータベースを選択しますか？",
-                "居宅療養管理指導情報CSV",JOptionPane.YES_NO_OPTION
+                "通所リハ利用者情報CSV書き出し",JOptionPane.YES_NO_OPTION
                )==JOptionPane.NO_OPTION) {
               runStat = STATE_COMPLETE;
               fr.dispose();
@@ -155,7 +155,7 @@ public class QkanKyotakuUtil extends QkanPatientImport {
     };
     exitBtn.addActionListener(exitNow);
 
-    JLabel title = new JLabel(" 給管鳥 居宅療養管理指導情報");
+    JLabel title = new JLabel(" 給管鳥 通所リハ利用者情報");
     title.setFont(new Font("SansSerif",Font.BOLD,18));
     JLabel dispPath = new JLabel("  現在のデータベース："+realInPath);
     dispPath.setFont(new Font("Serif",Font.PLAIN,12));
@@ -191,7 +191,7 @@ public class QkanKyotakuUtil extends QkanPatientImport {
       }
     };
     fr.addWindowListener(AppCloser);
-    fr.setSize(750,680);
+    fr.setSize(820,680);
     //fr.pack();
     Dimension sc = Toolkit.getDefaultToolkit().getScreenSize();
     Dimension sz = fr.getSize();
@@ -203,7 +203,7 @@ public class QkanKyotakuUtil extends QkanPatientImport {
   public void execCsvOut() {
   
     final JProgressBar pb = new JProgressBar();
-    final JLabel tit1 = new JLabel("【居宅療養管理指導情報CSV書き出し】");
+    final JLabel tit1 = new JLabel("【通所リハ情報CSV書き出し】");
     final JLabel tit = new JLabel("情報をCSVファイルに書き出しています。");
     tit.setHorizontalAlignment(JLabel.LEFT);
     int stat = STATE_SUCCESS;
@@ -396,7 +396,7 @@ public class QkanKyotakuUtil extends QkanPatientImport {
       if (fname==null) {
         Calendar c = Calendar.getInstance();
         StringBuffer sb = new StringBuffer();
-        sb.append("SHIDOU-");
+        sb.append("TSUSYOREHA-");
         sb.append(tTable.currentProvider);
         sb.append("_");
         sb.append(tTable.targetYear);
@@ -433,7 +433,7 @@ public class QkanKyotakuUtil extends QkanPatientImport {
   }
 
   public static void main(String[] args) {
-    QkanKyotakuUtil ipi = new QkanKyotakuUtil();
+    QkanTsusyoRehaUtil ipi = new QkanTsusyoRehaUtil();
     try {
       ipi.execCsvOut();
       //System.exit(0);

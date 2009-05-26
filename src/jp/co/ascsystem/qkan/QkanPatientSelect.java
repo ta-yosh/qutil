@@ -118,7 +118,8 @@ public class QkanPatientSelect {
       buf.append("PATIENT_NINTEI_HISTORY.INSURE_VALID_START,");
       buf.append("PATIENT_NINTEI_HISTORY.INSURE_VALID_END,");
       buf.append("PATIENT_NINTEI_HISTORY.PLANNER,");
-      buf.append("PROVIDER.PROVIDER_NAME from PATIENT ");
+      buf.append("PROVIDER.PROVIDER_NAME,");
+      buf.append("PATIENT_NINTEI_HISTORY.INSURED_ID from PATIENT ");
       buf.append("left outer join PATIENT_NINTEI_HISTORY on ");
       buf.append("(PATIENT_NINTEI_HISTORY.PATIENT_ID=PATIENT.PATIENT_ID) and ");
       buf.append("PATIENT_NINTEI_HISTORY.NINTEI_HISTORY_ID=");
@@ -134,7 +135,7 @@ public class QkanPatientSelect {
         dbm.Close();
         Rows = dbm.Rows;
         System.out.println("Rows = "+Rows);
-        Object data[][] = new Object[14][Rows];
+        Object data[][] = new Object[15][Rows];
         for (int i=0;i<Rows;i++) {
           StringBuffer sb = new StringBuffer();
           data[0][i] = dbm.getData("PATIENT_ID",i);
@@ -195,14 +196,14 @@ public class QkanPatientSelect {
           data[12][i] = dbm.getData("INSURE_VALID_END",i);
           if (dbm.getData("PLANNER",i)!=null)
           data[13][i] = (Integer.parseInt(dbm.getData("PLANNER",i).toString())==1) ? dbm.getData("PROVIDER_NAME",i):"";
-
-          
+          if (dbm.getData("INSURED_ID",i)!=null)
+          data[14][i] = dbm.getData("INSURED_ID",i);
         }
 
         for (int j=0;j<Rows;j++) {
-          int[] num = new int[] {0,1,2,3,4,5,6,10,11,12,13,7,8,9};
+          int[] num = new int[] {0,1,2,3,4,5,6,10,11,12,13,7,8,9,14};
           Vector rdat = new Vector();
-          for (int i=0;i<14;i++) {
+          for (int i=0;i<15;i++) {
             if (i==6) {
               String str;
               Integer age;
@@ -283,17 +284,21 @@ public class QkanPatientSelect {
     }
 
     public Vector getPatientByPno(int pno,int nno) {
-      int[] num = new int[] {0,1,2,3,4,5,6,11,12,13,7,8,9,10};
+      int[] num = new int[] {0,1,2,3,4,5,6,11,12,13,7,8,9,10,14};
       Vector dat = new Vector();
       int no = nno;
       for (int i=0;i<usrTbl.getRowCount();i++) {
         if (pno==Integer.parseInt((usrTbl.getValueAt(i,0)).toString())) {
           if (nno<0) dat.addElement(new Integer(-no));
           else dat.addElement(new Integer(nno));
-          for (int j=1;j<14;j++) {
-             if (nno<0) dat.addElement(usrTbl.getValueAt(i,j));
+          for (int j=1;j<15;j++) {
+             if (nno<0) {
+               if (nno==-9999999 && j>6 && j<11) dat.addElement(" ");
+               else dat.addElement(usrTbl.getValueAt(i,j));
+             }
              else dat.addElement(usrTbl.getValueAt(i,num[j]));
           }
+          System.out.println(dat.toString());
           return dat;
         }
       }
@@ -302,7 +307,7 @@ public class QkanPatientSelect {
 
     public String getPatientBasicDataCsv(int pno) {
       StringBuffer csvRecord;
-      int[] num = new int[] {0,1,2,3,4,5,6,11,12,13,7,8,9,10};
+      int[] num = new int[] {0,1,2,3,4,5,6,11,12,13,7,8,9,10,14};
       for (int i=0;i<usrTbl.getRowCount();i++) {
         if (pno==Integer.parseInt((usrTbl.getValueAt(i,0)).toString())) {
            csvRecord = new StringBuffer();
@@ -629,6 +634,7 @@ public class QkanPatientSelect {
       fieldName.addElement("郵便番号");
       fieldName.addElement("住所");
       fieldName.addElement("連絡先(Tel)");
+      fieldName.addElement("被保険者番号");
         dtm = new DefaultTableModel(data, fieldName);
         sorter = new TableSorter2(dtm);
         usrTbl = new JTable(sorter);
@@ -657,6 +663,8 @@ public class QkanPatientSelect {
         usrTbl.getColumnModel().getColumn(11).setPreferredWidth(85);
         usrTbl.getColumnModel().getColumn(12).setPreferredWidth(250);
         usrTbl.getColumnModel().getColumn(13).setPreferredWidth(100);
+        usrTbl.getColumnModel().getColumn(14).setMinWidth(0);
+        usrTbl.getColumnModel().getColumn(14).setMaxWidth(0);
         usrTbl.getTableHeader().setReorderingAllowed(false);
         JScrollPane scrPane = new JScrollPane();
         scrPane.getViewport().setView(usrTbl);
@@ -693,29 +701,28 @@ public class QkanPatientSelect {
     public String PDFout() {
       int cid=0;
       int num=0;
-      float width[] = new float[9];
-      int ctype[] = new int[13];
+      float width[] = new float[11];
+      int ctype[] = new int[11];
       Arrays.fill(ctype,0);
-      width[cid++] = 7; //ID
-      ctype[cid] = 6; // 0 - normal 1 - add comma 2 - align right
-      width[cid++] = 22; //ふりがな
-      ctype[cid] = 5; //生年月日
-      width[cid++] = Float.parseFloat("3.5"); //生年月日
-      width[cid] = Float.parseFloat("3.5"); //生年月日
+      width[cid] = 9; //ID
+      ctype[cid++] = 20; // 0 - normal 1 - add comma 2 - align right
+      width[cid++] = 10; //被保険者番号
+      width[cid] = 15; //氏名
+      ctype[cid++] = 24; 
+      width[cid] = 4;    //性別
+      ctype[cid++] = 7; 
+      width[cid] = 4;   //年齢
+      ctype[cid++] = 2; 
+      width[cid] = 7; //要介護度
+      ctype[cid++] = 8; 
+      width[cid++] = 9; //認定終了日
+      width[cid] = 6; //郵便番号
       ctype[cid++] = 3; //郵便番号
-      width[cid++] = 8; //郵便番号
-      width[cid++] = 22; //住所
-      width[cid] = 6; //要介護度
-      ctype[cid++] = 4; // 0 - normal 1 - add comma 2 - align right
-      width[cid++] = 7; //認定開始日
-      width[cid] = 20; //居宅介護支援事業所
-      ctype[cid++] = 4; //氏名
-      //width[cid++] = 15; //氏名
-      ctype[cid++] = 3; //性別
-      ctype[cid++] = 3; //年齢 
-      ctype[cid++] = 3; //連絡先(Tel)
-      ctype[cid] = 4; //認定終了日
-      //width[cid] = 10; //認定終了日
+      width[cid] = 28; //住所
+      ctype[cid++] = 32; 
+      width[cid++] = 10; //連絡先(Tel)
+      width[cid] = 15; //居宅介護支援事業所
+      ctype[cid] = 22; 
       Calendar cal = Calendar.getInstance();
       StringBuffer sb = new StringBuffer();
       sb.append("QKANUSER");
@@ -728,29 +735,29 @@ public class QkanPatientSelect {
       String fname = sb.toString();
 
       DngPdfTable pdf = new DngPdfTable(fname,1);
+      sb.delete(0,sb.length());
+      sb.append(cal.get(Calendar.YEAR));
+      sb.append("年");
+      if (cal.get(Calendar.MONTH)+1<10) sb.append("0");
+      sb.append(cal.get(Calendar.MONTH)+1);
+      sb.append("月");
+      if (cal.get(Calendar.DATE)<10) sb.append("0");
+      sb.append(cal.get(Calendar.DATE));
+      sb.append("日");
+      sb.append(" 現在  ");
+      pdf.setSubTitle(sb.toString());
       if (pdf.openPDF("利用者基本情報一覧")) {
-        sb.delete(0,sb.length());
-        sb.append(cal.get(Calendar.YEAR));
-        sb.append("年");
-        if (cal.get(Calendar.MONTH)+1<10) sb.append("0");
-        sb.append(cal.get(Calendar.MONTH)+1);
-        sb.append("月");
-        if (cal.get(Calendar.DATE)<10) sb.append("0");
-        sb.append(cal.get(Calendar.DATE));
-        sb.append("日");
-        sb.append(" 現在");
-        pdf.setParagraph(-1,sb.toString());
-        int[] cnum = new int[] {0,1,3,5,11,12,7,8,10,2,4,6,13,9};
-        Object[][] pdfDat = new Object[usrTbl.getRowCount()][usrTbl.getColumnCount()-1];
-        Object[] pdfColName = new Object[usrTbl.getColumnCount()-1];
+        int[] cnum = new int[] {1,14,2,4,6,7,9,11,12,13,10};
+        Object[][] pdfDat = new Object[usrTbl.getRowCount()][cnum.length];
+        Object[] pdfColName = new Object[cnum.length];
         for (int i=0;i<usrTbl.getRowCount();i++) {
-           for (int j=1;j<usrTbl.getColumnCount();j++) {
-             pdfDat[i][j-1] = usrTbl.getValueAt(i,cnum[j]).toString().replaceAll("^ +","").replaceAll(" +$","");
-             if (i==0) pdfColName[j-1] = usrTbl.getColumnName(cnum[j]);
+           for (int j=0;j<cnum.length;j++) {
+             pdfDat[i][j] = usrTbl.getValueAt(i,cnum[j]).toString().replaceAll("^ +","").replaceAll(" +$","");
+             if (i==0) pdfColName[j] = usrTbl.getColumnName(cnum[j]);
            }
         }
         JTable pdfTbl = new JTable(pdfDat,pdfColName);
-        pdf.setTable(pdfTbl,width,ctype,9);
+        pdf.setTable(pdfTbl,width,ctype,0);
         pdf.flush();
         return fname;
       }

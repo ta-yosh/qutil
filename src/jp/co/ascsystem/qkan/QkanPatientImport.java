@@ -60,9 +60,9 @@ public class QkanPatientImport {
 
     public QkanPatientImport() {
         propertyFile = getPropertyFile(); 
-        dbServer = getProperty("DBConfig/Server");
-        dbPath = getProperty("DBConfig/Path");
-        dbPort = getProperty("DBConfig/Port");
+        dbServer = getProperty("doc/DBConfig/Server");
+        dbPath = getProperty("doc/DBConfig/Path");
+        dbPort = getProperty("doc/DBConfig/Port");
     }
 
     public void destroy() {
@@ -104,7 +104,7 @@ public class QkanPatientImport {
         boolean kstat = false;
         String uri;
         uri = dbServer + "/" + dbPort + ":" + dbPath;
-        oTable = new QkanPatientSelect(uri,getProperty("DBConfig/UserName"),getProperty("DBConfig/Password"));
+        oTable = new QkanPatientSelect(uri,getProperty("doc/DBConfig/UserName"),getProperty("doc/DBConfig/Password"));
         oTable.setSelectable(false);
         if (oTable.Rows<0) {
           statMessage(STATE_ERROR,"給管鳥データベースに接続できません。\n給管鳥 が正常に起動する状態かどうかご確認ください。");
@@ -136,7 +136,7 @@ public class QkanPatientImport {
           }
           else {
             uri = dbServer + "/" + dbPort + ":" + dbPath0;
-            iTable = new QkanPatientSelect(uri,getProperty("DBConfig/UserName"),getProperty("DBConfig/Password"));
+            iTable = new QkanPatientSelect(uri,getProperty("doc/DBConfig/UserName"),getProperty("doc/DBConfig/Password"));
           }
 
           if (iTable.Rows<0) {
@@ -338,6 +338,7 @@ public class QkanPatientImport {
         System.exit(1);
       }
       if (pf==null) System.exit(1);
+      System.out.println("prop: "+pf.getAbsolutePath());
       return pf.getAbsolutePath();
     }
 

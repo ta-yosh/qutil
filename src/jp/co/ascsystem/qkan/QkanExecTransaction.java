@@ -34,6 +34,7 @@ public class QkanExecTransaction extends Thread {
     QkanPatientSelect iTable;
     QkanPatientSelect oTable;
     QkanTsusyoData tTable;
+    QkanTsusyoRehaData rTable;
     QkanKyotakuData kTable;
     public String dbOutPath;
 
@@ -67,6 +68,11 @@ public class QkanExecTransaction extends Thread {
       this.oTable=null;
       this.kTable=kTable;
     }
+    public void setTable(QkanTsusyoRehaData rTable) {
+      this.iTable=null;
+      this.oTable=null;
+      this.rTable=rTable;
+    }
     
     public void run() {
       isStarted = true;
@@ -87,11 +93,11 @@ public class QkanExecTransaction extends Thread {
       int lcount = 0;
       if (pfile!=null) {
         DngAppProperty props = new DngAppProperty(pfile); 
-        String dbPort = props.getProperty("DBConfig/Port");
-        String dbUser = props.getProperty("DBConfig/UserName");
-        String dbPass = props.getProperty("DBConfig/Password");
-        String dbPath = (oTable==null) ? dbOutPath:props.getProperty("DBConfig/Path");
-        String dbServer = props.getProperty("DBConfig/Server");
+        String dbPort = props.getProperty("doc/DBConfig/Port");
+        String dbUser = props.getProperty("doc/DBConfig/UserName");
+        String dbPass = props.getProperty("doc/DBConfig/Password");
+        String dbPath = (oTable==null) ? dbOutPath:props.getProperty("doc/DBConfig/Path");
+        String dbServer = props.getProperty("doc/DBConfig/Server");
         String dbUri = dbServer+"/"+dbPort+":"+dbPath;
         dbm = new DngDBAccess("firebird",dbUri,dbUser,dbPass);
         if (!dbm.connect()) {
@@ -109,7 +115,7 @@ public class QkanExecTransaction extends Thread {
           interrupt();
           return;
         }
-        if (tTable!=null || kTable!=null) {
+        if (tTable!=null || kTable!=null || rTable!=null) {
           StringBuffer sb = new StringBuffer(); 
           if (tTable!=null) {
             sb.append("\"\",\"");
@@ -126,7 +132,7 @@ public class QkanExecTransaction extends Thread {
                  sb.append("日");
             }
           }
-          else {
+          else if (kTable!=null) {
             sb.append("\"\",\"");
             sb.append(kTable.curProviderName);
             sb.append(" \",\"居宅療養管理指導情報\",\"\",\"\",\"");
@@ -141,9 +147,25 @@ public class QkanExecTransaction extends Thread {
                  sb.append("日");
             }
           }
+          else {
+            sb.append("\"\",\"");
+            sb.append(rTable.curProviderName);
+            sb.append("\",\"\",\"\",\"通所リハ情報\",\"");
+            sb.append(rTable.targetYear);
+            sb.append("年\",\"");
+            sb.append(rTable.targetMonth);
+            sb.append("月\",\"");
+            if (rTable.targetDay==0)  
+              sb.append("月間");
+            else {
+                 sb.append(rTable.targetDay);
+                 sb.append("日");
+            }
+          }
           sb.append("\"\r\n");
           String rec = (tTable!=null) ? tTable.getTsusyoDataCsv(-1):
-                                        kTable.getKyotakuDataCsv(-1);
+                       (kTable!=null) ?  kTable.getKyotakuDataCsv(-1):
+                                         rTable.getTsusyoRehaCsv(-1);
           rec = sb.toString() + rec;
           try {
             fos.write(rec);
@@ -178,7 +200,8 @@ public class QkanExecTransaction extends Thread {
             bsql = (pfile!=null) ? iTable.getPatientBasicDataSql(pNos[i][0]) :
                   ((iTable!=null) ? iTable.getPatientBasicDataCsv(pNos[i][0]):
                   ((tTable!=null) ? tTable.getTsusyoDataCsv(pNos[i][0]):
-                                    kTable.getKyotakuDataCsv(pNos[i][0])));
+                  ((kTable!=null) ? kTable.getKyotakuDataCsv(pNos[i][0]):
+                                    rTable.getTsusyoRehaCsv(pNos[i][0]))));
             if (bsql.equals("CON0")) {
               System.out.println("DB server has been busy. I try to connect again 20sec. after.... please wait.");
               try {sleep(20000);} catch(Exception ie){};
@@ -253,7 +276,7 @@ public class QkanExecTransaction extends Thread {
               sql = "select max(PATIENT_ID) from PATIENT;";
               dbm.execQuery(sql);
               patientNo = Integer.parseInt((dbm.getData(0,0)).toString());
-              //System.out.println("PATIENT add "+patientNo);
+              System.out.println("PATIENT add "+patientNo);
               for (int j=0;j<type.length-1;j++) {
                 System.out.println(type[j]+" START");
                 String sqls[][] = (type[j]=="SERVICE" || type[j]=="CLAIM") ?
@@ -338,7 +361,7 @@ public class QkanExecTransaction extends Thread {
               if (dNum!=null) {
                 oTable.removeRows(dNum);
               }
-              int nno = patientNo;
+              int nno = (patientNo!=0) ? patientNo:9999999;
               oTable.addRow(iTable.getPatientByPno(pNos[i][0],-nno));
             }
             progressBar.setValue(++lcount);

@@ -39,9 +39,9 @@ public class QkanPatientExport extends QkanPatientImport {
 
     public QkanPatientExport() {
         propertyFile = getPropertyFile(); 
-        dbServer = getProperty("DBConfig/Server");
-        dbPath = getProperty("DBConfig/Path");
-        dbPort = getProperty("DBConfig/Port");
+        dbServer = getProperty("doc/DBConfig/Server");
+        dbPath = getProperty("doc/DBConfig/Path");
+        dbPort = getProperty("doc/DBConfig/Port");
     }
 
     public JDialog  dbUpdate(JButton execBtn,final QkanExecTransaction dbexec) throws Exception {
@@ -62,7 +62,7 @@ public class QkanPatientExport extends QkanPatientImport {
             cancel(); 
           }
           String uri = dbServer + "/" + dbPort + ":" + dbPath;
-          iTable = new QkanPatientSelect(uri,getProperty("DBConfig/UserName"),getProperty("DBConfig/Password"));
+          iTable = new QkanPatientSelect(uri,getProperty("doc/DBConfig/UserName"),getProperty("doc/DBConfig/Password"));
           if (iTable.Rows<0) {
             statMessage(STATE_ERROR,"データベースに接続できません。\n給管鳥が問題なく起動する状態かどうかご確認ください。");
             return null;
@@ -458,8 +458,8 @@ public class QkanPatientExport extends QkanPatientImport {
                   "CREATE TABLE \"SERVICE\" ( \"SERVICE_ID\"  INTEGER NOT NULL, \"SERVICE_USE_TYPE\"  INTEGER, \"PATIENT_ID\"  INTEGER, \"PROVIDER_ID\"  VARCHAR(10), \"SYSTEM_SERVICE_KIND_DETAIL\"  INTEGER, \"SERVICE_DATE\"  DATE, \"WEEK_DAY\"  INTEGER, \"REGULATION_RATE\"  INTEGER, \"LAST_TIME\"  TIMESTAMP, PRIMARY KEY (\"SERVICE_ID\"))",
                   "CREATE TABLE \"SERVICE_PASSIVE_CHECK\" ( \"PATIENT_ID\"  INTEGER NOT NULL, \"TARGET_DATE\"  DATE NOT NULL, \"CHECK_TYPE\"  INTEGER NOT NULL, \"LAST_TIME\"  TIMESTAMP, PRIMARY KEY (\"PATIENT_ID\", \"TARGET_DATE\", \"CHECK_TYPE\"))"};
 
-        String dbUser = getProperty("DBConfig/UserName");
-        String dbPass = getProperty("DBConfig/Password");
+        String dbUser = getProperty("doc/DBConfig/UserName");
+        String dbPass = getProperty("doc/DBConfig/Password");
         String dbUri = dbServer+"/"+dbPort+":"+path0;
         //Calendar c =  Calendar.getInstance();
         //int nextYear = c.get(c.YEAR)+1; 
@@ -510,8 +510,8 @@ public class QkanPatientExport extends QkanPatientImport {
                     ,"HOMONKANGO_RESULT","HOMONKANGO_RESULT_CALENDAR"
                     ,"KYOTAKU_RYOYO","CLAIM","CLAIM_PATIENT_DETAIL"
                     ,"CLAIM_PATIENT_MEDICAL"};
-        String dbUser = getProperty("DBConfig/UserName");
-        String dbPass = getProperty("DBConfig/Password");
+        String dbUser = getProperty("doc/DBConfig/UserName");
+        String dbPass = getProperty("doc/DBConfig/Password");
         String dbUri = dbServer+"/"+dbPort+":"+path;
         //Calendar c =  Calendar.getInstance();
         //int nextYear = c.get(c.YEAR)+1; 
@@ -550,8 +550,8 @@ public class QkanPatientExport extends QkanPatientImport {
     public void finalizeExportDB() {
 
       boolean is20 = false;
-      String dbUser = getProperty("DBConfig/UserName");
-      String dbPass = getProperty("DBConfig/Password");
+      String dbUser = getProperty("doc/DBConfig/UserName");
+      String dbPass = getProperty("doc/DBConfig/Password");
       String dbTmpPath = dbOutPath+".fbak";
       String[] envp= new String[1];
       String gbak;

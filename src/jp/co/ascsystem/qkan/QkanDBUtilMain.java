@@ -35,7 +35,7 @@ public class QkanDBUtilMain {
 
     final QkanDBUtilMain idm = new QkanDBUtilMain();
     final JFrame fr = new JFrame();
-    fr.setTitle("給管鳥 データユーティリティ Ver1.1");
+    fr.setTitle("給管鳥 データユーティリティ Ver1.3");
     fr.setIconImage(idm.icon);
     final Container contentPane = fr.getContentPane();
     contentPane.setLayout(new BorderLayout());
@@ -94,6 +94,18 @@ public class QkanDBUtilMain {
       }
     };
     kdb.addActionListener(triggerKyotaku);
+
+    final JButton rdb = new JButton("通所リハ利用者情報CSV書き出し");
+    rdb.setFont(new Font("SanSerif",Font.PLAIN,14));
+    ActionListener triggerTsureha = new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        execThread it = new execThread(fr,6);
+        it.start();
+        //it.restart();
+      }
+    };
+    rdb.addActionListener(triggerTsureha);
+
 /*
     final JButton web = new JButton("給管鳥ウェブサイト");
     web.setFont(new Font("SanSerif",Font.PLAIN,14));
@@ -121,6 +133,10 @@ public class QkanDBUtilMain {
     int ysiz=200;
     if ((new QkanServiceDetect()).tsusyoDetect()==true) {
       pn.add(tdb);
+      ysiz=ysiz+50;
+    }
+    if ((new QkanServiceDetect()).tsurehaDetect()==true) {
+      pn.add(rdb);
       ysiz=ysiz+50;
     }
     if ((new QkanServiceDetect()).kyotakuDetect()==true) {
@@ -274,6 +290,27 @@ class execThread extends Thread {
       }
       catch(Exception ex) {
         iku.statMessage(iku.STATE_FATAL,ex.getMessage());
+      }
+    }
+    else if(type==6) {
+      QkanTsusyoRehaUtil itr = new QkanTsusyoRehaUtil();
+      if (!itr.vStat) {
+        itr.statMessage(itr.STATE_FATAL,"正しくないデータベース設定です。給管鳥を起動してデータベースの設定を確認してください。");
+        System.exit(1);
+      }
+      itr.setParent(frm);
+      try {
+        while(itr.runStat!=itr.STATE_FATAL) {
+          //System.out.println("STAT = "+itr.runStat); 
+          if (itr.runStat==itr.STATE_COMPLETE) {
+            itr.destroy();
+            break;
+          }
+          itr.execCsvOut();
+        }
+      }
+      catch(Exception ex) {
+        itr.statMessage(itr.STATE_FATAL,ex.getMessage());
       }
     }
     //else  {
