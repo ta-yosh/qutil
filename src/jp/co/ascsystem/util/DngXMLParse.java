@@ -62,7 +62,7 @@ public class DngXMLParse {
       else if (m2.find()) key = m2.group(1)+"_"+m2.group(3);
       else if(tag[i] != null) key = tag[i];
       else {
-        System.out.println("----- TAG_"+i+" [ "+tag[i]+" ] "+tree0+"  SKIP-----");
+        //System.out.println("----- TAG_"+i+" [ "+tag[i]+" ] "+tree0+"  SKIP-----");
         continue;
       }
       String val = value[i];
@@ -83,7 +83,7 @@ public class DngXMLParse {
       }
       else {
         hash.put(key,val);
-        System.out.println("----- TAG_"+i+" [ "+key+" ] "+tree0+" [value: "+val+" ]  -----");
+        //System.out.println("----- TAG_"+i+" [ "+key+" ] "+tree0+" [value: "+val+" ]  -----");
       }
     }
     return hash;

@@ -36,6 +36,7 @@ public class QkanExecTransaction extends Thread {
     QkanTsusyoData tTable;
     QkanTsusyoRehaData rTable;
     QkanKyotakuData kTable;
+    QkanProviderData pTable;
     public String dbOutPath;
 
     public void setPnos(int pNo[][]) {
@@ -72,6 +73,11 @@ public class QkanExecTransaction extends Thread {
       this.iTable=null;
       this.oTable=null;
       this.rTable=rTable;
+    }
+    public void setTable(QkanProviderData pTable) {
+      this.iTable=null;
+      this.oTable=null;
+      this.pTable=pTable;
     }
     
     public void run() {
@@ -115,7 +121,7 @@ public class QkanExecTransaction extends Thread {
           interrupt();
           return;
         }
-        if (tTable!=null || kTable!=null || rTable!=null) {
+        if (tTable!=null || kTable!=null || rTable!=null || pTable!=null) {
           StringBuffer sb = new StringBuffer(); 
           if (tTable!=null) {
             sb.append("\"\",\"");
@@ -147,6 +153,10 @@ public class QkanExecTransaction extends Thread {
                  sb.append("Æü");
             }
           }
+          else if (pTable!=null) {
+            sb.append("\"\",\"");
+            sb.append("µë´ÉÄ»\",\"\",\"»ö¶È½ê¾ðÊó");
+          }
           else {
             sb.append("\"\",\"");
             sb.append(rTable.curProviderName);
@@ -165,6 +175,7 @@ public class QkanExecTransaction extends Thread {
           sb.append("\"\r\n");
           String rec = (tTable!=null) ? tTable.getTsusyoDataCsv(-1):
                        (kTable!=null) ?  kTable.getKyotakuDataCsv(-1):
+                       (pTable!=null) ?  pTable.getProviderDataCsv(-1):
                                          rTable.getTsusyoRehaCsv(-1);
           rec = sb.toString() + rec;
           try {
@@ -201,7 +212,8 @@ public class QkanExecTransaction extends Thread {
                   ((iTable!=null) ? iTable.getPatientBasicDataCsv(pNos[i][0]):
                   ((tTable!=null) ? tTable.getTsusyoDataCsv(pNos[i][0]):
                   ((kTable!=null) ? kTable.getKyotakuDataCsv(pNos[i][0]):
-                                    rTable.getTsusyoRehaCsv(pNos[i][0]))));
+                  ((pTable!=null) ? pTable.getProviderDataCsv(pNos[i][0]):
+                                    rTable.getTsusyoRehaCsv(pNos[i][0])))));
             if (bsql.equals("CON0")) {
               System.out.println("DB server has been busy. I try to connect again 20sec. after.... please wait.");
               try {sleep(20000);} catch(Exception ie){};

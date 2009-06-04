@@ -93,10 +93,10 @@ public class QkanPatientImport {
         fr = (parent!=null) ? new JDialog(parent) : new JDialog();
         fr.setTitle("給管鳥 データユーティリティ");
 
-        if (!checkDBPath(dbPath)) {
+        if (!checkLocalHost(dbServer)) {
            cancel(); 
         }
-        if (!checkLocalHost(dbServer)) {
+        if (!checkDBPath(dbPath)) {
            cancel(); 
         }
         contentPane = fr.getContentPane();

@@ -35,7 +35,7 @@ public class QkanDBUtilMain {
 
     final QkanDBUtilMain idm = new QkanDBUtilMain();
     final JFrame fr = new JFrame();
-    fr.setTitle("給管鳥 データユーティリティ Ver1.3");
+    fr.setTitle("給管鳥 データユーティリティ Ver1.4");
     fr.setIconImage(idm.icon);
     final Container contentPane = fr.getContentPane();
     contentPane.setLayout(new BorderLayout());
@@ -106,6 +106,18 @@ public class QkanDBUtilMain {
     };
     rdb.addActionListener(triggerTsureha);
 
+    final JButton pdb = new JButton("事業者情報");
+    pdb.setFont(new Font("SanSerif",Font.PLAIN,14));
+    ActionListener triggerProvider= new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        execThread pt = new execThread(fr,7);
+        pt.start();
+        //it.restart();
+      }
+    };
+    pdb.addActionListener(triggerProvider);
+
+
 /*
     final JButton web = new JButton("給管鳥ウェブサイト");
     web.setFont(new Font("SanSerif",Font.PLAIN,14));
@@ -130,7 +142,7 @@ public class QkanDBUtilMain {
     pn.add(exb);
     pn.add(imb);
     pn.add(csb);
-    int ysiz=200;
+    int ysiz=250;
     if ((new QkanServiceDetect()).tsusyoDetect()==true) {
       pn.add(tdb);
       ysiz=ysiz+50;
@@ -143,6 +155,7 @@ public class QkanDBUtilMain {
       pn.add(kdb);
       ysiz=ysiz+50;
     }
+    pn.add(pdb);
     JLabel sysTitle = new JLabel("給管鳥 データユーティリティ");
     sysTitle.setFont(new Font("SanSerif",Font.BOLD,15));
     contentPane.add(sysTitle,BorderLayout.NORTH);
@@ -311,6 +324,27 @@ class execThread extends Thread {
       }
       catch(Exception ex) {
         itr.statMessage(itr.STATE_FATAL,ex.getMessage());
+      }
+    }
+    else if(type==7) {
+      QkanProviderUtil ptr = new QkanProviderUtil();
+      if (!ptr.vStat) {
+        ptr.statMessage(ptr.STATE_FATAL,"正しくないデータベース設定です。給管鳥を起動してデータベースの設定を確認してください。");
+        System.exit(1);
+      }
+      ptr.setParent(frm);
+      try {
+        while(ptr.runStat!=ptr.STATE_FATAL) {
+          System.out.println("STAT = "+ptr.runStat); 
+          if (ptr.runStat==ptr.STATE_COMPLETE) {
+            ptr.destroy();
+            break;
+          }
+          ptr.execCsvOut();
+        }
+      }
+      catch(Exception ex) {
+        ptr.statMessage(ptr.STATE_FATAL,ex.getMessage());
       }
     }
     //else  {

@@ -50,15 +50,16 @@ public class QkanPatientCsvOut extends QkanPatientImport {
       if (dbOutPath==null) {
         fr = (parent!=null) ? new JDialog(parent) : new JDialog();
         fr.setTitle("給管鳥 データユーティリティ");
-
+       /*
         if (!checkLocalHost(dbServer)) {
            cancel(); 
         }
+       */
         contentPane = fr.getContentPane();
         contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.PAGE_AXIS));
         boolean kstat = false;
         while (!kstat) {
-          if (!checkDBPath(dbPath)) {
+          if ((dbServer.equals("localhost") || dbServer.equals("127.0.0.1")) && !checkDBPath(dbPath)) {
             cancel(); 
           }
           String uri = dbServer + "/" + dbPort + ":" + dbPath;
@@ -172,7 +173,7 @@ public class QkanPatientCsvOut extends QkanPatientImport {
         center0P.add(execBtn);
         center0P.add(exitBtn);
         JPanel centerP = new JPanel();
-        JLabel dispPath = new JLabel("  現在のデータベース："+realInPath);
+        JLabel dispPath = new JLabel("  現在のデータベース："+dbServer+"/"+dbPort+":"+realInPath);
         dispPath.setFont(new Font("Serif",Font.PLAIN,12));
         dispPath.setForeground(Color.darkGray);
         northP.add(dispPath,BorderLayout.CENTER);

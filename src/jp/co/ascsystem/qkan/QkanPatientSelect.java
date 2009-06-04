@@ -221,6 +221,7 @@ public class QkanPatientSelect {
                 //String str = data[i][j].toString();
                 String str = data[num[i]][j].toString();
                 if (i==4) str = "   "+((str.equals("1")) ? "ÃË":"½÷");
+                if (i==12) str = halfnum.convert(str);
                 rdat.addElement(str);
               }catch(Exception e) {
                 rdat.addElement("");
@@ -719,7 +720,7 @@ public class QkanPatientSelect {
       width[cid] = 6; //Í¹ÊØÈÖ¹æ
       ctype[cid++] = 3; //Í¹ÊØÈÖ¹æ
       width[cid] = 28; //½»½ê
-      ctype[cid++] = 32; 
+      ctype[cid++] = 40; 
       width[cid++] = 10; //Ï¢ÍíÀè(Tel)
       width[cid] = 15; //µïÂğ²ğ¸î»Ù±ç»ö¶È½ê
       ctype[cid] = 22; 

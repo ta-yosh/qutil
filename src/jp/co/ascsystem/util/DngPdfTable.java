@@ -22,10 +22,11 @@ public class DngPdfTable {
     Table ptable;
     String fname,title,subtitle;
     String ctype[];
-    int ptotal;
+    int ptotal,type;
 
     public DngPdfTable(String fname, int type) {
         this.fname = fname; 
+        this.type = type;
         document = new Document(((type>0) ? PageSize.A4.rotate():PageSize.A4) ,20,20,25,10);
         try {
           mincho = BaseFont.createFont("HeiseiMin-W3",
@@ -154,8 +155,8 @@ public class DngPdfTable {
       ptable.setCellsFitPage(true);
 
       int rcount = 0;
-      int rpp = (colCount>0) ? 15 : 28;
-      int rpp2 = (colCount>0) ? 18 : 28;
+      int rpp = (colCount>0 || type>1) ? type : 28;
+      int rpp2 = (colCount>0 || type>1) ? type : 28;
       int pcount = 0;
       ptotal = (table.getRowCount()-rpp)/rpp2 + 1 ;
       if ((table.getRowCount()-rpp)%rpp2>0) ptotal++;

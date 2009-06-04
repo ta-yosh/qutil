@@ -55,15 +55,17 @@ public class QkanTsusyoRehaUtil extends QkanPatientImport {
     if (dbOutPath==null) {
       fr = (parent!=null) ? new JDialog(parent) : new JDialog();
       fr.setTitle("給管鳥 データユーティリティ");
-
+     /*
       if (!checkLocalHost(dbServer)) {
          cancel(); 
       }
+     */
       contentPane = fr.getContentPane();
       contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.PAGE_AXIS));
       boolean kstat = false;
       while (!kstat) {
-        if (!checkDBPath(dbPath)) {
+        if ((dbServer.equals("localhost") || dbServer.equals("127.0.0.1")) &&
+!checkDBPath(dbPath)) {
           cancel(); 
         }
         String uri = dbServer + "/" + dbPort + ":" + dbPath;
@@ -157,7 +159,7 @@ public class QkanTsusyoRehaUtil extends QkanPatientImport {
 
     JLabel title = new JLabel(" 給管鳥 通所リハ利用者情報");
     title.setFont(new Font("SansSerif",Font.BOLD,18));
-    JLabel dispPath = new JLabel("  現在のデータベース："+realInPath);
+    JLabel dispPath = new JLabel("  現在のデータベース："+dbServer+"/"+dbPort+":"+realInPath);
     dispPath.setFont(new Font("Serif",Font.PLAIN,12));
     dispPath.setForeground(Color.darkGray);
     JLabel chinf= new JLabel(" ※データベース変更は、給管鳥本体の\"データベース設定\"で行って下さい。");

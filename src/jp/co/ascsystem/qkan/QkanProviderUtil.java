@@ -31,7 +31,7 @@ import javax.swing.JLabel;
 import jp.co.ascsystem.lib.*;
 import jp.co.ascsystem.util.*;
 
-public class QkanTsusyoUtil extends QkanPatientImport {
+public class QkanProviderUtil extends QkanPatientImport {
 
   String dbOutPath=null;
   String realOutPath=null;
@@ -40,9 +40,9 @@ public class QkanTsusyoUtil extends QkanPatientImport {
   public JComboBox ymbox;
   public JLabel nodata;
 
-  QkanTsusyoData tTable;
+  QkanProviderData pTable;
 
-  public QkanTsusyoUtil() {
+  public QkanProviderUtil() {
     propertyFile = getPropertyFile(); 
     dbServer = getProperty("doc/DBConfig/Server");
     dbPath = getProperty("doc/DBConfig/Path");
@@ -55,11 +55,11 @@ public class QkanTsusyoUtil extends QkanPatientImport {
     if (dbOutPath==null) {
       fr = (parent!=null) ? new JDialog(parent) : new JDialog();
       fr.setTitle("給管鳥 データユーティリティ");
-     /*
+      /*
       if (!checkLocalHost(dbServer)) {
          cancel(); 
       }
-    */
+      */
       contentPane = fr.getContentPane();
       contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.PAGE_AXIS));
       boolean kstat = false;
@@ -69,12 +69,12 @@ public class QkanTsusyoUtil extends QkanPatientImport {
           cancel(); 
         }
         String uri = dbServer + "/" + dbPort + ":" + dbPath;
-        tTable = new QkanTsusyoData(uri,getProperty("doc/DBConfig/UserName"),getProperty("doc/DBConfig/Password"));
-        if (tTable.Rows<0) {
+        pTable = new QkanProviderData(uri,getProperty("doc/DBConfig/UserName"),getProperty("doc/DBConfig/Password"));
+        if (pTable.Rows<0) {
           statMessage(STATE_ERROR,"データベースに接続できません。\n給管鳥が問題なく起動する状態かどうかご確認ください。");
           return null;
         }
-        if (tTable.Rows==0) {
+        if (pTable.Rows==0) {
           if ( JOptionPane.showConfirmDialog(
                 fr,
                 "現在設定されているデータベースにはデータが存在しません。\n別のデータベースを選択しますか？",
@@ -108,7 +108,7 @@ public class QkanTsusyoUtil extends QkanPatientImport {
     pdfBtn.setFont(new Font("SanSerif",Font.PLAIN,14));
     final ActionListener pdfOut = new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        String fname = tTable.PDFout();
+        String fname = pTable.PDFout();
         if (fname!=null) {
           File pr = new File(getProperty("doc/Acrobat/Path"));
           File f = new File(fname);
@@ -157,7 +157,7 @@ public class QkanTsusyoUtil extends QkanPatientImport {
     };
     exitBtn.addActionListener(exitNow);
 
-    JLabel title = new JLabel(" 給管鳥 通所介護利用者情報");
+    JLabel title = new JLabel(" 給管鳥  事業所情報");
     title.setFont(new Font("SansSerif",Font.BOLD,18));
     JLabel dispPath = new JLabel("  現在のデータベース："+dbServer+"/"+dbPort+":"+realInPath);
     dispPath.setFont(new Font("Serif",Font.PLAIN,12));
@@ -167,17 +167,14 @@ public class QkanTsusyoUtil extends QkanPatientImport {
     chinf.setForeground(Color.blue);
     JPanel northP = new JPanel( new BorderLayout());
     northP.add(title,BorderLayout.NORTH);
-    northP.add(dispPath,BorderLayout.CENTER);
     northP.add(pdfBtn,BorderLayout.EAST);
+    northP.add(dispPath,BorderLayout.CENTER);
     northP.add(chinf,BorderLayout.SOUTH);
     contentPane.add(northP);
+    contentPane.add(pTable.getScrollList());
     center0P = new JPanel();
     center0P.add(execBtn);
     center0P.add(exitBtn);
-    final JPanel seleP = new JPanel(new BorderLayout());
-    JPanel spn = tTable.searchCondition();
-    seleP.add(spn,BorderLayout.CENTER);
-    contentPane.add(seleP);
     contentPane.add(center0P);
     WindowAdapter AppCloser =  new WindowAdapter() {
       public void windowClosing(WindowEvent e) {
@@ -193,19 +190,18 @@ public class QkanTsusyoUtil extends QkanPatientImport {
       }
     };
     fr.addWindowListener(AppCloser);
-    fr.setSize(800,680);
+    fr.setSize(800,600);
     //fr.pack();
     Dimension sc = Toolkit.getDefaultToolkit().getScreenSize();
     Dimension sz = fr.getSize();
     fr.setLocation((sc.width-sz.width)/2,(sc.height-sz.height)/2);
-    System.out.println("fr OK");
     return fr;
   }
 
   public void execCsvOut() {
   
     final JProgressBar pb = new JProgressBar();
-    final JLabel tit1 = new JLabel("【通所介護情報CSV書き出し】");
+    final JLabel tit1 = new JLabel("【事業所情報CSV書き出し】");
     final JLabel tit = new JLabel("情報をCSVファイルに書き出しています。");
     tit.setHorizontalAlignment(JLabel.LEFT);
     int stat = STATE_SUCCESS;
@@ -242,7 +238,7 @@ public class QkanTsusyoUtil extends QkanPatientImport {
     };
     ActionListener actionStart = new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-          tTable.selectAll();
+          pTable.selectAll();
           int[][] pNos = prepareExec();
           if (pNos==null) {
             statMessage(STATE_ERROR,  "データが有りません");
@@ -281,8 +277,9 @@ public class QkanTsusyoUtil extends QkanPatientImport {
         runStat=STATE_COMPLETE;
         return;
       }
-      dbexec.setTable(tTable);
+      dbexec.setTable(pTable);
     } catch (Exception e) {
+      System.out.println(e.toString());
       statMessage(STATE_ERROR,"データ一覧の取得失敗");
       return;
     }
@@ -297,7 +294,6 @@ public class QkanTsusyoUtil extends QkanPatientImport {
     contentPane.add(pn0);
     pn0.setVisible(false);
     if (parent != null) parent.setEnabled(false);
-    System.out.println("frame start "+runStat);
     fr.setVisible(true);
 
     while (runStat!=STATE_FATAL) {
@@ -312,7 +308,6 @@ public class QkanTsusyoUtil extends QkanPatientImport {
           pn0.add(new JLabel("データ書き出し中......."));
           pn0.add(cb);
         }
-        System.out.println("runStat = "+runStat);
         if (runStat==STATE_COMPLETE) { 
           if (isMbInPath) new File(dbPath).delete();
           return;
@@ -373,11 +368,10 @@ public class QkanTsusyoUtil extends QkanPatientImport {
   }
 
   public int[][] prepareExec() {
-    Object pdat[][] = tTable.getSelectedPatients();
+    Object pdat[][] = pTable.getSelectedProviders();
     if (pdat.length<1) return null;
     int pNos[][] = new int[pdat.length][2];
     for (int i=0;i<pdat.length;i++) {
-      System.out.println(pdat[i][0]);
       int patientNo = Integer.parseInt(pdat[i][0].toString());
       pNos[i][0] = patientNo;
       pNos[i][1] = -1;
@@ -390,7 +384,6 @@ public class QkanTsusyoUtil extends QkanPatientImport {
     String path = null;
     String ext[] = {"csv","CSV"};
     String fname = null; 
-    System.out.println(tTable.targetMonth+":"+tTable.targetDay);
     if (outPath==null) outPath=realInPath;
     else fname = (new File(outPath)).getName();
 
@@ -398,23 +391,14 @@ public class QkanTsusyoUtil extends QkanPatientImport {
       if (fname==null) {
         Calendar c = Calendar.getInstance();
         StringBuffer sb = new StringBuffer();
-        sb.append("TSUSYO-");
-        sb.append(tTable.currentProvider);
-        sb.append("_");
-        sb.append(tTable.targetYear);
-        if (tTable.targetMonth<10) sb.append("0");
-        sb.append(tTable.targetMonth);
-        if (tTable.targetDay>0) {
-          if (tTable.targetDay<10) sb.append("0");
-          sb.append(tTable.targetDay);
-        }
-        //sb.append(c.get(c.YEAR));
-        //String mm = (new Integer(c.get(c.MONTH)+1)).toString();
-        //if ((c.get(c.MONTH)+1)<10) sb.append("0");
-        //sb.append(mm);
-        //String dd = (new Integer(c.get(c.DATE))).toString();
-        //if (c.get(c.DATE)<10) sb.append("0");
-        //sb.append(dd);
+        sb.append("JIGYOSYO");
+        sb.append(c.get(c.YEAR));
+        String mm = (new Integer(c.get(c.MONTH)+1)).toString();
+        if ((c.get(c.MONTH)+1)<10) sb.append("0");
+        sb.append(mm);
+        String dd = (new Integer(c.get(c.DATE))).toString();
+        if (c.get(c.DATE)<10) sb.append("0");
+        sb.append(dd);
         sb.append(".csv");
         fname = sb.toString();
       }
@@ -435,12 +419,12 @@ public class QkanTsusyoUtil extends QkanPatientImport {
   }
 
   public static void main(String[] args) {
-    QkanTsusyoUtil ipi = new QkanTsusyoUtil();
+    QkanProviderUtil ipi = new QkanProviderUtil();
     try {
-      ipi.execCsvOut();
+      //ipi.execCsvOut();
       //System.exit(0);
-      //JDialog fr = ipi.dbUpdate(null,null);
-      //fr.setVisible(true);
+      JDialog fr = ipi.dbUpdate(null,null);
+      fr.setVisible(true);
     }
     catch(Exception e) {
       ipi.statMessage(STATE_FATAL,e.getMessage());
