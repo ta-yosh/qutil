@@ -49,6 +49,7 @@ public class QkanTsusyoRehaData {
     private String data[][];
     private int ymdata[][];
     private int timePlus[][]= new int[4][];
+    private int timeMinus[][]= new int[4][];
     private int kiboPlus[][]= new int[4][];
     private int initCode[]= new int[4];
     private int yinitCode[]= new int[4];
@@ -108,27 +109,7 @@ public class QkanTsusyoRehaData {
         currentProvider = data[0][1];
         curProviderName = data[0][2];
 
-        buf.delete(0,buf.length());
-        buf.append("select service_unit from m_service_code ");
-        buf.append("where service_code_item in (5002,5003,5004,5005,");
-        buf.append("5301,5400,5601,5602,5603,5604,5605,5606,5607)");
-        buf.append(" and system_service_kind_detail in (11611,16611) ");
-        buf.append("order by service_code_item");
-        if (dbm.connect()) {
-          dbm.execQuery(buf.toString());
-          yaUnit.put("1660103",(new int[] {0,0,Integer.parseInt(dbm.getData(0,0).toString())}));
-          yaUnit.put("1660104",(new int[] {0,0,Integer.parseInt(dbm.getData(0,1).toString())}));
-          yaUnit.put("1660105",(new int[] {0,0,Integer.parseInt(dbm.getData(0,2).toString())}));
-          yaUnit.put("1660106",(new int[] {0,0,Integer.parseInt(dbm.getData(0,3).toString())}));
-          taUnit.put("1160105",(new int[] {0,0,Integer.parseInt(dbm.getData(0,4).toString())}));
-          taUnit.put("1160107",(new int[] {0,0,Integer.parseInt(dbm.getData(0,5).toString())}));
-          taUnit.put("1160111",(new int[] {0,0,Integer.parseInt(dbm.getData(0,6).toString())}));
-          taUnit.put("1160112",(new int[] {0,0,Integer.parseInt(dbm.getData(0,7).toString()),Integer.parseInt(dbm.getData(0,8).toString()),Integer.parseInt(dbm.getData(0,9).toString())}));
-          taUnit.put("1160113",(new int[] {0,0,Integer.parseInt(dbm.getData(0,12).toString())}));
-          taUnit.put("1160114",(new int[] {0,0,Integer.parseInt(dbm.getData(0,10).toString())}));
-          taUnit.put("1160115",(new int[] {0,0,Integer.parseInt(dbm.getData(0,11).toString())}));
-        }
-        System.out.println("create test ="+dbm.execUpdate("create table test_t (id integer,test varchar(8))"));
+        //System.out.println("create test ="+dbm.execUpdate("create table test_t (id integer,test varchar(8))"));
         dbm.Close();
       }
       else Rows=-1;
@@ -151,11 +132,74 @@ public class QkanTsusyoRehaData {
       ratePlus.put("23","3");
       ratePlus.put("24","4");
       ratePlus.put("25","5");
+    }
+
+    public void setUnit(String dat) {
+      StringBuffer buf = new StringBuffer();
+      buf.append("select service_unit,system_service_kind_detail from m_service_code ");
+      if (targetYear<2009 || targetYear==2009 && targetMonth<4) {
+        buf.append("where service_code_item in (5002,5003,5004,5005,");
+        buf.append("5301,5400,5601,5602,5603,5604,5605,5606,5607)");
+      }
+      if (targetYear>2009 || targetYear==2009 && targetMonth>=4) {
+        buf.append("where service_code_item in (5002,5003,5004,5005,");
+        buf.append("5301,5400,5601,5602,5603,5605,5606,6143,8110,8111,");
+        buf.append("6111,6253,6109,6101,6102,6103,6104)");
+      }
+      buf.append(" and system_service_kind_detail in (11611,16611) ");
+      buf.append(" and service_valid_start<='");
+      buf.append(dat);
+      buf.append("' and service_valid_end>='");
+      buf.append(dat);
+      buf.append("' order by service_code_item,system_service_kind_detail desc");
+      System.out.println(buf.toString());
+      if (dbm.connect()) {
+        dbm.execQuery(buf.toString());
+        yaUnit.put("1660103",(new int[] {0,0,Integer.parseInt(dbm.getData(0,0).toString())}));
+        yaUnit.put("1660104",(new int[] {0,0,Integer.parseInt(dbm.getData(0,1).toString())}));
+        yaUnit.put("1660105",(new int[] {0,0,Integer.parseInt(dbm.getData(0,2).toString())}));
+        yaUnit.put("1660106",(new int[] {0,0,Integer.parseInt(dbm.getData(0,3).toString())}));
+        taUnit.put("1160105",(new int[] {0,0,Integer.parseInt(dbm.getData(0,4).toString())}));
+        taUnit.put("1160107",(new int[] {0,0,Integer.parseInt(dbm.getData(0,5).toString())}));
+        taUnit.put("1160111",(new int[] {0,0,Integer.parseInt(dbm.getData(0,6).toString())}));
+        if (targetYear<2009 || targetYear==2009 && targetMonth<4) {
+          taUnit.put("1160112",(new int[] {0,0,Integer.parseInt(dbm.getData(0,7).toString()),Integer.parseInt(dbm.getData(0,8).toString()),Integer.parseInt(dbm.getData(0,9).toString())}));
+          taUnit.put("1160113",(new int[] {0,0,Integer.parseInt(dbm.getData(0,12).toString())}));
+          taUnit.put("1160114",(new int[] {0,0,Integer.parseInt(dbm.getData(0,10).toString())}));
+          taUnit.put("1160115",(new int[] {0,0,Integer.parseInt(dbm.getData(0,11).toString())}));
+        }
+        if (targetYear>2009 || targetYear==2009 && targetMonth>=4) {
+          taUnit.put("1160112",(new int[] {0,0,Integer.parseInt(dbm.getData(0,7).toString()),Integer.parseInt(dbm.getData(0,8).toString())}));
+          taUnit.put("1160114",(new int[] {0,0,Integer.parseInt(dbm.getData(0,9).toString())}));
+          taUnit.put("1160115",(new int[] {0,0,Integer.parseInt(dbm.getData(0,10).toString())}));
+          yaUnit.put("1660108",(new int[] {0,0,Integer.parseInt(dbm.getData(0,11).toString()),Integer.parseInt(dbm.getData(0,15).toString()),0,Integer.parseInt(dbm.getData(0,13).toString()),Integer.parseInt(dbm.getData(0,16).toString())}));
+          taUnit.put("1160122",(new int[] {0,0,Integer.parseInt(dbm.getData(0,12).toString()),Integer.parseInt(dbm.getData(0,14).toString())}));
+          yaUnit.put("1660107",(new int[] {0,0,Integer.parseInt(dbm.getData(0,17).toString())}));
+          taUnit.put("1160121",(new int[] {0,0,Integer.parseInt(dbm.getData(0,18).toString())}));
+          taUnit.put("1160118",(new int[] {0,0,Integer.parseInt(dbm.getData(0,19).toString())}));
+          taUnit.put("1160119",(new int[] {0,0,Integer.parseInt(dbm.getData(0,20).toString())}));
+          taUnit.put("1160120",(new int[] {0,0,Integer.parseInt(dbm.getData(0,21).toString())}));
+          yaUnit.put("12",(new int[] {0,0,Integer.parseInt(dbm.getData(0,22).toString()),0,Integer.parseInt(dbm.getData(0,24).toString())}));
+          taUnit.put("12",(new int[] {0,0,Integer.parseInt(dbm.getData(0,23).toString())}));
+        }
+      }
       System.out.println("set timePlus start");
-      timePlus[0] = new int[] {0,0,0,0,0,0,0};
-      timePlus[1] = new int[] {0,0,10,20,30,40,50};
-      timePlus[2] = new int[] {0,0,10,20,30,40,50};
-      timePlus[3] = new int[] {0,0,10,20,30,40,50};
+      if (targetYear<2009 || targetYear==2009 && targetMonth<4) {
+        timePlus[0] = new int[] {0,0,0,0,0,0,0};
+        timePlus[1] = new int[] {0,0,10,20,30,40,50};
+        timePlus[2] = new int[] {0,0,10,20,30,40,50};
+        timePlus[3] = new int[] {0,0,10,20,30,40,50};
+      }
+      if (targetYear>2009 || targetYear==2009 && targetMonth>=4) {
+        timePlus[0] = new int[] {0,0,0,0,0,0,0,0};
+        timePlus[1] = new int[] {0,-40,0,10,20,30,40,50};
+        timePlus[2] = new int[] {0,-240,0,10,20,30,40,50};
+        timePlus[3] = new int[] {0,-240,0,10,20,30,40,50};
+        timeMinus[0] = new int[] {0,0,0,0};
+        timeMinus[1] = new int[] {0,-40,-40,-40};
+        timeMinus[2] = new int[] {0,-240,-430,-520};
+        timeMinus[3] = new int[] {0,-240,-430,-520};
+      }
       System.out.println("set kiboPlus start");
       kiboPlus[0] = new int[] {0,0,0,0};
       kiboPlus[1] = new int[] {0,0,1000,2000};
@@ -166,11 +210,21 @@ public class QkanTsusyoRehaData {
       yinitCode = new int[]  {1111,1111,8001,9001};
       //tValue.put("1160103",(new String[] {"","小規模型","通常型","療養"}));
       String osn = System.getProperty("os.name").substring(0,3);
-      if (osn.equals("Win")) {
-        tValue.put("1160104",(new String[] {"","2\uff5e3時間","3\uff5e4時間","4\uff5e6時間","6\uff5e8時間","8\uff5e9時間","9\uff5e10時間"}));
+      if (targetYear<2009 || targetYear==2009 && targetMonth<4) {
+        if (osn.equals("Win")) {
+          tValue.put("1160104",(new String[] {"","2\uff5e3時間","3\uff5e4時間","4\uff5e6時間","6\uff5e8時間","8\uff5e9時間","9\uff5e10時間"}));
+        }
+        else {
+          tValue.put("1160104",(new String[] {"","2〜3時間","3〜4時間","4〜6時間","6〜8時間","8〜9時間","9〜10時間"}));
+        }
       }
-      else {
-        tValue.put("1160104",(new String[] {"","2〜3時間","3〜4時間","4〜6時間","6〜8時間","8〜9時間","9〜10時間"}));
+      if (targetYear>2009 || targetYear==2009 && targetMonth>=4) {
+        if (osn.equals("Win")) {
+          tValue.put("1160104",(new String[] {"","1\uff5e2時間","2\uff5e3時間","3\uff5e4時間","4\uff5e6時間","6\uff5e8時間","8\uff5e9時間","9\uff5e10時間"}));
+        }
+        else {
+          tValue.put("1160104",(new String[] {"","1〜2時間","2〜3時間","3〜4時間","4〜6時間","6〜8時間","8〜9時間","9〜10時間"}));
+        }
       }
       tValue.put("1160105",(new String[] {"","無し","有り"}));
       tValue.put("1160107",(new String[] {"","無し","有り"}));
@@ -179,10 +233,20 @@ public class QkanTsusyoRehaData {
       tValue.put("1160113",(new String[] {"","無し","有り"}));
       tValue.put("1160114",(new String[] {"","無し","有り"}));
       tValue.put("1160115",(new String[] {"","無し","有り"}));
+      tValue.put("1160117",(new String[] {"","無し","有り"}));
+      tValue.put("1160118",(new String[] {"","無し","有り"}));
+      tValue.put("1160119",(new String[] {"","無し","有り"}));
+      tValue.put("1160120",(new String[] {"","無し","有り"}));
+      tValue.put("1160121",(new String[] {"","無し","有り"}));
+      tValue.put("1160122",(new String[] {"","無し","I型","II型"}));
+      tValue.put("12",(new String[] {"","無し","有り"}));
       yValue.put("1660103",(new String[] {"","無し","有り"}));
       yValue.put("1660104",(new String[] {"","無し","有り"}));
       yValue.put("1660105",(new String[] {"","無し","有り"}));
       yValue.put("1660106",(new String[] {"","無し","有り"}));
+      yValue.put("1660107",(new String[] {"","無し","有り"}));
+      yValue.put("1660108",(new String[] {"","無し","I型","II型","無し","I型","II型"}));
+      yValue.put("12",(new String[] {"","無し","有り","無し","有り"}));
     }
 
     public JPanel searchCondition() {
@@ -264,21 +328,6 @@ public class QkanTsusyoRehaData {
           pn1.add(ymbox);
           dayCondition();
           pn1.add(pn3);
-          dbm.connect();
-          dbm.execQuery("select provider_area_type from provider where provider_id='"+currentProvider+"'");
-          dbm.Close();
-          buf.delete(0,buf.length());
-          buf.append("select unit_price_value from m_area_unit_price ");
-          buf.append("where unit_price_type=");
-          buf.append(dbm.getData(0,0).toString());
-          buf.append(" and system_service_kind_detail in (11611,16611) ");
-          buf.append("order by system_service_kind_detail");
-          dbm.connect();
-          dbm.execQuery(buf.toString());
-          dbm.Close();
-          tunitRate = Float.parseFloat(dbm.getData(0,0).toString());
-          yunitRate = Float.parseFloat(dbm.getData(0,1).toString());
-          System.out.println("trate = "+tunitRate+" yrate = "+yunitRate);
 
           setTsusyoPanel(ymdata[0][0],ymdata[0][1],targetDay);
           
@@ -362,6 +411,25 @@ public class QkanTsusyoRehaData {
         dbox.addActionListener(dChange);
         pn3.add(dbox);
       }
+      dbm.connect();
+      dbm.execQuery("select provider_area_type from provider where provider_id='"+currentProvider+"'");
+      dbm.Close();
+      buf.delete(0,buf.length());
+      buf.append("select unit_price_value from m_area_unit_price ");
+      buf.append("where unit_price_type=");
+      buf.append(dbm.getData(0,0).toString());
+      buf.append(" and system_service_kind_detail in (11611,16611) ");
+      buf.append(" and unit_valid_start <= '");
+      buf.append(nStart);
+      buf.append("' and unit_valid_end >= '");
+      buf.append(nStart);
+      buf.append("' order by system_service_kind_detail");
+      dbm.connect();
+      dbm.execQuery(buf.toString());
+      dbm.Close();
+      tunitRate = Float.parseFloat(dbm.getData(0,0).toString());
+      yunitRate = Float.parseFloat(dbm.getData(0,1).toString());
+      System.out.println("trate = "+tunitRate+" yrate = "+yunitRate);
       pn3.setVisible(true);
     }
 
@@ -386,6 +454,7 @@ public class QkanTsusyoRehaData {
       if (targetDay>0)
         nStart = (new Integer(targetYear).toString())+"-"+(new Integer(targetMonth).toString())+"-"+(new Integer(targetDay).toString());
 
+      if (targetYear>0) setUnit(nStart);
       if (dbm.connect()) {
         StringBuffer buf = new StringBuffer();
 
@@ -445,6 +514,7 @@ public class QkanTsusyoRehaData {
         DngDBAccess dbm2 = new DngDBAccess("firebird",dbUri,dbUser,dbPass);
         for (int i=0;i<dbm.Rows;i++){
           int pointCode=0;
+          double mountRate=0;
           int sCount = Integer.parseInt(dbm.getData("COUNT",i).toString());
           int insRate = Integer.parseInt(dbm.getData("INSURE_RATE",i).toString());
           String insStart = dbm.getData("INSURE_VALID_START",i).toString();
@@ -553,7 +623,7 @@ public class QkanTsusyoRehaData {
           buf.append(" where SERVICE_ID=");
           buf.append(sNo);
           buf.append(" and SYSTEM_BIND_PATH");
-          buf.append(" in (1160103,1160104,1160105,1160107,1160109,1160110,1160111,1160112,1160113,1160114,1160115,1660101,1660102,1660103,1660104,1660105,1660106)");
+          buf.append(" in (12,14,1160103,1160104,1160105,1160107,1160109,1160110,1160111,1160112,1160113,1160114,1160115,1160116,1160117,1160118,1160119,1160120,1160121,1160122,1660101,1660102,1660103,1660104,1660105,1660106,1660107,1660108)");
           buf.append(" order by SYSTEM_BIND_PATH;");
           sql = buf.toString();
           System.out.println(sql);
@@ -566,6 +636,7 @@ public class QkanTsusyoRehaData {
           int hId=0;
           int kiboId=0;
           int timeId=0;
+          int kangoId=0;
           int kPlus=0;
           int tPlus=0;
           int addUnit=0;
@@ -581,21 +652,42 @@ public class QkanTsusyoRehaData {
             tVal.put("1160113","無し");
             tVal.put("1160114","無し");
             tVal.put("1160115","無し");
+            tVal.put("1160117","無し");
+            tVal.put("1160118","無し");
+            tVal.put("1160119","無し");
+            tVal.put("1160120","無し");
+            tVal.put("1160121","無し");
+            tVal.put("1160122","無し");
+            int kaisei = 0;
             for (int j=0;j<dbm2.Rows;j++){
               System.out.println("Rows start: "+j);
               int sbp0 = Integer.parseInt(dbm2.getData("SYSTEM_BIND_PATH",j).toString());
-              if (sbp0==1160103) {
+              if (sbp0==14) {
+                kaisei=Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString(
+));
+                System.out.println("kaisei: "+kaisei);
+              }
+              else if (sbp0==1160103 || sbp0==1160116) {
                 kiboId = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
                 System.out.println("kiboId : "+kiboId+"("+sbp0+")");
+                if (kaisei==20090401) {
+                  kPlus = kiboPlus[hId][kiboId];
+                  tPlus = (timeId==1) ? timeMinus[hId][kiboId] : timePlus[hId][timeId];
+                }
               } 
               else if (sbp0==1160109) {
                 hId = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
                 inic= initCode[hId];
-                kPlus = kiboPlus[hId][kiboId];
-                tPlus = timePlus[hId][timeId];
+                if (kaisei==0) {
+                  kPlus = kiboPlus[hId][kiboId];
+                  tPlus = timePlus[hId][timeId];
+                }
               } 
               else if (sbp0==1160110) {
-                if (dbm2.getData("DETAIL_VALUE",j).toString().equals("2")) kPlus = kPlus+100;
+                if (kaisei==0 && dbm2.getData("DETAIL_VALUE",j).toString().equals("2")) kPlus = kPlus+100;
+              }
+              else if (sbp0==1160117) {
+                kangoId = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
               }
               else {
                 System.out.println("num"+sbp0+"num");
@@ -613,7 +705,8 @@ public class QkanTsusyoRehaData {
                   add = (int[]) taUnit.get(dbm2.getData("SYSTEM_BIND_PATH",j).toString());
                   key = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
                   System.out.println("sbp = "+sbp0+" key = "+key+" add= "+add[key]);
-                  addUnit += add[key];
+                  if (sbp0==12) mountRate = (double)add[key]/100.0;
+                  else addUnit += add[key];
                 }
                 tVal.put(dbm2.getData("SYSTEM_BIND_PATH",j).toString(),val[key]);
               }
@@ -622,26 +715,43 @@ public class QkanTsusyoRehaData {
             pline.addElement((String)tVal.get("1160111"));
             pline.addElement((String)tVal.get("1160112"));
             pline.addElement((String)tVal.get("1160107"));
-            pline.addElement((String)tVal.get("1160113"));
+            pline.addElement((String)tVal.get((kaisei==0)?"1160113":"1160121"));
             pline.addElement((String)tVal.get("1160114"));
             pline.addElement((String)tVal.get("1160115"));
+            if (targetYear>2009 || targetYear==2009 && targetMonth>=4) {
+              pline.addElement((String)tVal.get("1160118"));
+              pline.addElement((String)tVal.get("1160119"));
+              pline.addElement((String)tVal.get("1160120"));
+            }
             pline.addElement("");
             pline.addElement("");
+            if (targetYear>2009 || targetYear==2009 && targetMonth>=4)
+              pline.addElement((String)tVal.get("1160122"));
+            if (kaisei==20090401 && timeId==1)
+               rPlus = (rPlus-1)*2+1+ ((kangoId==2)? 1:0);
             System.out.println("inic : "+inic+"+"+rPlus+"+"+kPlus+"+"+tPlus);
             pointCode = inic+rPlus+tPlus+kPlus;
             System.out.println("pointCode : "+pointCode);
           }
           else {
+            int jl=(targetYear>2009 || targetYear==2009 && targetMonth>=4)? 7:6;
             unitRate = yunitRate;
-            for (int j=0;j<6;j++) pline.addElement("");
+            for (int j=0;j<jl;j++) pline.addElement("");
             Hashtable yoVal = new Hashtable();
             yoVal.put("1660103","無し");
             yoVal.put("1660104","無し");
             yoVal.put("1660105","無し");
             yoVal.put("1660106","無し");
+            yoVal.put("1660107","無し");
+            yoVal.put("1660108","無し");
+            int kaisei = 0;
             for (int j=0;j<dbm2.Rows;j++) {
               int sbp0 = Integer.parseInt(dbm2.getData("SYSTEM_BIND_PATH",j).toString());
-              if (sbp0==1660101) {
+              if (sbp0==14) {
+                kaisei=Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
+                System.out.println("kaisei: "+kaisei);
+              }
+              else if (sbp0==1660101) {
                 hId = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
                 inic= yinitCode[hId];
                 if (cR.equals("13")) inic +=10;
@@ -658,13 +768,20 @@ public class QkanTsusyoRehaData {
                 int[] add = (int[]) yaUnit.get(dbm2.getData("SYSTEM_BIND_PATH",j).toString());
                 int key = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
                 yoVal.put(dbm2.getData("SYSTEM_BIND_PATH",j).toString(),val[key]);
-                if (!hiwari) addUnit += add[key];
+                if (sbp0==12) mountRate = (double)add[key]/100.0;
+                else if (!hiwari) addUnit += add[key];
               }
+            }
+            if (jl==7) {
+              pline.addElement((String)yoVal.get("1660107"));
+              pline.addElement("");
             }
             pline.addElement((String)yoVal.get("1660104"));
             pline.addElement((String)yoVal.get("1660105"));
             pline.addElement((String)yoVal.get("1660103"));
             pline.addElement((String)yoVal.get("1660106"));
+            if (targetYear>2009 || targetYear==2009 && targetMonth>=4)
+              pline.addElement((String)yoVal.get("1660108"));
             pointCode = inic;
           }
 
@@ -861,6 +978,10 @@ public class QkanTsusyoRehaData {
             buf.append(sbp);
             buf.append("' and  service_code_item='");
             buf.append(pointCode);
+            buf.append("' and service_valid_start <= '");
+            buf.append(nStart);
+            buf.append("' and service_valid_end >= '");
+            buf.append(nStart);
             buf.append("'");
             dbm2.connect();
             System.out.println(buf.toString());
@@ -868,6 +989,7 @@ public class QkanTsusyoRehaData {
             dbm2.Close();
             if (dbm2.Rows>0) {
               int p = Integer.parseInt(dbm2.getData(0,0).toString());
+              addUnit += (int)((double) p * mountRate + 0.50 );
               p += addUnit;
               int hiyou =(int)((double) p * unitRate);
               int futan = hiyou - (int)((double)hiyou/100.0*(double)insRate);
@@ -964,8 +1086,15 @@ public class QkanTsusyoRehaData {
       fieldName.addElement("若年");
       fieldName.addElement("栄養");
       fieldName.addElement("口腔");
+      if (targetYear>2009 || targetYear==2009 && targetMonth>=4) {
+        fieldName.addElement("個別");
+        fieldName.addElement("理学");
+        fieldName.addElement("認知");
+      }
       fieldName.addElement("運動");
       fieldName.addElement("評価");
+      if (targetYear>2009 || targetYear==2009 && targetMonth>=4)
+        fieldName.addElement("サー");
       if (td==0) {
         fieldName.addElement("回数");
       }
@@ -995,14 +1124,28 @@ public class QkanTsusyoRehaData {
       sorter.setColumnClass(0,Integer.class);
       sorter.setColumnClass(2,Integer.class);
       if (td==0) {
-        sorter.setColumnClass(15,Integer.class);
-        sorter.setColumnClass(16,Integer.class);
-        sorter.setColumnClass(17,Integer.class);
-        sorter.setColumnClass(18,Integer.class);
-        sorter.setColumnClass(19,Integer.class);
+        if (targetYear>2009 || targetYear==2009 && targetMonth>=4) {
+          sorter.setColumnClass(19,Integer.class);
+          sorter.setColumnClass(20,Integer.class);
+          sorter.setColumnClass(21,Integer.class);
+          sorter.setColumnClass(22,Integer.class);
+          sorter.setColumnClass(23,Integer.class);
+        }
+        else {
+          sorter.setColumnClass(15,Integer.class);
+          sorter.setColumnClass(16,Integer.class);
+          sorter.setColumnClass(17,Integer.class);
+          sorter.setColumnClass(18,Integer.class);
+          sorter.setColumnClass(19,Integer.class);
+        }
       } else {
-        sorter.setColumnClass(17,Integer.class);
-        sorter.setColumnClass(18,Integer.class);
+        if (targetYear>2009 || targetYear==2009 && targetMonth>=4) {
+          sorter.setColumnClass(21,Integer.class);
+          sorter.setColumnClass(22,Integer.class);
+        } else {
+          sorter.setColumnClass(17,Integer.class);
+          sorter.setColumnClass(18,Integer.class);
+        }
       }
       usrTbl.getColumnModel().getColumn(0).setCellRenderer(ren);
       usrTbl.getColumnModel().getColumn(2).setCellRenderer(ren);
@@ -1041,6 +1184,16 @@ public class QkanTsusyoRehaData {
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32);
       usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32);
+      if (targetYear>2009 || targetYear==2009 && targetMonth>=4) {
+        usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
+        usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32);
+        usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
+        usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32);
+        usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
+        usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32);
+        usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
+        usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32);
+      }
       System.out.println("cid : "+cid);
       if (td==0) {
         usrTbl.getColumnModel().getColumn(cid).setCellRenderer(ren);
@@ -1111,9 +1264,9 @@ public class QkanTsusyoRehaData {
       int cid=0;
       int num=0;
       if (targetDay==0) {
-        num=20;
+        num=(targetYear>2009 || targetYear==2009 && targetMonth>=4)? 24:20;
       } else {
-        num=19;
+        num=(targetYear>2009 || targetYear==2009 && targetMonth>=4)? 23:19;
       }
       float width[] = new float[num];
       int ctype[] = new int[num];
@@ -1138,7 +1291,7 @@ public class QkanTsusyoRehaData {
       width[cid++] = Float.parseFloat("3.5"); //入浴
       width[cid++] = Float.parseFloat("3.5"); //リハ
       ctype[cid] = 7; // 0 - normal 1 - add comma 2 - align right
-      width[cid++] = Float.parseFloat("8.0"); //短期
+      width[cid++] = Float.parseFloat("8.5"); //短期
       ctype[cid] = 7; // 0 - normal 1 - add comma 2 - align right
       width[cid++] = Float.parseFloat("3.5"); //訪問指導
       ctype[cid] = 7; // 0 - normal 1 - add comma 2 - align right
@@ -1147,10 +1300,22 @@ public class QkanTsusyoRehaData {
       width[cid++] = Float.parseFloat("3.5"); //栄養
       ctype[cid] = 7; // 0 - normal 1 - add comma 2 - align right
       width[cid++] = Float.parseFloat("3.5"); //口腔
+      if (targetYear>2009 || targetYear==2009 && targetMonth>=4) {
+        ctype[cid] = 7; // 0 - normal 1 - add comma 2 - align right
+        width[cid++] = Float.parseFloat("3.5"); //個別
+        ctype[cid] = 7; // 0 - normal 1 - add comma 2 - align right
+        width[cid++] = Float.parseFloat("3.5"); //理学
+        ctype[cid] = 7; // 0 - normal 1 - add comma 2 - align right
+        width[cid++] = Float.parseFloat("3.5"); //認知
+      }
       ctype[cid] = 7; // 0 - normal 1 - add comma 2 - align right
       width[cid++] = Float.parseFloat("3.5"); //運動
       ctype[cid] = 7; // 0 - normal 1 - add comma 2 - align right
       width[cid++] = Float.parseFloat("3.5"); //評価
+      if (targetYear>2009 || targetYear==2009 && targetMonth>=4) {
+        ctype[cid] = 7; // 0 - normal 1 - add comma 2 - align right
+        width[cid++] = Float.parseFloat("3.5"); //サー
+      }
       if (targetDay==0) {
         ctype[cid] = 2; // 0 - normal 1 - add comma 2 - align right
         width[cid++] = Float.parseFloat("3.5"); //回数

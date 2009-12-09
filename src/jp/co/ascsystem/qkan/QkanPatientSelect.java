@@ -48,7 +48,7 @@ public class QkanPatientSelect {
       try {
         BufferedReader reader = new BufferedReader(new FileReader(csvFile));
         while ((line=reader.readLine()) !=null) {
-          String[] ritems = new String[14];
+          String[] ritems = new String[15];
           String[] items = line.split(",");
           int skip=0;
           int col=0;
@@ -72,6 +72,8 @@ public class QkanPatientSelect {
               item = item.replaceAll("^\"","").replaceAll("\"$","");
             }
             item = item.replaceAll("\"\"","\"");
+            //System.out.println(item);
+
             if (col==4) item = "   "+item;
             if (col==6) {
               Integer age = new Integer(patientAge(rdat.get(5).toString()));
@@ -81,14 +83,16 @@ public class QkanPatientSelect {
             else ritems[col] = item;
           }
           for (int i=7;i<14;i++) {
-            if (i<11) rdat.addElement((col==13) ? ritems[i+3]:"");
+            if (i<11) rdat.addElement((col>=13) ? ritems[i+3]:"");
             else rdat.addElement(ritems[i-4]);
           }
           this.data.addElement(rdat); 
+         //System.out.println(rdat.toString());
           Rows++;
         }
       }
       catch (Exception e) {
+         System.out.println(e);
          Rows--;
       }
     }

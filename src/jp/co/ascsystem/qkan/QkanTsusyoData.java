@@ -49,6 +49,7 @@ public class QkanTsusyoData {
     private String data[][];
     private int ymdata[][];
     private int timePlus[][]= new int[4][];
+    private int timeKPlus[];
     private int kiboPlus[][]= new int[4][];
     private int initCode[]= new int[4];
     private int yinitCode[]= new int[4];
@@ -107,27 +108,6 @@ public class QkanTsusyoData {
         cBox = new DngGenericCombo(data);
         currentProvider = data[0][1];
         curProviderName = data[0][2];
-
-        buf.delete(0,buf.length());
-        buf.append("select service_unit from m_service_code ");
-        buf.append("where service_code_item in (5001,5002,5003,5004,5005,");
-        buf.append("5050,5301,5605,5606,5607)");
-        buf.append(" and system_service_kind_detail in (11511,16511) ");
-        buf.append("order by service_code_item");
-        if (dbm.connect()) {
-          dbm.execQuery(buf.toString());
-          dbm.Close();
-          yaUnit.put("1650103",(new int[] {0,0,Integer.parseInt(dbm.getData(0,0).toString())}));
-          yaUnit.put("1650104",(new int[] {0,0,Integer.parseInt(dbm.getData(0,1).toString())}));
-          yaUnit.put("1650105",(new int[] {0,0,Integer.parseInt(dbm.getData(0,2).toString())}));
-          yaUnit.put("1650106",(new int[] {0,0,Integer.parseInt(dbm.getData(0,3).toString())}));
-          yaUnit.put("1650107",(new int[] {0,0,Integer.parseInt(dbm.getData(0,4).toString())}));
-          taUnit.put("1150105",(new int[] {0,0,Integer.parseInt(dbm.getData(0,5).toString())}));
-          taUnit.put("1150106",(new int[] {0,0,Integer.parseInt(dbm.getData(0,6).toString()),Integer.parseInt(dbm.getData(0,6).toString())}));
-          taUnit.put("1150110",(new int[] {0,0,Integer.parseInt(dbm.getData(0,9).toString())}));
-          taUnit.put("1150111",(new int[] {0,0,Integer.parseInt(dbm.getData(0,7).toString())}));
-          taUnit.put("1150112",(new int[] {0,0,Integer.parseInt(dbm.getData(0,8).toString())}));
-        }
       }
       else Rows=-1;
       careRate.put("1","非該当"); 
@@ -149,16 +129,28 @@ public class QkanTsusyoData {
       ratePlus.put("23","3");
       ratePlus.put("24","4");
       ratePlus.put("25","5");
+    }
+
+    public void setUnit(String dat) {
       System.out.println("set timePlus start");
       timePlus[0] = new int[] {0,0,0,0,0,0,0};
       timePlus[1] = new int[] {0,0,100,200,300,400,500};
       timePlus[2] = new int[] {0,0,10,20,30,40,50};
       timePlus[3] = new int[] {0,0,10,20,30,40,50};
+      timeKPlus = new int[] {0,0,5,10,15,20,25};
       System.out.println("set kiboPlus start");
-      kiboPlus[0] = new int[] {0,0,0,0};
-      kiboPlus[1] = new int[] {0,0,1000,3000};
-      kiboPlus[2] = new int[] {0,0,100,300};
-      kiboPlus[3] = new int[] {0,0,100,300};
+      if (targetYear<2009 || targetYear==2009 && targetMonth<4) { 
+        kiboPlus[0] = new int[] {0,0,0,0};
+        kiboPlus[1] = new int[] {0,0,1000,3000};
+        kiboPlus[2] = new int[] {0,0,100,300};
+        kiboPlus[3] = new int[] {0,0,100,300};
+      }
+      if (targetYear>2009 || targetYear==2009 && targetMonth>=4) { 
+        kiboPlus[0] = new int[] {0,0,0,0,0};
+        kiboPlus[1] = new int[] {0,0,1000,2510,2540,3000};
+        kiboPlus[2] = new int[] {0,0,100,60,160,300};
+        kiboPlus[3] = new int[] {0,0,100,60,160,300};
+      }
       System.out.println("set initCode start");
       initCode = new int[]  {1140,1140,8400,9400};
       yinitCode = new int[]  {1111,1111,8001,9001};
@@ -177,11 +169,66 @@ public class QkanTsusyoData {
       tValue.put("1150110",(new String[] {"","無し","有り"}));
       tValue.put("1150111",(new String[] {"","無し","有り"}));
       tValue.put("1150112",(new String[] {"","無し","有り"}));
+      tValue.put("1150113",(new String[] {"","無し","有り"}));
+      tValue.put("1150114",(new String[] {"","無し","型I","型II"}));
+      tValue.put("1150115",(new String[] {"","無し","有り"}));
+      tValue.put("1150116",(new String[] {"","無し","有り"}));
+      tValue.put("1150117",(new String[] {"","無し","I型","II型","III型"}));
+      tValue.put("12",(new String[] {"","無し","有り"}));
       yValue.put("1650103",(new String[] {"","無し","有り"}));
       yValue.put("1650104",(new String[] {"","無し","有り"}));
       yValue.put("1650105",(new String[] {"","無し","有り"}));
       yValue.put("1650106",(new String[] {"","無し","有り"}));
       yValue.put("1650107",(new String[] {"","無し","有り"}));
+      yValue.put("1650108",(new String[] {"","無し","有り"}));
+      yValue.put("1650109",(new String[] {"","無し","I型","II型","無し","I型","II型"}));
+      yValue.put("12",(new String[] {"","無し","有り","無し","有り"}));
+      StringBuffer buf = new StringBuffer();
+      buf.append("select service_unit,system_service_kind_detail from m_service_code ");
+      if (targetYear<2009 || targetYear==2009 && targetMonth<4) { 
+        buf.append("where service_code_item in (5001,5002,5003,5004,5005,");
+        buf.append("5050,5301,5605,5606,5607)");
+      }
+      if (targetYear>2009 || targetYear==2009 && targetMonth>=4) { 
+        buf.append("where service_code_item in (5001,5002,5003,5004,5005,");
+        buf.append("5050,5051,5301,5605,5606,8111,6104,6109,8110,6101,6102,6103)");
+      }
+      buf.append(" and system_service_kind_detail in (11511,16511) ");
+      buf.append(" and service_valid_start<='");
+      buf.append(dat);
+      buf.append("' and service_valid_end>='");
+      buf.append(dat);
+      buf.append("' order by service_code_item,system_service_kind_detail desc");
+      System.out.println(buf.toString());
+      if (dbm.connect()) {
+        dbm.execQuery(buf.toString());
+        dbm.Close();
+        yaUnit.put("1650103",(new int[] {0,0,Integer.parseInt(dbm.getData(0,0).toString())}));
+        yaUnit.put("1650104",(new int[] {0,0,Integer.parseInt(dbm.getData(0,1).toString())}));
+        yaUnit.put("1650105",(new int[] {0,0,Integer.parseInt(dbm.getData(0,2).toString())}));
+        yaUnit.put("1650106",(new int[] {0,0,Integer.parseInt(dbm.getData(0,3).toString())}));
+        yaUnit.put("1650107",(new int[] {0,0,Integer.parseInt(dbm.getData(0,4).toString())}));
+
+        if (targetYear<2009 || targetYear==2009 && targetMonth<4) { 
+          taUnit.put("1150105",(new int[] {0,0,Integer.parseInt(dbm.getData(0,5).toString())}));
+          taUnit.put("1150106",(new int[] {0,0,Integer.parseInt(dbm.getData(0,6).toString()),Integer.parseInt(dbm.getData(0,6).toString())}));
+          taUnit.put("1150111",(new int[] {0,0,Integer.parseInt(dbm.getData(0,7).toString())}));
+          taUnit.put("1150112",(new int[] {0,0,Integer.parseInt(dbm.getData(0,8).toString())}));
+          taUnit.put("1150110",(new int[] {0,0,Integer.parseInt(dbm.getData(0,9).toString())}));
+        }
+        if (targetYear>2009 || targetYear==2009 && targetMonth>=4) { 
+          taUnit.put("1150114",(new int[] {0,0,Integer.parseInt(dbm.getData(0,5).toString()),Integer.parseInt(dbm.getData(0,6).toString())}));
+          taUnit.put("1150106",(new int[] {0,0,Integer.parseInt(dbm.getData(0,7).toString()),Integer.parseInt(dbm.getData(0,7).toString())}));
+          taUnit.put("1150116",(new int[] {0,0,Integer.parseInt(dbm.getData(0,8).toString())}));
+          taUnit.put("1150112",(new int[] {0,0,Integer.parseInt(dbm.getData(0,9).toString())}));
+          yaUnit.put("1650109",(new int[] {0,0,Integer.parseInt(dbm.getData(0,10).toString()),Integer.parseInt(dbm.getData(0,14).toString()),0,Integer.parseInt(dbm.getData(0,12).toString()),Integer.parseInt(dbm.getData(0,16).toString())}));
+          taUnit.put("1150117",(new int[] {0,0,Integer.parseInt(dbm.getData(0,11).toString()),Integer.parseInt(dbm.getData(0,13).toString()),Integer.parseInt(dbm.getData(0,15).toString())}));
+          yaUnit.put("1650108",(new int[] {0,0,Integer.parseInt(dbm.getData(0,17).toString())}));
+          taUnit.put("1150115",(new int[] {0,0,Integer.parseInt(dbm.getData(0,18).toString())}));
+          yaUnit.put("12",(new int[] {0,0,Integer.parseInt(dbm.getData(0,19).toString()),0,Integer.parseInt(dbm.getData(0,21).toString())}));
+          taUnit.put("12",(new int[] {0,0,Integer.parseInt(dbm.getData(0,20).toString())}));
+        }
+      }
     }
 
     public JPanel searchCondition() {
@@ -263,21 +310,6 @@ public class QkanTsusyoData {
           pn1.add(ymbox);
           dayCondition();
           pn1.add(pn3);
-          dbm.connect();
-          dbm.execQuery("select provider_area_type from provider where provider_id='"+currentProvider+"'");
-          dbm.Close();
-          buf.delete(0,buf.length());
-          buf.append("select unit_price_value from m_area_unit_price ");
-          buf.append("where unit_price_type=");
-          buf.append(dbm.getData(0,0).toString());
-          buf.append(" and system_service_kind_detail in (11511,16511) ");
-          buf.append("order by system_service_kind_detail");
-          dbm.connect();
-          dbm.execQuery(buf.toString());
-          dbm.Close();
-          tunitRate = Float.parseFloat(dbm.getData(0,0).toString());
-          yunitRate = Float.parseFloat(dbm.getData(0,1).toString());
-          System.out.println("trate = "+tunitRate+" yrate = "+yunitRate);
 
           setTsusyoPanel(ymdata[0][0],ymdata[0][1],targetDay);
           
@@ -361,6 +393,25 @@ public class QkanTsusyoData {
         dbox.addActionListener(dChange);
         pn3.add(dbox);
       }
+      dbm.connect();
+      dbm.execQuery("select provider_area_type from provider where provider_id='"+currentProvider+"'");
+      dbm.Close();
+      buf.delete(0,buf.length());
+      buf.append("select unit_price_value from m_area_unit_price ");
+      buf.append("where unit_price_type=");
+      buf.append(dbm.getData(0,0).toString());
+      buf.append(" and system_service_kind_detail in (11511,16511) ");
+      buf.append(" and unit_valid_start <= '");
+      buf.append(nStart);
+      buf.append("' and unit_valid_end >= '");
+      buf.append(nStart);
+      buf.append("' order by system_service_kind_detail");
+      dbm.connect();
+      dbm.execQuery(buf.toString());
+      dbm.Close();
+      tunitRate = Float.parseFloat(dbm.getData(0,0).toString());
+      yunitRate = Float.parseFloat(dbm.getData(0,1).toString());
+      System.out.println("trate = "+tunitRate+" yrate = "+yunitRate);
       pn3.setVisible(true);
     }
 
@@ -385,6 +436,7 @@ public class QkanTsusyoData {
       if (targetDay>0)
         nStart = (new Integer(targetYear).toString())+"-"+(new Integer(targetMonth).toString())+"-"+(new Integer(targetDay).toString());
 
+      if (targetYear>0) setUnit(nStart);
       if (dbm.connect()) {
         StringBuffer buf = new StringBuffer();
 
@@ -444,6 +496,7 @@ public class QkanTsusyoData {
         DngDBAccess dbm2 = new DngDBAccess("firebird",dbUri,dbUser,dbPass);
         for (int i=0;i<dbm.Rows;i++){
           int pointCode=0;
+          double mountRate=0;
           int sCount = Integer.parseInt(dbm.getData("COUNT",i).toString());
           int insRate = Integer.parseInt(dbm.getData("INSURE_RATE",i).toString());
           String insStart = dbm.getData("INSURE_VALID_START",i).toString();
@@ -552,7 +605,7 @@ public class QkanTsusyoData {
           buf.append(" where SERVICE_ID=");
           buf.append(sNo);
           buf.append(" and SYSTEM_BIND_PATH");
-          buf.append(" in (1150103,1150104,1150105,1150106,1150108,1150109,1150110,1150111,1150112,1650101,1650102,1650103,1650104,1650105,1650106,1650107)");
+          buf.append(" in (12,14,1150103,1150104,1150105,1150106,1150108,1150109,1150110,1150111,1150112,1150113,1150114,1150115,1150116,1150117,1650101,1650102,1650103,1650104,1650105,1650106,1650107,1650108,1650109)");
           buf.append(" order by SYSTEM_BIND_PATH;");
           sql = buf.toString();
           System.out.println(sql);
@@ -567,6 +620,7 @@ public class QkanTsusyoData {
           int timeId=0;
           int kPlus=0;
           int tPlus=0;
+          int mPlus=0;
           int addUnit=0;
           double unitRate;
           boolean hiwari = false;
@@ -578,66 +632,98 @@ public class QkanTsusyoData {
             tVal.put("1150110","無し");
             tVal.put("1150111","無し");
             tVal.put("1150112","無し");
+            tVal.put("1150114","無し");
+            tVal.put("1150115","無し");
+            tVal.put("1150116","無し");
+            tVal.put("1150117","無し");
+            int kaisei = 0;
             for (int j=0;j<dbm2.Rows;j++){
               System.out.println("Rows start: "+j);
               int sbp0 = Integer.parseInt(dbm2.getData("SYSTEM_BIND_PATH",j).toString());
-              if (sbp0==1150103) {
+              if (sbp0==14) {
+                kaisei=Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
+                System.out.println("kaisei: "+kaisei);
+              }
+              else if (sbp0==1150103 ||  sbp0==1150113) {
                 kiboId = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
                 System.out.println("kiboId : "+kiboId+"("+sbp0+")");
+                if (kaisei==20090401) {
+                  kPlus = kiboPlus[hId][kiboId];
+                  tPlus = (kiboId==5 && timeId==2) ? 1 : 
+                          (kiboId>2) ? timeKPlus[timeId]:timePlus[hId][timeId];
+                  if (kiboId==5) rPlus = 0;
+                  String[] val = (String[])tValue.get(((kiboId!=5)? "1150104":"1150104R")); 
+                  pline.addElement(val[timeId]);
+                  tVal.put("1150104",val[timeId]);
+                }
               } 
               else if (sbp0==1150108) {
                 hId = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
                 inic= initCode[hId];
-                kPlus = kiboPlus[hId][kiboId];
-                tPlus = (kiboId==3 && timeId==2) ? 1 : timePlus[hId][timeId];
-                if (kiboId==3) rPlus = 0;
+                if (kaisei==0) {
+                  kPlus = kiboPlus[hId][kiboId];
+                  tPlus = (kiboId==3 && timeId==2) ? 1 : timePlus[hId][timeId];
+                  if (kiboId==3) rPlus = 0;
+                }
               } 
               else if (sbp0==1150109) {
-                if (dbm2.getData("DETAIL_VALUE",j).toString().equals("2")) kPlus = kPlus* 2;
+                if (kaisei==0 && dbm2.getData("DETAIL_VALUE",j).toString().equals("2")) kPlus = kPlus* 2;
+              }
+              else if (sbp0==1150104) {
+                timeId = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
+                if (kaisei==0) {
+                  String[] val = (String[])tValue.get(((kiboId!=3)? "1150104":"1150104R")); 
+                  pline.addElement(val[timeId]);
+                  tVal.put(dbm2.getData("SYSTEM_BIND_PATH",j).toString(),val[timeId]);
+                }
               }
               else {
                 System.out.println("num"+sbp0+"num");
                 String[] val;
                 int[] add;
                 int key;
-                if (sbp0==1150104) {
-                  timeId = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
-                  val = (String[])tValue.get(((kiboId!=3)? "1150104":"1150104R")); 
-                  key = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
-                  pline.addElement(val[key]);
-                }
-                else {
-                  val = (String[])tValue.get(dbm2.getData("SYSTEM_BIND_PATH",j).toString());
-                  add = (int[]) taUnit.get(dbm2.getData("SYSTEM_BIND_PATH",j).toString());
-                  key = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
-                  System.out.println("sbp = "+sbp0+" key = "+key+" add= "+add[key]);
-                  addUnit += add[key];
-                }
+                val = (String[])tValue.get(dbm2.getData("SYSTEM_BIND_PATH",j).toString());
+                add = (int[]) taUnit.get(dbm2.getData("SYSTEM_BIND_PATH",j).toString());
+                key = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
+                System.out.println("sbp = "+sbp0+" key = "+key+" add= "+add[key]);
+                if (sbp0==12) mountRate = (double)add[key]/100.0; 
+                else addUnit += add[key];
                 tVal.put(dbm2.getData("SYSTEM_BIND_PATH",j).toString(),val[key]);
               }
             }
-            pline.addElement((String)tVal.get("1150105"));
+            pline.addElement((String)tVal.get((kaisei==0)?"1150105":"1150114"));
             pline.addElement((String)tVal.get("1150106"));
-            pline.addElement((String)tVal.get("1150110"));
-            pline.addElement((String)tVal.get("1150111"));
+            pline.addElement((String)tVal.get((kaisei==0)?"1150110":"1150115"));
+            pline.addElement((String)tVal.get((kaisei==0)?"1150111":"1150116"));
             pline.addElement((String)tVal.get("1150112"));
             pline.addElement("");
             pline.addElement("");
+            if (kaisei!=0) { 
+              pline.addElement((String)tVal.get("1150117"));
+            }
             System.out.println("inic : "+inic+"+"+rPlus+"+"+kPlus+"+"+tPlus);
             pointCode = inic+rPlus+tPlus+kPlus;
             System.out.println("pointCode : "+pointCode);
           }
           else {
+            int jl=(targetYear>2009 || targetYear==2009 && targetMonth>=4)? 3:4;
             unitRate = yunitRate;
-            for (int j=0;j<4;j++) pline.addElement("");
+            for (int j=0;j<jl;j++) pline.addElement("");
             Hashtable yoVal = new Hashtable();
             yoVal.put("1650103","無し");
             yoVal.put("1650104","無し");
             yoVal.put("1650105","無し");
             yoVal.put("1650106","無し");
+            yoVal.put("1650108","無し");
+            yoVal.put("1650109","無し");
+            int kaisei=0;
             for (int j=0;j<dbm2.Rows;j++) {
               int sbp0 = Integer.parseInt(dbm2.getData("SYSTEM_BIND_PATH",j).toString());
-              if (sbp0==1650101) {
+              if (sbp0==14) {
+                kaisei=Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
+                System.out.println("kaisei: "+kaisei);
+              }
+              else if (sbp0==1650101) {
                 hId = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
                 inic= yinitCode[hId];
                 if (cR.equals("13")) inic +=10;
@@ -653,14 +739,21 @@ public class QkanTsusyoData {
                 String[] val = (String[])yValue.get(dbm2.getData("SYSTEM_BIND_PATH",j).toString());
                 int[] add = (int[]) yaUnit.get(dbm2.getData("SYSTEM_BIND_PATH",j).toString());
                 int key = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
+                if (sbp0==1650109 && cR.equals("13")) key += 3;
+                if (sbp0==12 && hiwari) key += 2;
                 yoVal.put(dbm2.getData("SYSTEM_BIND_PATH",j).toString(),val[key]);
-                if (!hiwari) addUnit += add[key];
+                if (sbp0==12) mountRate = (double)add[key]/100.0; 
+                else if (!hiwari) addUnit += add[key];
               }
             }
+            if (jl==3) pline.addElement((String)yoVal.get("1650108"));
             pline.addElement((String)yoVal.get("1650105"));
             pline.addElement((String)yoVal.get("1650106"));
             pline.addElement((String)yoVal.get("1650103"));
             pline.addElement((String)yoVal.get("1650104"));
+            if (kaisei!=0) { 
+              pline.addElement((String)yoVal.get("1650109"));
+            }
             pointCode = inic;
           }
 
@@ -855,6 +948,10 @@ public class QkanTsusyoData {
             buf.append(sbp);
             buf.append("' and  service_code_item='");
             buf.append(pointCode);
+            buf.append("' and service_valid_start <= '");
+            buf.append(nStart);
+            buf.append("' and service_valid_end >= '");
+            buf.append(nStart);
             buf.append("'");
             dbm2.connect();
             System.out.println(buf.toString());
@@ -862,11 +959,12 @@ public class QkanTsusyoData {
             dbm2.Close();
             if (dbm2.Rows>0) {
               int p = Integer.parseInt(dbm2.getData(0,0).toString());
+              addUnit += (int)((double) p * mountRate + 0.50 );
               p += addUnit;
               int hiyou =(int)((double) p * unitRate);
               int futan = hiyou - (int)((double)hiyou/100.0*(double)insRate);
               //if (hiyou%10>0) futan +=1;
-              System.out.println("p = "+p+" add = "+addUnit+" hiyou = "+hiyou+" futan = "+futan);
+              System.out.println("p = "+p+" add = "+addUnit+" unitRate = "+unitRate+ " hiyou = "+hiyou+" futan = "+futan);
               pline.addElement(new Integer(hiyou));
               pline.addElement(new Integer(futan));
             }
@@ -958,6 +1056,9 @@ public class QkanTsusyoData {
       fieldName.addElement("口腔");
       fieldName.addElement("アク");
       fieldName.addElement("運動");
+      if (targetYear>2009 || targetYear==2009 && targetMonth>=4) { 
+        fieldName.addElement("サー");
+      }
       if (td==0) {
         fieldName.addElement("回数");
       }
@@ -985,13 +1086,19 @@ public class QkanTsusyoData {
       sorter.setColumnClass(0,Integer.class);
       sorter.setColumnClass(2,Integer.class);
       if (td==0) {
-        sorter.setColumnClass(13,Integer.class);
+        if (targetYear>2009 || targetYear==2009 && targetMonth>=4)
+          sorter.setColumnClass(18,Integer.class);
+        else
+          sorter.setColumnClass(13,Integer.class);
         sorter.setColumnClass(14,Integer.class);
         sorter.setColumnClass(15,Integer.class);
         sorter.setColumnClass(16,Integer.class);
         sorter.setColumnClass(17,Integer.class);
       } else {
-        sorter.setColumnClass(15,Integer.class);
+        if (targetYear>2009 || targetYear==2009 && targetMonth>=4)
+          sorter.setColumnClass(17,Integer.class);
+        else
+          sorter.setColumnClass(15,Integer.class);
         sorter.setColumnClass(16,Integer.class);
       }
       usrTbl.getColumnModel().getColumn(0).setCellRenderer(ren);
@@ -1015,7 +1122,10 @@ public class QkanTsusyoData {
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32);
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32);
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32);
-      usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(40);
+      if (targetYear>2009 || targetYear==2009 && targetMonth>=4) { 
+        usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32);
+      }
+      usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32);
       System.out.println("cid : "+cid);
       if (td==0) {
         usrTbl.getColumnModel().getColumn(cid).setCellRenderer(ren);
@@ -1086,9 +1196,9 @@ public class QkanTsusyoData {
       int cid=0;
       int num=0;
       if (targetDay==0) {
-        num=18;
+        num=(targetYear>2009 || targetYear==2009 && targetMonth>=4)? 19:18;
       } else {
-        num=17;
+        num=(targetYear>2009 || targetYear==2009 && targetMonth>=4)? 18:17;
       }
       float width[] = new float[num];
       int ctype[] = new int[num];
@@ -1112,6 +1222,9 @@ public class QkanTsusyoData {
       width[cid++] = Float.parseFloat("3.5"); //口腔
       width[cid++] = Float.parseFloat("3.5"); //アク
       width[cid++] = Float.parseFloat("3.5"); //運動
+      if (targetYear>2009 || targetYear==2009 && targetMonth>=4) { 
+        width[cid++] = Float.parseFloat("3.5"); //運動
+      }
       if (targetDay==0) {
         ctype[cid] = 2; // 0 - normal 1 - add comma 2 - align right
         width[cid++] = Float.parseFloat("3.5"); //回数
