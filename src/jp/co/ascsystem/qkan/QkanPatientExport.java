@@ -583,12 +583,19 @@ public class QkanPatientExport extends QkanPatientImport {
         gbak = cmd[0]+"\\Firebird\\Firebird_1_5\\bin\\gbak.exe";
         File gf = new File(gbak);
         if (! gf.exists()) {
-          cmd[0] = quot+cmd[0]+"\\Firebird\\Firebird_2_0\\bin\\gbak.exe"+quot;
+          gbak = cmd[0]+"\\Firebird\\Firebird_2_0\\bin\\gbak.exe";
+          gf = new File(gbak);
+          if (! gf.exists()) {
+            gbak = cmd[0]+"\\Firebird\\Firebird_2_1\\bin\\gbak.exe";
+            gf = new File(gbak);
+            if (! gf.exists()) {
+              gbak = cmd[0]+"\\Firebird\\Firebird_2_5\\bin\\gbak.exe";
+              gf = new File(gbak);
+            }
+          }
           is20 = true;
         }
-        else {
-          cmd[0] = quot+gbak+quot;
-        }
+        cmd[0] = quot+gbak+quot;
       //  rmc = "cmd.exe /c del "+quot+dbTmpPath+quot;
       }
      // else rmc = "rm "+dbTmpPath;
