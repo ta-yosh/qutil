@@ -35,7 +35,7 @@ public class QkanDBUtilMain {
 
     final QkanDBUtilMain idm = new QkanDBUtilMain();
     final JFrame fr = new JFrame();
-    fr.setTitle("給管鳥 データユーティリティ Ver1.4");
+    fr.setTitle("給管鳥 データユーティリティ Ver1.5");
     fr.setIconImage(idm.icon);
     final Container contentPane = fr.getContentPane();
     contentPane.setLayout(new BorderLayout());

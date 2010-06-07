@@ -876,6 +876,8 @@ public class QkanTsusyoData {
                    if (dbm2.getData(j,0)!=null) 
                      other += Integer.parseInt(dbm2.getData(j+1,0).toString());
                  }
+                 if (dbm2.getData("OTHER_HIMOKU_NO6",0)!=null) 
+                   other += Integer.parseInt(dbm2.getData("OTHER_PAY_NO6",0).toString());
               }
 
               pline.addElement(new Integer(hiyou));
