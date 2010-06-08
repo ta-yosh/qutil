@@ -811,6 +811,7 @@ public class QkanTsusyoData {
             else cRows=0;
             if (cRows>0) {
               int other=0;
+              int clid = Integer.parseInt(dbm2.getData("CLAIM_ID",0).toString());
               if (!hiwari) pline.addElement(new Integer(dbm2.getData("DETAIL_VALUE",0).toString()));
               else {
                 DngDBAccess dbm3 = new DngDBAccess("firebird",dbUri,dbUser,dbPass);
@@ -866,7 +867,10 @@ public class QkanTsusyoData {
               buf.append(targetMonth);
               buf.append(" and CATEGORY_NO=16 and PROVIDER_ID='");
               buf.append(currentProvider);
-              buf.append("')");
+              buf.append("' and CLAIM_DATE=(select claim_date from claim ");
+              buf.append("where claim_id=");
+              buf.append(clid);
+              buf.append(") )");
               System.out.println(buf.toString());
               dbm2.connect();
               dbm2.execQuery(buf.toString());

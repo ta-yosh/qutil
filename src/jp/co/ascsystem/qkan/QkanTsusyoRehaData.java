@@ -840,6 +840,8 @@ public class QkanTsusyoRehaData {
             else cRows=0;
             if (cRows>0) {
               int other=0;
+              int clid = Integer.parseInt(dbm2.getData("CLAIM_ID",0).toString())
+;
               if (!hiwari) pline.addElement(new Integer(dbm2.getData("DETAIL_VALUE",0).toString()));
               else {
                 DngDBAccess dbm3 = new DngDBAccess("firebird",dbUri,dbUser,dbPass);
@@ -895,7 +897,10 @@ public class QkanTsusyoRehaData {
               buf.append(targetMonth);
               buf.append(" and CATEGORY_NO=16 and PROVIDER_ID='");
               buf.append(currentProvider);
-              buf.append("')");
+              buf.append("' and CLAIM_DATE=(select claim_date from claim ");
+              buf.append("where claim_id=");
+              buf.append(clid);
+              buf.append(") )");
               System.out.println(buf.toString());
               dbm2.connect();
               dbm2.execQuery(buf.toString());
@@ -905,6 +910,8 @@ public class QkanTsusyoRehaData {
                    if (dbm2.getData(j,0)!=null) 
                      other += Integer.parseInt(dbm2.getData(j+1,0).toString());
                  }
+                 if (dbm2.getData("OTHER_HIMOKU_NO6",0)!=null)
+                   other += Integer.parseInt(dbm2.getData("OTHER_PAY_NO6",0).toString());
               }
 
               pline.addElement(new Integer(hiyou));
