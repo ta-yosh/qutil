@@ -36,6 +36,60 @@ public class QkanServiceDetect {
     return false;
   }
 
+  public boolean houkaiDetect() {
+  
+    DngDBAccess dbm = new DngDBAccess("firebird",dbUri,dbUser,dbPass);
+    StringBuffer buf = new StringBuffer();
+    buf.append("select PROVIDER_ID,PROVIDER_NAME from PROVIDER ");
+    buf.append("where PROVIDER_ID in (");
+    buf.append("   select PROVIDER_ID from PROVIDER_SERVICE");
+    buf.append("    where SYSTEM_SERVICE_KIND_DETAIL in (11111,16111)");
+    buf.append(")");
+    String sql = buf.toString();
+    if (dbm.connect()) {
+      dbm.execQuery(sql);
+      dbm.Close();
+      return (dbm.Rows>0) ? true:false;
+    }
+    return false;
+  }
+
+  public boolean houkanDetect() {
+  
+    DngDBAccess dbm = new DngDBAccess("firebird",dbUri,dbUser,dbPass);
+    StringBuffer buf = new StringBuffer();
+    buf.append("select PROVIDER_ID,PROVIDER_NAME from PROVIDER ");
+    buf.append("where PROVIDER_ID in (");
+    buf.append("   select PROVIDER_ID from PROVIDER_SERVICE");
+    buf.append("    where SYSTEM_SERVICE_KIND_DETAIL in (11311,16311)");
+    buf.append(")");
+    String sql = buf.toString();
+    if (dbm.connect()) {
+      dbm.execQuery(sql);
+      dbm.Close();
+      return (dbm.Rows>0) ? true:false;
+    }
+    return false;
+  }
+
+  public boolean hourehaDetect() {
+  
+    DngDBAccess dbm = new DngDBAccess("firebird",dbUri,dbUser,dbPass);
+    StringBuffer buf = new StringBuffer();
+    buf.append("select PROVIDER_ID,PROVIDER_NAME from PROVIDER ");
+    buf.append("where PROVIDER_ID in (");
+    buf.append("   select PROVIDER_ID from PROVIDER_SERVICE");
+    buf.append("    where SYSTEM_SERVICE_KIND_DETAIL in (11411,16411)");
+    buf.append(")");
+    String sql = buf.toString();
+    if (dbm.connect()) {
+      dbm.execQuery(sql);
+      dbm.Close();
+      return (dbm.Rows>0) ? true:false;
+    }
+    return false;
+  }
+
   public boolean kyotakuDetect() {
   
     DngDBAccess dbm = new DngDBAccess("firebird",dbUri,dbUser,dbPass);

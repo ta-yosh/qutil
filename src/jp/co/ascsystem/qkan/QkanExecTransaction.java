@@ -34,6 +34,9 @@ public class QkanExecTransaction extends Thread {
     QkanPatientSelect iTable;
     QkanPatientSelect oTable;
     QkanTsusyoData tTable;
+    QkanHouKaiData hTable;
+    QkanHouKanData nTable;
+    QkanHouRehaData vTable;
     QkanTsusyoRehaData rTable;
     QkanKyotakuData kTable;
     QkanProviderData pTable;
@@ -59,6 +62,22 @@ public class QkanExecTransaction extends Thread {
       this.oTable=oTable;
     }
     
+    public void setTable(QkanHouKaiData hTable) {
+      this.iTable=null;
+      this.oTable=null;
+      this.hTable=hTable;
+    }
+    
+    public void setTable(QkanHouKanData nTable) {
+      this.iTable=null;
+      this.oTable=null;
+      this.nTable=nTable;
+    }
+    public void setTable(QkanHouRehaData vTable) {
+      this.iTable=null;
+      this.oTable=null;
+      this.vTable=vTable;
+    }
     public void setTable(QkanTsusyoData tTable) {
       this.iTable=null;
       this.oTable=null;
@@ -121,7 +140,7 @@ public class QkanExecTransaction extends Thread {
           interrupt();
           return;
         }
-        if (tTable!=null || kTable!=null || rTable!=null || pTable!=null) {
+        if (tTable!=null || kTable!=null || hTable!=null || nTable!=null || vTable!=null  || rTable!=null || pTable!=null) {
           StringBuffer sb = new StringBuffer(); 
           if (tTable!=null) {
             sb.append("\"\",\"");
@@ -135,6 +154,51 @@ public class QkanExecTransaction extends Thread {
               sb.append("月間");
             else {
                  sb.append(tTable.targetDay);
+                 sb.append("日");
+            }
+          }
+          else if (hTable!=null) {
+            sb.append("\"\",\"");
+            sb.append(hTable.curProviderName);
+            sb.append("\",\"\",\"\",\"訪問介護情報\",\"");
+            sb.append(hTable.targetYear);
+            sb.append("年\",\"");
+            sb.append(hTable.targetMonth);
+            sb.append("月\",\"");
+            if (hTable.targetDay==0)  
+              sb.append("月間");
+            else {
+                 sb.append(hTable.targetDay);
+                 sb.append("日");
+            }
+          }
+          else if (nTable!=null) {
+            sb.append("\"\",\"");
+            sb.append(nTable.curProviderName);
+            sb.append("\",\"\",\"\",\"訪問看護情報\",\"");
+            sb.append(nTable.targetYear);
+            sb.append("年\",\"");
+            sb.append(nTable.targetMonth);
+            sb.append("月\",\"");
+            if (nTable.targetDay==0)  
+              sb.append("月間");
+            else {
+                 sb.append(nTable.targetDay);
+                 sb.append("日");
+            }
+          }
+          else if (vTable!=null) {
+            sb.append("\"\",\"");
+            sb.append(vTable.curProviderName);
+            sb.append("\",\"\",\"\",\"訪問リハ情報\",\"");
+            sb.append(vTable.targetYear);
+            sb.append("年\",\"");
+            sb.append(vTable.targetMonth);
+            sb.append("月\",\"");
+            if (vTable.targetDay==0)  
+              sb.append("月間");
+            else {
+                 sb.append(vTable.targetDay);
                  sb.append("日");
             }
           }
@@ -174,6 +238,9 @@ public class QkanExecTransaction extends Thread {
           }
           sb.append("\"\r\n");
           String rec = (tTable!=null) ? tTable.getTsusyoDataCsv(-1):
+                       (hTable!=null) ?  hTable.getHouKaiDataCsv(-1):
+                       (nTable!=null) ?  nTable.getHouKanDataCsv(-1):
+                       (vTable!=null) ?  vTable.getHouRehaDataCsv(-1):
                        (kTable!=null) ?  kTable.getKyotakuDataCsv(-1):
                        (pTable!=null) ?  pTable.getProviderDataCsv(-1):
                                          rTable.getTsusyoRehaCsv(-1);
@@ -211,9 +278,12 @@ public class QkanExecTransaction extends Thread {
             bsql = (pfile!=null) ? iTable.getPatientBasicDataSql(pNos[i][0]) :
                   ((iTable!=null) ? iTable.getPatientBasicDataCsv(pNos[i][0]):
                   ((tTable!=null) ? tTable.getTsusyoDataCsv(pNos[i][0]):
+                  ((hTable!=null) ? hTable.getHouKaiDataCsv(pNos[i][0]):
+                  ((nTable!=null) ? nTable.getHouKanDataCsv(pNos[i][0]):
+                  ((vTable!=null) ? vTable.getHouRehaDataCsv(pNos[i][0]):
                   ((kTable!=null) ? kTable.getKyotakuDataCsv(pNos[i][0]):
                   ((pTable!=null) ? pTable.getProviderDataCsv(pNos[i][0]):
-                                    rTable.getTsusyoRehaCsv(pNos[i][0])))));
+                                    rTable.getTsusyoRehaCsv(pNos[i][0]))))))));
             if (bsql.equals("CON0")) {
               System.out.println("DB server has been busy. I try to connect again 20sec. after.... please wait.");
               try {sleep(20000);} catch(Exception ie){};

@@ -18,12 +18,14 @@
     <copy todir="${ClassDir}">
       <fileset dir="${SrcDir}">
         <include name="jp/co/ascsystem/qkan/icon/*" />
+        <include name="resources/*" />
       </fileset>
     </copy>
     <delete file="${JarName}" /> 
     <jar jarfile="${JarName}" basedir="${ClassDir}"> 
       <include name="jp/co/ascsystem/**/*" /> 
       <include name="jp/co/ascsystem/qkan/icon/*" /> 
+      <include name="resources/qkan.ico" /> 
       <manifest> 
         <attribute name="Main-Class" value="jp.co.ascsystem.qkan.QkanDBUtilMain" /> 
         <attribute name="Class-Path" value=". lib/firebirdsql-full.jar lib/iText.jar lib/iTextAsian.jar" /> 

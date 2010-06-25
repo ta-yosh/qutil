@@ -152,7 +152,7 @@ public class DngDBAccess {
         stmt.close();
       } catch (Exception e) {
         this.Rows = 0;
-        System.err.println("データベースクエリエラー");
+        System.err.println("クエリエラー["+sqlStmt+"]\r\n"+e.toString());
     }
     return;
   }

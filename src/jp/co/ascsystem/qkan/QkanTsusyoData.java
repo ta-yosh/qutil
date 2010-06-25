@@ -636,6 +636,7 @@ public class QkanTsusyoData {
             tVal.put("1150115","無し");
             tVal.put("1150116","無し");
             tVal.put("1150117","無し");
+            tVal.put("12","無し");
             int kaisei = 0;
             for (int j=0;j<dbm2.Rows;j++){
               System.out.println("Rows start: "+j);
@@ -698,8 +699,10 @@ public class QkanTsusyoData {
             pline.addElement((String)tVal.get("1150112"));
             pline.addElement("");
             pline.addElement("");
+            pline.addElement("");
             if (kaisei!=0) { 
               pline.addElement((String)tVal.get("1150117"));
+              pline.addElement((String)tVal.get("12"));
             }
             System.out.println("inic : "+inic+"+"+rPlus+"+"+kPlus+"+"+tPlus);
             pointCode = inic+rPlus+tPlus+kPlus;
@@ -714,11 +717,14 @@ public class QkanTsusyoData {
             yoVal.put("1650104","無し");
             yoVal.put("1650105","無し");
             yoVal.put("1650106","無し");
+            yoVal.put("1650107","無し");
             yoVal.put("1650108","無し");
             yoVal.put("1650109","無し");
+            yoVal.put("12","無し");
             int kaisei=0;
             for (int j=0;j<dbm2.Rows;j++) {
               int sbp0 = Integer.parseInt(dbm2.getData("SYSTEM_BIND_PATH",j).toString());
+              System.out.println("num"+sbp0+"num");
               if (sbp0==14) {
                 kaisei=Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
                 System.out.println("kaisei: "+kaisei);
@@ -751,10 +757,13 @@ public class QkanTsusyoData {
             pline.addElement((String)yoVal.get("1650106"));
             pline.addElement((String)yoVal.get("1650103"));
             pline.addElement((String)yoVal.get("1650104"));
+            pline.addElement((String)yoVal.get("1650107"));
             if (kaisei!=0) { 
               pline.addElement((String)yoVal.get("1650109"));
+              pline.addElement((String)yoVal.get("12"));
             }
             pointCode = inic;
+            System.out.println("pointCode : "+pointCode);
           }
 
           if (targetDay==0) {
@@ -798,8 +807,11 @@ public class QkanTsusyoData {
               buf.append("') and SYSTEM_BIND_PATH=701007 ");
               if (sbp==11511) buf.append("and DETAIL_VALUE='15')");
               else buf.append("and DETAIL_VALUE='65')");
-              buf.append(" and SYSTEM_BIND_PATH");
-              buf.append(" in (701008,701014,701015,701016,701017)");
+              //buf.append(" and SYSTEM_BIND_PATH");
+              //buf.append(" in (701008,701014,701015,701016,701017)");
+              buf.append(" and (SYSTEM_BIND_PATH=701008 or ");
+              buf.append("SYSTEM_BIND_PATH>=701014 and ");
+              buf.append("SYSTEM_BIND_PATH<=701026)");
               buf.append(" order by SYSTEM_BIND_PATH;");
               sql = buf.toString();
               System.out.println(sql);
@@ -850,12 +862,28 @@ public class QkanTsusyoData {
                   System.out.println(buf.toString());
                   dbm3.execQuery(buf.toString());
                   dbm3.Close();
-                  if (dbm3.getData(0,0)!=null);
+                  if (dbm3.getData(0,0)!=null)
                     pline.addElement(new Integer(dbm3.getData(0,0).toString()));
                 }
               }
               int hiyou = (int)(Float.parseFloat(dbm2.getData("DETAIL_VALUE",1).toString())*Float.parseFloat(dbm2.getData("DETAIL_VALUE",2).toString()));
               int futan = Integer.parseInt(dbm2.getData("DETAIL_VALUE",4).toString());
+              int kouhiunit,kouhi,jikouhi;
+              if (cRows>5) {
+                kouhiunit = Integer.parseInt(dbm2.getData("DETAIL_VALUE",5).toString())
+                       +Integer.parseInt(dbm2.getData("DETAIL_VALUE",8).toString())
+                       +Integer.parseInt(dbm2.getData("DETAIL_VALUE",11).toString());
+                kouhi = Integer.parseInt(dbm2.getData("DETAIL_VALUE",6).toString())
+                       +Integer.parseInt(dbm2.getData("DETAIL_VALUE",9).toString())
+                       +Integer.parseInt(dbm2.getData("DETAIL_VALUE",12).toString());
+                jikouhi = Integer.parseInt(dbm2.getData("DETAIL_VALUE",7).toString())
+                       +Integer.parseInt(dbm2.getData("DETAIL_VALUE",10).toString())
+                       +Integer.parseInt(dbm2.getData("DETAIL_VALUE",13).toString());
+              } else {
+                kouhiunit = -1;
+                kouhi = 0;
+                jikouhi = 0;
+              }
             
               buf.delete(0,buf.length());
               buf.append("select * from CLAIM_PATIENT_DETAIL where CLAIM_ID=");
@@ -884,10 +912,16 @@ public class QkanTsusyoData {
                    other += Integer.parseInt(dbm2.getData("OTHER_PAY_NO6",0).toString());
               }
 
+              if (kouhiunit>0) futan = futan+ jikouhi;
               pline.addElement(new Integer(hiyou));
               pline.addElement(new Integer(futan));
               pline.addElement(new Integer(other));
               pline.addElement(new Integer(other+futan));
+              //if (kouhiunit>0) {
+                pline.addElement(new Integer(kouhi));
+              //} else {
+              //  pline.addElement(new String(" -  "));
+              //}
             }
             else { 
               DngDBAccess dbm3 = new DngDBAccess("firebird",dbUri,dbUser,dbPass);
@@ -985,9 +1019,12 @@ public class QkanTsusyoData {
           JLabel lab1 = new JLabel("＊日単位での金額について：負担金額は端数処理の関係で月間金額とは異なる場合があります。 ");
           lab1.setFont(new Font("Dialog",Font.PLAIN,11));
           JLabel lab2 = new JLabel("　　　　　　　　　　　　　予防サービスの場合は月間の金額を表示、日割の場合は基本単位数のみの金額を表示しています。");
+          JLabel lab3 = new JLabel("　　　　　　　　　　　　　公費負担分は考慮しておりません。");
           lab2.setFont(new Font("Dialog",Font.PLAIN,11));
+          lab3.setFont(new Font("Dialog",Font.PLAIN,11));
           pnl.add(lab1,BorderLayout.NORTH);
           pnl.add(lab2,BorderLayout.CENTER);
+          pnl.add(lab3,BorderLayout.SOUTH);
         } else {
           JLabel lab1 = new JLabel("＊月間での金額について：実績確定分のみ表示されます。 ");
           lab1.setFont(new Font("Dialog",Font.PLAIN,11));
@@ -1062,8 +1099,10 @@ public class QkanTsusyoData {
       fieldName.addElement("口腔");
       fieldName.addElement("アク");
       fieldName.addElement("運動");
+      fieldName.addElement("評価");
       if (targetYear>2009 || targetYear==2009 && targetMonth>=4) { 
         fieldName.addElement("サー");
+        fieldName.addElement("中山間");
       }
       if (td==0) {
         fieldName.addElement("回数");
@@ -1071,8 +1110,9 @@ public class QkanTsusyoData {
       fieldName.addElement("費用");
       fieldName.addElement("負担額");
       if (td==0) {
-        fieldName.addElement("その他負担額");
+        fieldName.addElement("その他負担");
         fieldName.addElement("負担額合計");
+        fieldName.addElement("公費負担額");
       }
       dtm = new DefaultTableModel(data, fieldName);
       sorter = new TableSorter2(dtm);
@@ -1092,20 +1132,25 @@ public class QkanTsusyoData {
       sorter.setColumnClass(0,Integer.class);
       sorter.setColumnClass(2,Integer.class);
       if (td==0) {
-        if (targetYear>2009 || targetYear==2009 && targetMonth>=4)
-          sorter.setColumnClass(18,Integer.class);
-        else
-          sorter.setColumnClass(13,Integer.class);
-        sorter.setColumnClass(14,Integer.class);
-        sorter.setColumnClass(15,Integer.class);
+        if (targetYear>2009 || targetYear==2009 && targetMonth>=4) {
+          sorter.setColumnClass(20,Integer.class);
+          sorter.setColumnClass(21,Integer.class);
+        } else {
+          sorter.setColumnClass(14,Integer.class);
+          sorter.setColumnClass(15,Integer.class);
+        }
         sorter.setColumnClass(16,Integer.class);
         sorter.setColumnClass(17,Integer.class);
+        sorter.setColumnClass(18,Integer.class);
+        sorter.setColumnClass(19,Integer.class);
       } else {
-        if (targetYear>2009 || targetYear==2009 && targetMonth>=4)
+        if (targetYear>2009 || targetYear==2009 && targetMonth>=4) {
+          sorter.setColumnClass(18,Integer.class);
+          sorter.setColumnClass(19,Integer.class);
+        } else {
+          sorter.setColumnClass(16,Integer.class);
           sorter.setColumnClass(17,Integer.class);
-        else
-          sorter.setColumnClass(15,Integer.class);
-        sorter.setColumnClass(16,Integer.class);
+        }
       }
       usrTbl.getColumnModel().getColumn(0).setCellRenderer(ren);
       usrTbl.getColumnModel().getColumn(2).setCellRenderer(ren);
@@ -1128,10 +1173,12 @@ public class QkanTsusyoData {
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32);
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32);
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32);
+      usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32);
+      usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32);
       if (targetYear>2009 || targetYear==2009 && targetMonth>=4) { 
         usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32);
+        usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(40);
       }
-      usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32);
       System.out.println("cid : "+cid);
       if (td==0) {
         usrTbl.getColumnModel().getColumn(cid).setCellRenderer(ren);
@@ -1147,6 +1194,8 @@ public class QkanTsusyoData {
         usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(80);
         usrTbl.getColumnModel().getColumn(cid).setCellRenderer(ren);
         usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(63);
+        usrTbl.getColumnModel().getColumn(cid).setCellRenderer(ren);
+        usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(60);
       }
       //usrTbl.getTableHeader().setReorderingAllowed(false);
       JScrollPane scrPane = new JScrollPane();
@@ -1202,9 +1251,9 @@ public class QkanTsusyoData {
       int cid=0;
       int num=0;
       if (targetDay==0) {
-        num=(targetYear>2009 || targetYear==2009 && targetMonth>=4)? 19:18;
+        num=(targetYear>2009 || targetYear==2009 && targetMonth>=4)? 22:20;
       } else {
-        num=(targetYear>2009 || targetYear==2009 && targetMonth>=4)? 18:17;
+        num=(targetYear>2009 || targetYear==2009 && targetMonth>=4)? 20:18;
       }
       float width[] = new float[num];
       int ctype[] = new int[num];
@@ -1228,8 +1277,10 @@ public class QkanTsusyoData {
       width[cid++] = Float.parseFloat("3.5"); //口腔
       width[cid++] = Float.parseFloat("3.5"); //アク
       width[cid++] = Float.parseFloat("3.5"); //運動
+      width[cid++] = Float.parseFloat("3.5"); //評価
       if (targetYear>2009 || targetYear==2009 && targetMonth>=4) { 
-        width[cid++] = Float.parseFloat("3.5"); //運動
+        width[cid++] = Float.parseFloat("3.5"); //サー
+        width[cid++] = Float.parseFloat("4.0"); //中山間
       }
       if (targetDay==0) {
         ctype[cid] = 2; // 0 - normal 1 - add comma 2 - align right
@@ -1244,6 +1295,8 @@ public class QkanTsusyoData {
         width[cid++] = 7; //その他負担額
         ctype[cid] = 1; // 0 - normal 1 - add comma 2 - align right
         width[cid++] = Float.parseFloat("7.5"); //負担額合計
+        ctype[cid] = 1; // 0 - normal 1 - add comma 2 - align right
+        width[cid++] = Float.parseFloat("7"); //公費負担額
       }
       //Calendar cal = Calendar.getInstance();
       //String date=cal.get(Calendar.YEAR)+""+(cal.get(Calendar.MONTH) + 1)
