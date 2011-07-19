@@ -2,4 +2,4 @@
 export LC_CTYPE=ja_JP.SJIS
 #java -jar QDBUtil.jar
 #/usr/local/jdk1.4.2/bin/java -jar QDBUtil.jar >log.log 2>&1
-java -Dfile.encoding=sjis -jar QDBUtil.jar >log.log 2>&1
+java -Dfile.encoding=sjis -jar QDBUtil$1.jar >log.log 2>&1

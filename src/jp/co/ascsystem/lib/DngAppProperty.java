@@ -1,6 +1,7 @@
 package jp.co.ascsystem.lib;
 
 import java.io.*;
+import java.util.regex.*;
 import jp.co.ascsystem.util.DngXMLParse;
 
 public class DngAppProperty {
@@ -13,6 +14,8 @@ public class DngAppProperty {
     String[] keys = key.split("/");
     String val = xml.getValue(keys);
     //if (val=="" || val.matches(".*?<.*>.*")) val=null;
+    val = Pattern.compile("_KAKKOL_").matcher(val).replaceAll("\\(");
+    val = Pattern.compile("_KAKKOR_").matcher(val).replaceAll("\\)");
     return val;
   }
 }

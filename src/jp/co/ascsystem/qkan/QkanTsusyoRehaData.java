@@ -459,11 +459,15 @@ public class QkanTsusyoRehaData {
         StringBuffer buf = new StringBuffer();
 
         buf.append("select PATIENT_FIRST_NAME,PATIENT_FAMILY_NAME,");
-        buf.append("SERVICE.PATIENT_ID,max(SERVICE_ID) as SID,");
+        buf.append("SERVICE.PATIENT_ID,SERVICE_ID as SID,");
         buf.append("SYSTEM_SERVICE_KIND_DETAIL,max(JOTAI_CODE) as JOTAI_CODE,PATIENT_BIRTHDAY,");
         buf.append("count(SERVICE.SERVICE_ID),INSURE_RATE,");
         buf.append("min(INSURE_VALID_START) as INSURE_VALID_START,");
         buf.append("max(INSURE_VALID_END) as INSURE_VALID_END");
+        buf.append(",min(extract(DAY from SERVICE_DATE)) as FIRST_DAY");
+        buf.append(",SERVICE_USE_TYPE");
+        buf.append(",substring(SERVICE.LAST_TIME from 1 for 16) as LAST");
+        buf.append(",SERVICE_DATE");
         buf.append(" from SERVICE ");
         buf.append(" inner join PATIENT on ");
         buf.append("(PATIENT.PATIENT_ID=SERVICE.PATIENT_ID and DELETE_FLAG=0)");
@@ -504,7 +508,9 @@ public class QkanTsusyoRehaData {
         buf.append("' group by SERVICE.PATIENT_ID,PATIENT_FIRST_NAME,");
         buf.append("PATIENT_FAMILY_NAME,PATIENT_BIRTHDAY,");
         buf.append("INSURE_RATE,SYSTEM_SERVICE_KIND_DETAIL");
-        buf.append(" order by SYSTEM_SERVICE_KIND_DETAIL");
+        buf.append(",SERVICE.SERVICE_ID,LAST,SERVICE_USE_TYPE,SERVICE_DATE");
+        buf.append(" order by SYSTEM_SERVICE_KIND_DETAIL,SERVICE.PATIENT_ID");
+        buf.append(",LAST desc,SERVICE_DATE asc");
 
         String sql = buf.toString();
         System.out.println(sql);
@@ -512,7 +518,42 @@ public class QkanTsusyoRehaData {
         dbm.Close();
         Vector pdata = new Vector();
         DngDBAccess dbm2 = new DngDBAccess("firebird",dbUri,dbUser,dbPass);
+        int pNo=-1;
+        int uTp=-1;
+        int ln = 0;
+        String sids = "";
+        boolean monfin = false;
         for (int i=0;i<dbm.Rows;i++){
+          int lastP = pNo;
+          pNo = Integer.parseInt(dbm.getData(2,i).toString());
+          if (pNo!=lastP) {
+            uTp = Integer.parseInt(dbm.getData("SERVICE_USE_TYPE",i).toString());
+            if (targetDay==0) {
+              if (!monfin && lastP != -1) {
+                pNo = lastP;
+                i--;
+                System.out.println("tbl Create start");
+              } else {
+                sids = dbm.getData("SID",i).toString();
+                monfin=false;
+                if (i<dbm.Rows-1) continue;
+              }
+            }
+          }
+          else {
+            if (uTp!=Integer.parseInt(dbm.getData("SERVICE_USE_TYPE",i).toString())) {
+              if (targetDay>0) continue;
+              else if (monfin) continue;
+              else i--;
+              System.out.println("tbl create start");
+            } else {
+              if (targetDay==0) {
+                sids += ","+dbm.getData("SID",i).toString();
+                if (i<dbm.Rows-1) continue;
+              }
+            }
+          }
+          monfin = true;
           int pointCode=0;
           double mountRate=0;
           int sCount = Integer.parseInt(dbm.getData("COUNT",i).toString());
@@ -521,7 +562,6 @@ public class QkanTsusyoRehaData {
           String insEnd = dbm.getData("INSURE_VALID_END",i).toString();
 
           Vector pline = new Vector();
-          int pNo = new Integer(dbm.getData(2,i).toString()).intValue();
           //pline.addElement(dbm.getData(2,i).toString());
           int sNo = new Integer(dbm.getData(3,i).toString()).intValue();
           //pline.addElement(dbm.getData(3,i).toString());
@@ -614,207 +654,217 @@ public class QkanTsusyoRehaData {
             }
             pline.addElement(ti);
           }
-          int rPlus = Integer.parseInt((String)ratePlus.get(cR));
-          buf.delete(0,buf.length());
-          buf.append("select SERVICE_ID,SYSTEM_BIND_PATH,");
-          buf.append("DETAIL_VALUE");
-          buf.append(" from SERVICE_DETAIL_INTEGER_");
-          buf.append(detYear);
-          buf.append(" where SERVICE_ID=");
-          buf.append(sNo);
-          buf.append(" and SYSTEM_BIND_PATH");
-          buf.append(" in (12,14,1160103,1160104,1160105,1160107,1160109,1160110,1160111,1160112,1160113,1160114,1160115,1160116,1160117,1160118,1160119,1160120,1160121,1160122,1660101,1660102,1660103,1660104,1660105,1660106,1660107,1660108)");
-          buf.append(" order by SYSTEM_BIND_PATH;");
-          sql = buf.toString();
-          System.out.println(sql);
-          dbm2.connect();
-          dbm2.execQuery(sql);
-          dbm2.Close();
+	  int rPlus = Integer.parseInt((String)ratePlus.get(cR));
+	  buf.delete(0,buf.length());
+	  buf.append("select SYSTEM_BIND_PATH,");
+	  if (targetDay==0)
+	    buf.append("max(DETAIL_VALUE) as DETAIL_VALUE");
+	  else
+	    buf.append("DETAIL_VALUE");
+	  buf.append(" from SERVICE_DETAIL_INTEGER_");
+	  buf.append(detYear);
+	  buf.append(" where SERVICE_ID");
+	  if (targetDay==0)
+	    buf.append(" in ("+sids+")");
+	  else
+	    buf.append("="+sNo);
+	  buf.append(" and SYSTEM_BIND_PATH");
+	  buf.append(" in (12,14,1160103,1160104,1160105,1160107,1160109,1160110,1160111,1160112,1160113,1160114,1160115,1160116,1160117,1160118,1160119,1160120,1160121,1160122,1660101,1660102,1660103,1660104,1660105,1660106,1660107,1660108)");
+	  if (targetDay==0)
+	    buf.append(" group by SYSTEM_BIND_PATH ");
+	  buf.append(" order by SYSTEM_BIND_PATH;");
+	  sql = buf.toString();
+	  System.out.println(sql);
+	  dbm2.connect();
+	  dbm2.execQuery(sql);
+	  dbm2.Close();
 
-          System.out.println("dbm2:"+dbm2.Rows);
-          int inic=0;
-          int hId=0;
-          int kiboId=0;
-          int timeId=0;
-          int kangoId=0;
-          int kPlus=0;
-          int tPlus=0;
-          int addUnit=0;
-          double unitRate;
-          boolean hiwari = false;
-          if (sbp==11611) {
-            unitRate = tunitRate;
-            Hashtable tVal = new Hashtable();
-            tVal.put("1160105","無し");
-            tVal.put("1160107","無し");
-            tVal.put("1160111","無し");
-            tVal.put("1160112","無し");
-            tVal.put("1160113","無し");
-            tVal.put("1160114","無し");
-            tVal.put("1160115","無し");
-            tVal.put("1160117","無し");
-            tVal.put("1160118","無し");
-            tVal.put("1160119","無し");
-            tVal.put("1160120","無し");
-            tVal.put("1160121","無し");
-            tVal.put("1160122","無し");
-            tVal.put("12","無し");
-            int kaisei = 0;
-            for (int j=0;j<dbm2.Rows;j++){
-              System.out.println("Rows start: "+j);
-              int sbp0 = Integer.parseInt(dbm2.getData("SYSTEM_BIND_PATH",j).toString());
-              if (sbp0==14) {
-                kaisei=Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString(
+	  System.out.println("dbm2:"+dbm2.Rows);
+	  int inic=0;
+	  int hId=0;
+	  int kiboId=0;
+	  int timeId=0;
+	  int kangoId=0;
+	  int kPlus=0;
+	  int tPlus=0;
+	  int addUnit=0;
+	  double unitRate;
+	  boolean hiwari = false;
+	  if (sbp==11611) {
+	    unitRate = tunitRate;
+	    Hashtable tVal = new Hashtable();
+	    tVal.put("1160105","無し");
+	    tVal.put("1160107","無し");
+	    tVal.put("1160111","無し");
+	    tVal.put("1160112","無し");
+	    tVal.put("1160113","無し");
+	    tVal.put("1160114","無し");
+	    tVal.put("1160115","無し");
+	    tVal.put("1160117","無し");
+	    tVal.put("1160118","無し");
+	    tVal.put("1160119","無し");
+	    tVal.put("1160120","無し");
+	    tVal.put("1160121","無し");
+	    tVal.put("1160122","無し");
+	    tVal.put("12","無し");
+	    int kaisei = 0;
+	    for (int j=0;j<dbm2.Rows;j++){
+	      System.out.println("Rows start: "+j);
+	      int sbp0 = Integer.parseInt(dbm2.getData("SYSTEM_BIND_PATH",j).toString());
+	      if (sbp0==14) {
+		kaisei=Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString(
 ));
-                System.out.println("kaisei: "+kaisei);
-              }
-              else if (sbp0==1160103 || sbp0==1160116) {
-                kiboId = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
-                System.out.println("kiboId : "+kiboId+"("+sbp0+")");
-                if (kaisei==20090401) {
-                  kPlus = kiboPlus[hId][kiboId];
-                  tPlus = (timeId==1) ? timeMinus[hId][kiboId] : timePlus[hId][timeId];
-                }
-              } 
-              else if (sbp0==1160109) {
-                hId = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
-                inic= initCode[hId];
-                if (kaisei==0) {
-                  kPlus = kiboPlus[hId][kiboId];
-                  tPlus = timePlus[hId][timeId];
-                }
-              } 
-              else if (sbp0==1160110) {
-                if (kaisei==0 && dbm2.getData("DETAIL_VALUE",j).toString().equals("2")) kPlus = kPlus+100;
-              }
-              else if (sbp0==1160117) {
-                kangoId = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
-              }
-              else {
-                System.out.println("num"+sbp0+"num");
-                String[] val;
-                int[] add;
-                int key;
-                if (sbp0==1160104) {
-                  timeId = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
-                  val = (String[])tValue.get("1160104"); 
-                  key = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
-                  pline.addElement(val[key]);
-                }
-                else {
-                  val = (String[])tValue.get(dbm2.getData("SYSTEM_BIND_PATH",j).toString());
-                  add = (int[]) taUnit.get(dbm2.getData("SYSTEM_BIND_PATH",j).toString());
-                  key = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
-                  System.out.println("sbp = "+sbp0+" key = "+key+" add= "+add[key]);
-                  if (sbp0==12) mountRate = (double)add[key]/100.0;
-                  else addUnit += add[key];
-                }
-                tVal.put(dbm2.getData("SYSTEM_BIND_PATH",j).toString(),val[key]);
-              }
-            }
-            pline.addElement((String)tVal.get("1160105"));
-            pline.addElement((String)tVal.get("1160111"));
-            pline.addElement((String)tVal.get("1160112"));
-            pline.addElement((String)tVal.get("1160107"));
-            pline.addElement((String)tVal.get((kaisei==0)?"1160113":"1160121"));
-            pline.addElement((String)tVal.get("1160114"));
-            pline.addElement((String)tVal.get("1160115"));
-            if (targetYear>2009 || targetYear==2009 && targetMonth>=4) {
-              pline.addElement((String)tVal.get("1160118"));
-              pline.addElement((String)tVal.get("1160119"));
-              pline.addElement((String)tVal.get("1160120"));
-            }
-            pline.addElement("");
-            pline.addElement("");
-            if (targetYear>2009 || targetYear==2009 && targetMonth>=4) {
-              pline.addElement((String)tVal.get("1160122"));
-              pline.addElement((String)tVal.get("12"));
-            }
-            if (kaisei==20090401 && timeId==1)
-               rPlus = (rPlus-1)*2+1+ ((kangoId==2)? 1:0);
-            System.out.println("inic : "+inic+"+"+rPlus+"+"+kPlus+"+"+tPlus);
-            pointCode = inic+rPlus+tPlus+kPlus;
-            System.out.println("pointCode : "+pointCode);
-          }
-          else {
-            int jl=(targetYear>2009 || targetYear==2009 && targetMonth>=4)? 5:6;
-            unitRate = yunitRate;
-            for (int j=0;j<jl;j++) pline.addElement("");
-            Hashtable yoVal = new Hashtable();
-            yoVal.put("1660103","無し");
-            yoVal.put("1660104","無し");
-            yoVal.put("1660105","無し");
-            yoVal.put("1660106","無し");
-            yoVal.put("1660107","無し");
-            yoVal.put("1660108","無し");
-            yoVal.put("12","無し");
-            int kaisei = 0;
-            for (int j=0;j<dbm2.Rows;j++) {
-              int sbp0 = Integer.parseInt(dbm2.getData("SYSTEM_BIND_PATH",j).toString());
-              if (sbp0==14) {
-                kaisei=Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
-                System.out.println("kaisei: "+kaisei);
-              }
-              else if (sbp0==1660101) {
-                hId = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
-                inic= yinitCode[hId];
-                if (cR.equals("13")) inic +=10;
-              } 
-              else if (sbp0==1660102) {
-                if(Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString())==2) {
-                   inic = inic+1;
-                   hiwari = true;
-                }
-              } 
-              else {
+		System.out.println("kaisei: "+kaisei);
+	      }
+	      else if (sbp0==1160103 || sbp0==1160116) {
+		kiboId = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
+		System.out.println("kiboId : "+kiboId+"("+sbp0+")");
+		if (kaisei==20090401) {
+		  kPlus = kiboPlus[hId][kiboId];
+		  tPlus = (timeId==1) ? timeMinus[hId][kiboId] : timePlus[hId][timeId];
+		}
+	      } 
+	      else if (sbp0==1160109) {
+		hId = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
+		inic= initCode[hId];
+		if (kaisei==0) {
+		  kPlus = kiboPlus[hId][kiboId];
+		  tPlus = timePlus[hId][timeId];
+		}
+	      } 
+	      else if (sbp0==1160110) {
+		if (kaisei==0 && dbm2.getData("DETAIL_VALUE",j).toString().equals("2")) kPlus = kPlus+100;
+	      }
+	      else if (sbp0==1160117) {
+		kangoId = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
+	      }
+	      else {
+		System.out.println("num"+sbp0+"num");
+		String[] val;
+		int[] add;
+		int key;
+		if (sbp0==1160104) {
+		  timeId = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
+		  val = (String[])tValue.get("1160104"); 
+		  key = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
+		  pline.addElement(val[key]);
+		}
+		else {
+		  val = (String[])tValue.get(dbm2.getData("SYSTEM_BIND_PATH",j).toString());
+		  add = (int[]) taUnit.get(dbm2.getData("SYSTEM_BIND_PATH",j).toString());
+		  key = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
+		  System.out.println("sbp = "+sbp0+" key = "+key+" add= "+add[key]);
+		  if (sbp0==12) mountRate = (double)add[key]/100.0;
+		  else addUnit += add[key];
+		}
+		tVal.put(dbm2.getData("SYSTEM_BIND_PATH",j).toString(),val[key]);
+	      }
+	    }
+	    pline.addElement((String)tVal.get("1160105"));
+	    pline.addElement((String)tVal.get("1160111"));
+	    pline.addElement((String)tVal.get("1160112"));
+	    pline.addElement((String)tVal.get("1160107"));
+	    pline.addElement((String)tVal.get((kaisei==0)?"1160113":"1160121"));
+	    pline.addElement((String)tVal.get("1160114"));
+	    pline.addElement((String)tVal.get("1160115"));
+	    if (targetYear>2009 || targetYear==2009 && targetMonth>=4) {
+	      pline.addElement((String)tVal.get("1160118"));
+	      pline.addElement((String)tVal.get("1160119"));
+	      pline.addElement((String)tVal.get("1160120"));
+	    }
+	    pline.addElement("");
+	    pline.addElement("");
+	    if (targetYear>2009 || targetYear==2009 && targetMonth>=4) {
+	      pline.addElement((String)tVal.get("1160122"));
+	      pline.addElement((String)tVal.get("12"));
+	    }
+	    if (kaisei==20090401 && timeId==1)
+	       rPlus = (rPlus-1)*2+1+ ((kangoId==2)? 1:0);
+	    System.out.println("inic : "+inic+"+"+rPlus+"+"+kPlus+"+"+tPlus);
+	    pointCode = inic+rPlus+tPlus+kPlus;
+	    System.out.println("pointCode : "+pointCode);
+	  }
+	  else {
+	    int jl=(targetYear>2009 || targetYear==2009 && targetMonth>=4)? 5:6;
+	    unitRate = yunitRate;
+	    for (int j=0;j<jl;j++) pline.addElement("");
+	    Hashtable yoVal = new Hashtable();
+	    yoVal.put("1660103","無し");
+	    yoVal.put("1660104","無し");
+	    yoVal.put("1660105","無し");
+	    yoVal.put("1660106","無し");
+	    yoVal.put("1660107","無し");
+	    yoVal.put("1660108","無し");
+	    yoVal.put("12","無し");
+	    int kaisei = 0;
+	    for (int j=0;j<dbm2.Rows;j++) {
+	      int sbp0 = Integer.parseInt(dbm2.getData("SYSTEM_BIND_PATH",j).toString());
+	      if (sbp0==14) {
+		kaisei=Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
+		System.out.println("kaisei: "+kaisei);
+	      }
+	      else if (sbp0==1660101) {
+		hId = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
+		inic= yinitCode[hId];
+               if (cR.equals("13")) inic +=10;
+             } 
+             else if (sbp0==1660102) {
+               if(Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString())==2) {
+                  inic = inic+1;
+                  hiwari = true;
+               }
+             } 
+             else {
 
-                String[] val = (String[])yValue.get(dbm2.getData("SYSTEM_BIND_PATH",j).toString());
-                int[] add = (int[]) yaUnit.get(dbm2.getData("SYSTEM_BIND_PATH",j).toString());
-                int key = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
-                yoVal.put(dbm2.getData("SYSTEM_BIND_PATH",j).toString(),val[key]);
-                if (sbp0==12) mountRate = (double)add[key]/100.0;
-                else if (!hiwari) addUnit += add[key];
-              }
-            }
-            if (jl==5) pline.addElement((String)yoVal.get("1660107"));
-            pline.addElement((String)yoVal.get("1660104"));
-            pline.addElement((String)yoVal.get("1660105"));
-            if (jl==5) {
-              pline.addElement("");
-              pline.addElement("");
-              pline.addElement("");
-            }
-            pline.addElement((String)yoVal.get("1660103"));
-            pline.addElement((String)yoVal.get("1660106"));
-            if (targetYear>2009 || targetYear==2009 && targetMonth>=4) {
-              pline.addElement((String)yoVal.get("1660108"));
-              pline.addElement((String)yoVal.get("12"));
-            }
-            pointCode = inic;
-          }
+               String[] val = (String[])yValue.get(dbm2.getData("SYSTEM_BIND_PATH",j).toString());
+               int[] add = (int[]) yaUnit.get(dbm2.getData("SYSTEM_BIND_PATH",j).toString());
+               int key = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
+               if (sbp0==1660108 && cR.equals("13")) key += 3;
+               yoVal.put(dbm2.getData("SYSTEM_BIND_PATH",j).toString(),val[key]);
+               if (sbp0==12) mountRate = (double)add[key]/100.0;
+               else if (!hiwari) addUnit += add[key];
+               System.out.println("sbp = "+sbp0+" key = "+key+" add= "+add[key]);
+             }
+           }
+           if (jl==5) pline.addElement((String)yoVal.get("1660107"));
+           pline.addElement((String)yoVal.get("1660104"));
+           pline.addElement((String)yoVal.get("1660105"));
+           if (jl==5) {
+             pline.addElement("");
+             pline.addElement("");
+             pline.addElement("");
+           }
+           pline.addElement((String)yoVal.get("1660103"));
+           pline.addElement((String)yoVal.get("1660106"));
+           if (targetYear>2009 || targetYear==2009 && targetMonth>=4) {
+             pline.addElement((String)yoVal.get("1660108"));
+             pline.addElement((String)yoVal.get("12"));
+           }
+           pointCode = inic;
+         }
 
-          if (targetDay==0) {
-            buf.delete(0,buf.length());
-            buf.append("select distinct extract(YEAR from CLAIM_DATE),");
-            buf.append("extract(MONTH from CLAIM_DATE) from CLAIM where PATIENT_ID=");
-            buf.append(pNo);
-            buf.append(" and extract(YEAR from TARGET_DATE)=");
-            buf.append(targetYear);
-            buf.append(" and extract(MONTH from TARGET_DATE)=");
-            buf.append(targetMonth);
-            buf.append(" and CATEGORY_NO=7 and PROVIDER_ID='");
-            buf.append(currentProvider);
-            buf.append("'");
-            DngDBAccess dbm5 = new DngDBAccess("firebird",dbUri,dbUser,dbPass);
-            dbm5.connect();
-            System.out.println(buf.toString());
-            dbm5.execQuery(buf.toString());
-            dbm5.Close();
-            int cRows;
-            if (dbm5.Rows>0) { 
-              int cYear = Integer.parseInt(dbm5.getData(0,0).toString());
-              if (Integer.parseInt(dbm5.getData(1,0).toString())<4) cYear--; 
-              buf.delete(0,buf.length());
+         if (targetDay==0) {
+           buf.delete(0,buf.length());
+           buf.append("select distinct extract(YEAR from CLAIM_DATE),");
+           buf.append("extract(MONTH from CLAIM_DATE) from CLAIM where PATIENT_ID=");
+           buf.append(pNo);
+           buf.append(" and extract(YEAR from TARGET_DATE)=");
+           buf.append(targetYear);
+           buf.append(" and extract(MONTH from TARGET_DATE)=");
+           buf.append(targetMonth);
+           buf.append(" and CATEGORY_NO=7 and PROVIDER_ID='");
+           buf.append(currentProvider);
+           buf.append("'");
+           DngDBAccess dbm5 = new DngDBAccess("firebird",dbUri,dbUser,dbPass);
+           dbm5.connect();
+           System.out.println(buf.toString());
+           dbm5.execQuery(buf.toString());
+           dbm5.Close();
+           int cRows;
+           if (dbm5.Rows>0) { 
+             int cYear = Integer.parseInt(dbm5.getData(0,0).toString());
+             if (Integer.parseInt(dbm5.getData(1,0).toString())<4) cYear--; 
+             buf.delete(0,buf.length());
               buf.append("select CLAIM_ID,SYSTEM_BIND_PATH,");
               buf.append("DETAIL_VALUE");
               buf.append(" from CLAIM_DETAIL_TEXT_");
@@ -1007,7 +1057,7 @@ public class QkanTsusyoRehaData {
               int hiyou =(int)((double) addUnit * unitRate);
               int futan = hiyou - (int)((double)hiyou/100.0*(double)insRate);
               //if (hiyou%10>0) futan +=1;
-              System.out.println("add = "+addUnit+" hiyou = "+hiyou+" futan = "+futan);
+              System.out.println("addUnit= "+addUnit+" uintRate = "+unitRate+" insRate = "+insRate+" hiyou = "+hiyou+" futan = "+futan);
               pline.addElement(new Integer(hiyou));
               pline.addElement(new Integer(futan));
           } 
@@ -1029,12 +1079,13 @@ public class QkanTsusyoRehaData {
             dbm2.Close();
             if (dbm2.Rows>0) {
               int p = Integer.parseInt(dbm2.getData(0,0).toString());
+              System.out.println("p = "+p+" add = "+addUnit+" mountRate = "+ ((int)((double) p * mountRate + 0.50 ))+" unitRate = "+unitRate+" insRate = "+insRate);
               addUnit += (int)((double) p * mountRate + 0.50 );
               p += addUnit;
               int hiyou =(int)((double) p * unitRate);
               int futan = hiyou - (int)((double)hiyou/100.0*(double)insRate);
               //if (hiyou%10>0) futan +=1;
-              System.out.println("p = "+p+" add = "+addUnit+" hiyou = "+hiyou+" futan = "+futan);
+              System.out.println("hiyou = "+hiyou+" futan = "+futan);
               pline.addElement(new Integer(hiyou));
               pline.addElement(new Integer(futan));
             }

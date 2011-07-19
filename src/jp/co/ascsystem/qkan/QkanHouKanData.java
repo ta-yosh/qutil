@@ -425,6 +425,7 @@ public class QkanHouKanData {
     }
   
     public void setHouKanPanel(int targetYear,int targetMonth,int targetDay) {
+      Hashtable firsted= new Hashtable();
       pn2.setVisible(false);      
       pn2.removeAll();
       pnl.setVisible(false);      
@@ -448,13 +449,21 @@ public class QkanHouKanData {
         StringBuffer buf = new StringBuffer();
 
         buf.append("select PATIENT_FIRST_NAME,PATIENT_FAMILY_NAME,");
-        buf.append("SERVICE.PATIENT_ID,max(SERVICE_ID) as SID,");
+        buf.append("SERVICE.PATIENT_ID,SERVICE.SERVICE_ID as SID,");
         buf.append("SYSTEM_SERVICE_KIND_DETAIL,max(JOTAI_CODE) as JOTAI_CODE,PATIENT_BIRTHDAY,");
         buf.append("count(SERVICE.SERVICE_ID),INSURE_RATE,");
         buf.append("min(INSURE_VALID_START) as INSURE_VALID_START,");
         buf.append("max(INSURE_VALID_END) as INSURE_VALID_END,");
         buf.append("min(extract(DAY from SERVICE_DATE)) as FIRST_DAY");
+        buf.append(",SERVICE_USE_TYPE");
+        buf.append(",substring(SERVICE.LAST_TIME from 1 for 16) as LAST,");
+        buf.append("SERVICE_DATE,");
+        buf.append("SERVICE_DETAIL_DATE_");
+        buf.append(detYear+".DETAIL_VALUE as START");
         buf.append(" from SERVICE ");
+        buf.append(" inner join SERVICE_DETAIL_DATE_"+detYear+" on ");
+        buf.append("SERVICE.SERVICE_ID=SERVICE_DETAIL_DATE_"+detYear);
+        buf.append(".SERVICE_ID and SYSTEM_BIND_PATH=3");
         buf.append(" inner join PATIENT on ");
         buf.append("(PATIENT.PATIENT_ID=SERVICE.PATIENT_ID and DELETE_FLAG=0)");
         buf.append(" inner join PATIENT_NINTEI_HISTORY on ");
@@ -467,14 +476,12 @@ public class QkanHouKanData {
         if (targetDay>0) {
           buf.append("' and INSURE_VALID_START<='");
           buf.append(nStart);
-          //buf.append("'");
         }
         if (targetDay==0) {
           buf.append("' and INSURE_VALID_START<'");
           buf.append(nEnd);
         }
 
-        //buf.append("')) where SYSTEM_SERVICE_KIND_DETAIL in (11311,16311)");
         buf.append("')) where ((SYSTEM_SERVICE_KIND_DETAIL=11311 and ");
         buf.append("substring(JOTAI_CODE from 1 for 1)=2) or ");
         buf.append("(SYSTEM_SERVICE_KIND_DETAIL=16311 and ");
@@ -494,15 +501,57 @@ public class QkanHouKanData {
         buf.append("' group by SERVICE.PATIENT_ID,PATIENT_FIRST_NAME,");
         buf.append("PATIENT_FAMILY_NAME,PATIENT_BIRTHDAY,");
         buf.append("INSURE_RATE,SYSTEM_SERVICE_KIND_DETAIL");
-        buf.append(" order by SYSTEM_SERVICE_KIND_DETAIL");
+        buf.append(",SERVICE.SERVICE_ID,LAST");
+        buf.append(",START,SERVICE_USE_TYPE,SERVICE_DATE");
+        buf.append(" order by SYSTEM_SERVICE_KIND_DETAIL,SERVICE.PATIENT_ID");
+        buf.append(",LAST desc,SERVICE_DATE asc,START asc");
 
         String sql = buf.toString();
         System.out.println(sql);
         dbm.execQuery(sql);
         dbm.Close();
         Vector pdata = new Vector();
+
         DngDBAccess dbm2 = new DngDBAccess("firebird",dbUri,dbUser,dbPass);
+        int pNo=-1;
+        int uTp=-1;
+        int ln = 0;
+        String sids = "";
+        boolean monfin = false;
+
         for (int i=0;i<dbm.Rows;i++){
+          int lastP = pNo;
+          pNo = Integer.parseInt(dbm.getData(2,i).toString());
+          if (pNo!=lastP) {
+            uTp = Integer.parseInt(dbm.getData("SERVICE_USE_TYPE",i).toString());
+            if (targetDay==0) {
+              firstDate.put(dbm.getData("PATIENT_ID",i).toString(),dbm.getData("FIRST_DAY",i).toString());
+              if (!monfin && lastP != -1) {
+                pNo = lastP;
+                i--;
+                System.out.println("tbl Create start");
+              } else {
+                sids = dbm.getData("SID",i).toString();
+                monfin=false;
+                if (i<dbm.Rows-1) continue;
+              }
+            }
+          }
+          else {
+            if (uTp!=Integer.parseInt(dbm.getData("SERVICE_USE_TYPE",i).toString())) {
+              if (targetDay>0) continue;
+              else if (monfin) continue;
+              else i--;
+              System.out.println("tbl create start");
+            } else {
+              if (targetDay==0) {
+                sids += ","+dbm.getData("SID",i).toString();
+                if (i<dbm.Rows-1) continue;
+              }
+            }
+          }
+
+          monfin = true;
           double mountRate=0;
           int sCount = Integer.parseInt(dbm.getData("COUNT",i).toString());
           int insRate = Integer.parseInt(dbm.getData("INSURE_RATE",i).toString());
@@ -510,14 +559,16 @@ public class QkanHouKanData {
           String insEnd = dbm.getData("INSURE_VALID_END",i).toString();
 
           Vector pline = new Vector();
-          int pNo = new Integer(dbm.getData(2,i).toString()).intValue();
+          if (!firsted.containsKey(new Integer(pNo)))
+            firsted.put(new Integer(pNo), new Vector());
+
           //pline.addElement(dbm.getData(2,i).toString());
           int sNo = new Integer(dbm.getData(3,i).toString()).intValue();
           //pline.addElement(dbm.getData(3,i).toString());
           String nam1=(dbm.getData(1,i)!=null) ? dbm.getData(1,i).toString()+" ":"";
           String nam2=(dbm.getData(0,i)!=null) ? dbm.getData(0,i).toString():"";
           String nam =nam1+nam2;
-          pline.addElement(new Integer(i+1));
+          pline.addElement(new Integer(++ln));
           pline.addElement(nam);
           if (dbm.getData("PATIENT_BIRTHDAY",i)!=null) {
             int age =patientAge(dbm.getData("PATIENT_BIRTHDAY",i).toString());
@@ -531,7 +582,6 @@ public class QkanHouKanData {
           String cR="1";
 
           if (targetDay==0) {
-            firstDate.put(dbm.getData("PATIENT_ID",i).toString(),dbm.getData("FIRST_DAY",i).toString());
             buf.delete(0,buf.length());
             buf.append("select JOTAI_CODE from PATIENT_NINTEI_HISTORY ");
             buf.append("where PATIENT_ID=");
@@ -605,14 +655,22 @@ public class QkanHouKanData {
             pline.addElement(ti);
           }
           buf.delete(0,buf.length());
-          buf.append("select SERVICE_ID,SYSTEM_BIND_PATH,");
-          buf.append("DETAIL_VALUE");
+          buf.append("select SYSTEM_BIND_PATH,");
+          if (targetDay==0)
+            buf.append("max(DETAIL_VALUE) as DETAIL_VALUE");
+          else
+            buf.append("DETAIL_VALUE");
           buf.append(" from SERVICE_DETAIL_INTEGER_");
           buf.append(detYear);
-          buf.append(" where SERVICE_ID=");
-          buf.append(sNo);
+          buf.append(" where SERVICE_ID");
+          if (targetDay==0)
+            buf.append(" in ("+sids+")");
+          else
+            buf.append("="+sNo);
           buf.append(" and SYSTEM_BIND_PATH");
           buf.append(" in (12,14,1130103,1130104,1130105,1130106,1130107,1130108,1130109,1130110,1130111,1130112,1130113,1130114,1130115,1630101,1630102,1630103,1630104,1630105,1630106,1630107,1630108,1630109,1630110,1630111)");
+          if (targetDay==0)
+            buf.append(" group by SYSTEM_BIND_PATH ");
           buf.append(" order by SYSTEM_BIND_PATH;");
           sql = buf.toString();
           System.out.println(sql);
@@ -669,11 +727,18 @@ public class QkanHouKanData {
                 //pline.addElement(val[key]);
                 tVal.put(Integer.toString(sbp0),val[key]);
                 int[] add = (int[]) taUnit.get(dbm2.getData("SYSTEM_BIND_PATH",j).toString());
-                System.out.println("sbp = "+sbp0+" key = "+key+" add= "+add[key]);
                 if (sbp0==12) mountRate = (double)add[key]/100.0; 
-                else if (sbp0==1130108) 
+                else if (sbp0==1130113) addUnit += add[key];
+                else {
+                  if (targetDay==Integer.parseInt(firstDate.get(Integer.toString(
+pNo)).toString()) && !((Vector)firsted.get(new Integer(pNo))).contains(new Integer(sbp0))) {
+                    if (sbp0==1130108) 
                        addUnit += (skubun==1) ? add[key]:add[key+2];
-                else addUnit += add[key];
+                    else addUnit += add[key];
+                    if (add[key]>0) ((Vector)firsted.get(new Integer(pNo))).addElement(new Integer(sbp0));
+                  }
+                }
+                System.out.println("sbp = "+sbp0+" key = "+key+" add= "+addUnit);
               }
               else {
                 int key = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
@@ -761,9 +826,16 @@ public class QkanHouKanData {
                 int[] add = (int[]) yaUnit.get(dbm2.getData("SYSTEM_BIND_PATH",j).toString());
                 System.out.println("sbp = "+sbp0+" key = "+key+" add= "+add[key]);
                 if (sbp0==12) mountRate = (double)add[key]/100.0; 
-                else if (sbp0==1630105) 
+                else if (sbp0==1630109) addUnit += add[key];
+                else {
+                  if (targetDay==Integer.parseInt(firstDate.get(Integer.toString(
+pNo)).toString()) && !((Vector)firsted.get(new Integer(pNo))).contains(new Integer(sbp0))) {
+                    if (sbp0==1630105) 
                        addUnit += (skubun==1) ? add[key]:add[key+2];
-                else addUnit += add[key];
+                    else addUnit += add[key];
+                    if (add[key]>0) ((Vector)firsted.get(new Integer(pNo))).addElement(new Integer(sbp0));
+                  }
+                }
               }
               else {
                 int key = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
@@ -873,10 +945,52 @@ public class QkanHouKanData {
               cRows = dbm2.Rows;
             }
             else cRows=0;
+            DngDBAccess dbm3 = new DngDBAccess("firebird",dbUri,dbUser,dbPass);
+            if (dbm3.connect()) {
+                buf.delete(0,buf.length());
+                buf.append("select count(service_id),SERVICE_USE_TYPE,");
+                buf.append("max(LAST_TIME) as LAST from");
+                buf.append(" (select SERVICE_ID,SERVICE_USE_TYPE,");
+                buf.append("SERVICE.LAST_TIME from service");
+                buf.append(" inner join PATIENT_NINTEI_HISTORY on ");
+                buf.append("(PATIENT_NINTEI_HISTORY.PATIENT_ID=");
+                buf.append(pNo);
+                buf.append(" and NINTEI_HISTORY_ID in ");
+                buf.append("(select NINTEI_HISTORY_ID from ");
+                buf.append("PATIENT_NINTEI_HISTORY where PATIENT_ID=");
+                buf.append(pNo);
+                buf.append(" and INSURE_VALID_END>=SERVICE.SERVICE_DATE");
+                buf.append(" and INSURE_VALID_START<=SERVICE.SERVICE_DATE");
+                buf.append(")) where SERVICE.PATIENT_ID=");
+                buf.append(pNo);
+                buf.append(" and ((SYSTEM_SERVICE_KIND_DETAIL=11311 and ");
+                buf.append("substring(JOTAI_CODE from 1 for 1)=2) or ");
+                buf.append("(SYSTEM_SERVICE_KIND_DETAIL=16311 and ");
+                buf.append("substring(JOTAI_CODE from 1 for 1)=1))");
+                buf.append(" and SERVICE_USE_TYPE in (4,6)");
+                buf.append(" and extract(YEAR from SERVICE_DATE)=");
+                buf.append(targetYear);
+                buf.append(" and extract(MONTH from SERVICE_DATE)=");
+                buf.append(targetMonth);
+                buf.append(" and SERVICE_DATE<='");
+                buf.append(insEnd);
+                buf.append("' and SERVICE_DATE>='");
+                buf.append(insStart);
+                buf.append("' and SERVICE.PROVIDER_ID='");
+                buf.append(currentProvider);
+                buf.append("') group by SERVICE_USE_TYPE");
+                buf.append(" order by LAST desc");
+                System.out.println(buf.toString());
+                dbm3.execQuery(buf.toString());
+                dbm3.Close();
+            }
             if (cRows>0) {
               int other=0;
               int clid = Integer.parseInt(dbm2.getData("CLAIM_ID",0).toString());
-              pline.addElement(new Integer(dbm2.getData("DETAIL_VALUE",0).toString()));
+              if (dbm3.Rows>0 && dbm3.getData(0,0)!=null)
+                pline.addElement(new Integer(dbm3.getData(0,0).toString()));
+              else
+                pline.addElement(new Integer(dbm2.getData("DETAIL_VALUE",0).toString()));
               int hiyou = (int)(Float.parseFloat(dbm2.getData("DETAIL_VALUE",1).toString())*Float.parseFloat(dbm2.getData("DETAIL_VALUE",2).toString()));
               int futan = Integer.parseInt(dbm2.getData("DETAIL_VALUE",4).toString());
 
@@ -936,42 +1050,6 @@ public class QkanHouKanData {
               //}
             }
             else { 
-              DngDBAccess dbm3 = new DngDBAccess("firebird",dbUri,dbUser,dbPass);
-              if (dbm3.connect()) {
-                buf.delete(0,buf.length());
-                buf.append("select count(service_date),SERVICE_USE_TYPE from");
-                buf.append(" (select distinct service_date,SERVICE_USE_TYPE from service");
-                buf.append(" inner join PATIENT_NINTEI_HISTORY on ");
-                buf.append("(PATIENT_NINTEI_HISTORY.PATIENT_ID=");
-                buf.append(pNo);
-                buf.append(" and NINTEI_HISTORY_ID in ");
-                buf.append("(select NINTEI_HISTORY_ID from ");
-                buf.append("PATIENT_NINTEI_HISTORY where PATIENT_ID=");
-                buf.append(pNo);
-                buf.append(" and INSURE_VALID_END>=SERVICE.SERVICE_DATE");
-                buf.append(" and INSURE_VALID_START<=SERVICE.SERVICE_DATE");
-                buf.append(")) where SERVICE.PATIENT_ID=");
-                buf.append(pNo);
-                buf.append(" and ((SYSTEM_SERVICE_KIND_DETAIL=11311 and ");
-                buf.append("substring(JOTAI_CODE from 1 for 1)=2) or ");
-                buf.append("(SYSTEM_SERVICE_KIND_DETAIL=16311 and ");
-                buf.append("substring(JOTAI_CODE from 1 for 1)=1))");
-                buf.append(" and SERVICE_USE_TYPE in (4,6)");
-                buf.append(" and extract(YEAR from SERVICE_DATE)=");
-                buf.append(targetYear);
-                buf.append(" and extract(MONTH from SERVICE_DATE)=");
-                buf.append(targetMonth);
-                buf.append(" and SERVICE_DATE<='");
-                buf.append(insEnd);
-                buf.append("' and SERVICE_DATE>='");
-                buf.append(insStart);
-                buf.append("' and SERVICE.PROVIDER_ID='");
-                buf.append(currentProvider);
-                buf.append("') group by SERVICE_USE_TYPE");
-                buf.append(" order by SERVICE_USE_TYPE desc");
-                System.out.println(buf.toString());
-                dbm3.execQuery(buf.toString());
-                dbm3.Close();
                 if (dbm3.Rows>0) {
                   if (dbm3.getData(0,0)!=null)
                     pline.addElement(new Integer(dbm3.getData(0,0).toString()));
@@ -982,7 +1060,6 @@ public class QkanHouKanData {
                     pline.addElement(new String("-"));
                     pline.addElement(new String("»»½ÐÉÔ²Ä"));
                 }
-              }
             }
           }
           else {

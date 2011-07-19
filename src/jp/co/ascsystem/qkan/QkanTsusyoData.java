@@ -441,11 +441,15 @@ public class QkanTsusyoData {
         StringBuffer buf = new StringBuffer();
 
         buf.append("select PATIENT_FIRST_NAME,PATIENT_FAMILY_NAME,");
-        buf.append("SERVICE.PATIENT_ID,max(SERVICE_ID) as SID,");
+        buf.append("SERVICE.PATIENT_ID,SERVICE_ID as SID,");
         buf.append("SYSTEM_SERVICE_KIND_DETAIL,max(JOTAI_CODE) as JOTAI_CODE,PATIENT_BIRTHDAY,");
         buf.append("count(SERVICE.SERVICE_ID),INSURE_RATE,");
         buf.append("min(INSURE_VALID_START) as INSURE_VALID_START,");
         buf.append("max(INSURE_VALID_END) as INSURE_VALID_END");
+        buf.append(",min(extract(DAY from SERVICE_DATE)) as FIRST_DAY");
+        buf.append(",SERVICE_USE_TYPE");
+        buf.append(",substring(SERVICE.LAST_TIME from 1 for 16) as LAST");
+        buf.append(",SERVICE_DATE");
         buf.append(" from SERVICE ");
         buf.append(" inner join PATIENT on ");
         buf.append("(PATIENT.PATIENT_ID=SERVICE.PATIENT_ID and DELETE_FLAG=0)");
@@ -486,7 +490,9 @@ public class QkanTsusyoData {
         buf.append("' group by SERVICE.PATIENT_ID,PATIENT_FIRST_NAME,");
         buf.append("PATIENT_FAMILY_NAME,PATIENT_BIRTHDAY,");
         buf.append("INSURE_RATE,SYSTEM_SERVICE_KIND_DETAIL");
-        buf.append(" order by SYSTEM_SERVICE_KIND_DETAIL");
+        buf.append(",SERVICE.SERVICE_ID,LAST,SERVICE_USE_TYPE,SERVICE_DATE");
+        buf.append(" order by SYSTEM_SERVICE_KIND_DETAIL,SERVICE.PATIENT_ID");
+        buf.append(",LAST desc,SERVICE_DATE asc");
 
         String sql = buf.toString();
         System.out.println(sql);
@@ -494,7 +500,44 @@ public class QkanTsusyoData {
         dbm.Close();
         Vector pdata = new Vector();
         DngDBAccess dbm2 = new DngDBAccess("firebird",dbUri,dbUser,dbPass);
+        int pNo=-1;
+        int uTp=-1;
+        int ln = 0;
+        String sids = "";
+        boolean monfin = false;
         for (int i=0;i<dbm.Rows;i++){
+          int lastP = pNo;
+          pNo = Integer.parseInt(dbm.getData(2,i).toString());
+          if (pNo!=lastP) {
+            uTp = Integer.parseInt(dbm.getData("SERVICE_USE_TYPE",i).toString())
+;
+            if (targetDay==0) {
+              //firstDate.put(dbm.getData("PATIENT_ID",i).toString(),dbm.getData("FIRST_DAY",i).toString());
+              if (!monfin && lastP != -1) {
+                pNo = lastP;
+                i--;
+                System.out.println("tbl Create start");
+              } else {
+                sids = dbm.getData("SID",i).toString();
+                monfin=false;
+                if (i<dbm.Rows-1) continue;
+              }
+            }
+          }
+          else {
+            if (uTp!=Integer.parseInt(dbm.getData("SERVICE_USE_TYPE",i).toString())) {
+              if (targetDay>0) continue;
+              else if (monfin) continue;
+              else i--;
+              System.out.println("tbl create start");
+            } else {
+              if (targetDay==0) {
+                sids += ","+dbm.getData("SID",i).toString();
+                if (i<dbm.Rows-1) continue;
+              }
+            }
+          }
+          monfin = true;
           int pointCode=0;
           double mountRate=0;
           int sCount = Integer.parseInt(dbm.getData("COUNT",i).toString());
@@ -503,14 +546,13 @@ public class QkanTsusyoData {
           String insEnd = dbm.getData("INSURE_VALID_END",i).toString();
 
           Vector pline = new Vector();
-          int pNo = new Integer(dbm.getData(2,i).toString()).intValue();
           //pline.addElement(dbm.getData(2,i).toString());
           int sNo = new Integer(dbm.getData(3,i).toString()).intValue();
           //pline.addElement(dbm.getData(3,i).toString());
           String nam1=(dbm.getData(1,i)!=null) ? dbm.getData(1,i).toString()+" ":"";
           String nam2=(dbm.getData(0,i)!=null) ? dbm.getData(0,i).toString():"";
           String nam =nam1+nam2;
-          pline.addElement(new Integer(i+1));
+          pline.addElement(new Integer(++ln));
           pline.addElement(nam);
           if (dbm.getData("PATIENT_BIRTHDAY",i)!=null) {
             int age =patientAge(dbm.getData("PATIENT_BIRTHDAY",i).toString());
@@ -598,14 +640,22 @@ public class QkanTsusyoData {
           }
           int rPlus = Integer.parseInt((String)ratePlus.get(cR));
           buf.delete(0,buf.length());
-          buf.append("select SERVICE_ID,SYSTEM_BIND_PATH,");
-          buf.append("DETAIL_VALUE");
+          buf.append("select SYSTEM_BIND_PATH,");
+          if (targetDay==0)
+            buf.append("max(DETAIL_VALUE) as DETAIL_VALUE");
+          else
+            buf.append("DETAIL_VALUE");
           buf.append(" from SERVICE_DETAIL_INTEGER_");
           buf.append(detYear);
-          buf.append(" where SERVICE_ID=");
-          buf.append(sNo);
+          buf.append(" where SERVICE_ID");
+          if (targetDay==0)
+            buf.append(" in ("+sids+")");
+          else
+            buf.append("="+sNo);
           buf.append(" and SYSTEM_BIND_PATH");
           buf.append(" in (12,14,1150103,1150104,1150105,1150106,1150108,1150109,1150110,1150111,1150112,1150113,1150114,1150115,1150116,1150117,1650101,1650102,1650103,1650104,1650105,1650106,1650107,1650108,1650109)");
+          if (targetDay==0)
+            buf.append(" group by SYSTEM_BIND_PATH ");
           buf.append(" order by SYSTEM_BIND_PATH;");
           sql = buf.toString();
           System.out.println(sql);
@@ -750,6 +800,7 @@ public class QkanTsusyoData {
                 yoVal.put(dbm2.getData("SYSTEM_BIND_PATH",j).toString(),val[key]);
                 if (sbp0==12) mountRate = (double)add[key]/100.0; 
                 else if (!hiwari) addUnit += add[key];
+                System.out.println("sbp = "+sbp0+" key = "+key+" add= "+add[key]);
               }
             }
             if (jl==3) pline.addElement((String)yoVal.get("1650108"));
@@ -905,11 +956,14 @@ public class QkanTsusyoData {
               dbm2.Close();
               if (dbm2.Rows>0) {
                  for (int j=1;j<16;j=j+2) {
-                   if (dbm2.getData(j,0)!=null) 
+                   if (dbm2.getData(j,0)!=null)  {
                      other += Integer.parseInt(dbm2.getData(j+1,0).toString());
+                     System.out.println(dbm2.getData(j,0)+":"+dbm2.getData(j+1,0));
+                   }
                  }
                  if (dbm2.getData("OTHER_HIMOKU_NO6",0)!=null) 
                    other += Integer.parseInt(dbm2.getData("OTHER_PAY_NO6",0).toString());
+                   System.out.println(dbm2.getData("OTHER_HIMOKU_NO6",0)+":"+dbm2.getData("OTHER_PAY_NO6",0));
               }
 
               if (kouhiunit>0) futan = futan+ jikouhi;
@@ -999,12 +1053,13 @@ public class QkanTsusyoData {
             dbm2.Close();
             if (dbm2.Rows>0) {
               int p = Integer.parseInt(dbm2.getData(0,0).toString());
+              System.out.println("p = "+p+" addUnit= "+addUnit+" uintRate = "+unitRate+" insRate = "+insRate);
               addUnit += (int)((double) p * mountRate + 0.50 );
               p += addUnit;
               int hiyou =(int)((double) p * unitRate);
               int futan = hiyou - (int)((double)hiyou/100.0*(double)insRate);
               //if (hiyou%10>0) futan +=1;
-              System.out.println("p = "+p+" add = "+addUnit+" unitRate = "+unitRate+ " hiyou = "+hiyou+" futan = "+futan);
+              System.out.println("hiyou = "+hiyou+" futan = "+futan);
               pline.addElement(new Integer(hiyou));
               pline.addElement(new Integer(futan));
             }
