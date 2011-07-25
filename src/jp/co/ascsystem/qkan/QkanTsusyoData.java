@@ -500,21 +500,25 @@ public class QkanTsusyoData {
         dbm.Close();
         Vector pdata = new Vector();
         DngDBAccess dbm2 = new DngDBAccess("firebird",dbUri,dbUser,dbPass);
+        int sbp=-1;
         int pNo=-1;
         int uTp=-1;
         int ln = 0;
         String sids = "";
         boolean monfin = false;
         for (int i=0;i<dbm.Rows;i++){
+          int lastSbp = sbp;
           int lastP = pNo;
+          sbp = Integer.parseInt(dbm.getData(4,i).toString());
           pNo = Integer.parseInt(dbm.getData(2,i).toString());
-          if (pNo!=lastP) {
+          if (sbp!=lastSbp || pNo!=lastP) {
             uTp = Integer.parseInt(dbm.getData("SERVICE_USE_TYPE",i).toString())
 ;
             if (targetDay==0) {
               //firstDate.put(dbm.getData("PATIENT_ID",i).toString(),dbm.getData("FIRST_DAY",i).toString());
-              if (!monfin && lastP != -1) {
+              if (!monfin && (lastP != -1 || lastSbp != -1) ) {
                 pNo = lastP;
+                sbp = lastSbp;
                 i--;
                 System.out.println("tbl Create start");
               } else {
@@ -560,7 +564,6 @@ public class QkanTsusyoData {
           } else {
             pline.addElement("");
           }
-          int sbp = Integer.parseInt(dbm.getData(4,i).toString());
           String kind = (sbp==11511) ? 
                         "":"м╫ки";
           String cR="1";

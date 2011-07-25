@@ -483,6 +483,7 @@ public class QkanHouRehaData {
         dbm.Close();
         Vector pdata = new Vector();
         DngDBAccess dbm2 = new DngDBAccess("firebird",dbUri,dbUser,dbPass);
+        int sbp=-1;
         int pNo=-1;
         int uTp=-1;
         int ln = 0;
@@ -491,13 +492,16 @@ public class QkanHouRehaData {
         boolean monfin = false;
         for (int i=0;i<dbm.Rows;i++){
           int lastP = pNo;
+          int lastSbp = sbp;
           pNo = Integer.parseInt(dbm.getData(2,i).toString());
-          if (pNo!=lastP) {
+          sbp = Integer.parseInt(dbm.getData(4,i).toString());
+          if (pNo!=lastP || sbp!=lastSbp) {
             uTp = Integer.parseInt(dbm.getData("SERVICE_USE_TYPE",i).toString());
             added = false;
             if (targetDay==0) {
-              if (!monfin && lastP != -1) {
+              if (!monfin && (lastP != -1 || lastSbp != -1)) {
                 pNo = lastP;
+                sbp = lastSbp;
                 i--;
                 System.out.println("tbl Create start");
               } else {
@@ -543,7 +547,6 @@ public class QkanHouRehaData {
           } else {
             pline.addElement("");
           }
-          int sbp = Integer.parseInt(dbm.getData(4,i).toString());
           String kind = (sbp==11411) ? 
                         "":"м╫ки";
           String cR="1";
