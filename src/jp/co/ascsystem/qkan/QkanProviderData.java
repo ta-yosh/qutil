@@ -71,7 +71,7 @@ public class QkanProviderData {
         for (int i=0;i<dbm.Rows;i++) {
           String key = dbm.getData("SYSTEM_SERVICE_KIND_DETAIL",i).toString();
           String val = dbm.getData("SERVICE_CALENDAR_ABBREVIATION",i).toString();
-          //System.out.println(key+" = 「"+val+"」");
+          System.out.println(key+" = 「"+val+"」");
           sbLabel.put(key,val);
         }
         buf.delete(0,buf.length());
@@ -85,7 +85,7 @@ public class QkanProviderData {
           String services = "";
           String services2 = "";
           String proid = dbm.getData("PROVIDER_ID",i).toString();
-          //System.out.println("PROID = "+proid);
+          System.out.println(i+" PROID = "+proid);
           buf.delete(0,buf.length());
           buf.append("select STAFF_FAMILY_NAME,STAFF_FIRST_NAME from STAFF");
           buf.append(" where PROVIDER_ID='");
@@ -95,9 +95,16 @@ public class QkanProviderData {
           if (dbm2.connect()) {
             dbm2.execQuery(buf.toString());
             if (dbm2.Rows>0) {
-            tanto = dbm2.getData("STAFF_FAMILY_NAME",0).toString()
-                    +dbm2.getData("STAFF_FIRST_NAME",0).toString();
+              tanto = "";
+              for (int j=0;j<dbm2.Rows;j++) {
+                if (j>0) tanto += ",";
+                tanto += ((dbm2.getData("STAFF_FAMILY_NAME",j)!=null) ?
+                        dbm2.getData("STAFF_FAMILY_NAME",j).toString():"")
+                       +((dbm2.getData("STAFF_FIRST_NAME",j)!=null) ?
+                        dbm2.getData("STAFF_FIRST_NAME",j).toString():"");
+              }
             }
+            System.out.println("tanto = "+tanto);
             buf.delete(0,buf.length());
             buf.append("select SYSTEM_SERVICE_KIND_DETAIL ");
             buf.append("from PROVIDER_SERVICE where PROVIDER_ID='");
@@ -162,6 +169,7 @@ public class QkanProviderData {
                         dbm.getData("PROVIDER_FAX_SECOND",i).toString()+"-":"")
                        +((dbm.getData("PROVIDER_FAX_THIRD",i)!=null) ?
                         dbm.getData("PROVIDER_FAX_THIRD",i).toString():"");
+          System.out.println("jugyo_type="+dbm.getData("PROVIDER_JIGYOU_TYPE",i)+" area_type="+dbm.getData("PROVIDER_AREA_TYPE",i));
           pdata[i][7] = (dbm.getData("PROVIDER_JIGYOU_TYPE",i)!=null) ?
                         jigyoKubun[Integer.parseInt(dbm.getData("PROVIDER_JIGYOU_TYPE",i).toString())]:"";
           pdata[i][8] = (dbm.getData("PROVIDER_AREA_TYPE",i)!=null) ?
@@ -179,6 +187,7 @@ public class QkanProviderData {
         }
       }
       else Rows=-1;
+      System.out.println("Provider list "+Rows+"recs prepared OK");
     }
 
     public String getData(int row,int col) {
