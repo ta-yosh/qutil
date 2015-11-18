@@ -16,6 +16,7 @@ public class DngAppProperty {
     //if (val=="" || val.matches(".*?<.*>.*")) val=null;
     val = Pattern.compile("_KAKKOL_").matcher(val).replaceAll("\\(");
     val = Pattern.compile("_KAKKOR_").matcher(val).replaceAll("\\)");
+    val = Pattern.compile("_DOLLER_").matcher(val).replaceAll("\\$");
     return val;
   }
 }

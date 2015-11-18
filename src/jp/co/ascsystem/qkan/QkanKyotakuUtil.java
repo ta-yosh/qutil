@@ -62,6 +62,7 @@ public class QkanKyotakuUtil extends QkanPatientImport {
      */
       contentPane = fr.getContentPane();
       contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.PAGE_AXIS));
+      contentPane.setBackground(new Color(210,230,250));
       boolean kstat = false;
       while (!kstat) {
         if ((dbServer.equals("localhost") || dbServer.equals("127.0.0.1")) &&
@@ -166,16 +167,19 @@ public class QkanKyotakuUtil extends QkanPatientImport {
     chinf.setFont(new Font("Dialog",Font.ITALIC,10));
     chinf.setForeground(Color.blue);
     JPanel northP = new JPanel( new BorderLayout());
+    northP.setOpaque(false);
     northP.add(title,BorderLayout.NORTH);
     northP.add(dispPath,BorderLayout.CENTER);
     northP.add(pdfBtn,BorderLayout.EAST);
     northP.add(chinf,BorderLayout.SOUTH);
     contentPane.add(northP);
     center0P = new JPanel();
+    center0P.setOpaque(false);
     center0P.add(execBtn);
     center0P.add(exitBtn);
     final JPanel seleP = new JPanel(new BorderLayout());
     JPanel spn = tTable.searchCondition();
+    seleP.setOpaque(false);
     seleP.add(spn,BorderLayout.CENTER);
     contentPane.add(seleP);
     contentPane.add(center0P);
@@ -283,7 +287,9 @@ public class QkanKyotakuUtil extends QkanPatientImport {
       }
       dbexec.setTable(tTable);
     } catch (Exception e) {
+      System.out.println(e.toString());
       statMessage(STATE_ERROR,"データ一覧の取得失敗");
+      runStat = STATE_COMPLETE;
       return;
     }
 

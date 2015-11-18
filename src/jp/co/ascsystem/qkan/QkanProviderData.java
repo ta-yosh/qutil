@@ -56,8 +56,8 @@ public class QkanProviderData {
     Hashtable sbLabel = new Hashtable();
     Hashtable vServ = new Hashtable();
     String jigyoKubun[] = new String[] {"","ªÿƒÍ","¥Ω‡≥∫≈ˆ","","","√œ∞ËÃ©√Â"};
-    String chiikiKubun[] = new String[] {"","∆√ Ã∂Ë","∆√π√√œ","π√√œ","≤µ√œ",
-                                         "§Ω§Œ¬æ","∆√ Ã√œ∞Ë"};
+    String chiikiKubun[] = new String[] {"","£±µÈ√œ","£¥µÈ√œ","£µµÈ√œ","£∂µÈ√œ",
+                                   "§Ω§Œ¬æ","£≤µÈ√œ","£≥µÈ√œ","£µµÈ√œ§Œ£≤","£∂µÈ√œ§Œ£≤"};
     public QkanProviderData(String dbUri,String dbUser,String dbPass) {
       this.dbUri = dbUri;
       this.dbUser = dbUser;
@@ -75,7 +75,7 @@ public class QkanProviderData {
           sbLabel.put(key,val);
         }
         buf.delete(0,buf.length());
-        buf.append("select * from PROVIDER"); //order by PROVIDER_NAME");
+        buf.append("select * from PROVIDER where DELETE_FLAG=0");
         dbm.execQuery(buf.toString());
         Rows = dbm.Rows;
         dbm.Close();
@@ -121,6 +121,7 @@ public class QkanProviderData {
             for (int j=0;j<dbm2.Rows;j++) {
               String sskd = dbm2.getData("SYSTEM_SERVICE_KIND_DETAIL",j).toString();
               int sskdn = Integer.parseInt(sskd);
+              if (sskdn>20000) continue;
               if (sskdn>12210 && sskdn<12315) {
                 if (tanryoCnt>0) continue; 
                 tanryoCnt++;
@@ -169,7 +170,7 @@ public class QkanProviderData {
                         dbm.getData("PROVIDER_FAX_SECOND",i).toString()+"-":"")
                        +((dbm.getData("PROVIDER_FAX_THIRD",i)!=null) ?
                         dbm.getData("PROVIDER_FAX_THIRD",i).toString():"");
-          System.out.println("jugyo_type="+dbm.getData("PROVIDER_JIGYOU_TYPE",i)+" area_type="+dbm.getData("PROVIDER_AREA_TYPE",i));
+          System.out.println("jugyo_type="+dbm.getData("PROVIDER_JIGYOU_TYPE",i)+" area_type="+dbm.getData("PROVIDER_AREA_TYPE",i)+" serv = "+services2);
           pdata[i][7] = (dbm.getData("PROVIDER_JIGYOU_TYPE",i)!=null) ?
                         jigyoKubun[Integer.parseInt(dbm.getData("PROVIDER_JIGYOU_TYPE",i).toString())]:"";
           pdata[i][8] = (dbm.getData("PROVIDER_AREA_TYPE",i)!=null) ?
@@ -320,10 +321,10 @@ public class QkanProviderData {
       float width[] = new float[10];
       int ctype[] = new int[10];
       Arrays.fill(ctype,0);
-      width[cid++] = 10;
+      width[cid++] = 9;
       ctype[cid] = 22;
       width[cid++] = 18;
-      width[cid++] = 8;
+      width[cid++] = 7;
       ctype[cid] = 30;
       width[cid++] = 20;
       width[cid++] = 10;
@@ -331,7 +332,7 @@ public class QkanProviderData {
       ctype[cid] = 7;
       width[cid++] = 8;
       ctype[cid] = 7;
-      width[cid++] = 8;
+      width[cid++] = 10;
       width[cid++] = 13;
       ctype[cid] = 38;
       width[cid] = 30;

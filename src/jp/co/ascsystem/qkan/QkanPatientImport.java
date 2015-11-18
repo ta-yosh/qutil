@@ -156,7 +156,7 @@ public class QkanPatientImport {
         ActionListener exitNow = new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             runStat = STATE_COMPLETE;
-            if (isMbInPath) new File(dbPath0).delete();
+            if (isMbInPath && ! isCsv ) new File(dbPath0).delete();
             if (isCalled) {
               fr.dispose();
               parent.setEnabled(true);
@@ -250,7 +250,7 @@ public class QkanPatientImport {
         WindowAdapter AppCloser =  new WindowAdapter() {
           public void windowClosing(WindowEvent e) {
             runStat = STATE_COMPLETE;
-            if (isMbInPath) new File(dbPath0).delete();
+            if (isMbInPath && ! isCsv ) new File(dbPath0).delete();
             if (isCalled) {
               fr.dispose();
               parent.setEnabled(true);
@@ -334,8 +334,11 @@ public class QkanPatientImport {
       String ppath;
       File pf = new File("properity.xml");
       if (!pf.exists()) {
-        statMessage(STATE_ERROR, "給管鳥の設定ファイル(properity.xml)が見つかりません。\n「了解(OK)」を押して終了させ、このプログラムを給管鳥のインストールディレクトリ(Qkan4.5フォルダ)\nに配置してから実行して下さい。");
-        System.exit(1);
+        pf = new File("property.xml");
+        if (!pf.exists()) {
+          statMessage(STATE_ERROR, "給管鳥の設定ファイルが見つかりません。\n「了解(OK)」を押して終了させ、このプログラムを給管鳥のインストールディレクトリ\nに配置してから実行して下さい。");
+          System.exit(1);
+        }
       }
       if (pf==null) System.exit(1);
       System.out.println("prop: "+pf.getAbsolutePath());
@@ -508,7 +511,9 @@ public class QkanPatientImport {
         }
         dbexec.setTable(iTable,oTable);
       } catch (Exception e) {
+        System.out.println(e);
         statMessage(STATE_ERROR,"データ一覧の取得失敗");
+        runStat = STATE_COMPLETE;
         return;
       }
 
@@ -530,7 +535,7 @@ public class QkanPatientImport {
           dbexec.join();
           pn0.setVisible(false);
           if (runStat==STATE_COMPLETE) {
-            if (isMbInPath) new File(dbPath0).delete();
+            if (isMbInPath && ! isCsv ) new File(dbPath0).delete();
             return;
           }
           statMessage(dbexec.stat,dbexec.errMessage);
@@ -543,7 +548,7 @@ public class QkanPatientImport {
         }
         center0P.setVisible(true);
       }
-      if (isMbInPath) new File(dbPath0).delete();
+      if (isMbInPath && ! isCsv ) new File(dbPath0).delete();
       return;
     }
 

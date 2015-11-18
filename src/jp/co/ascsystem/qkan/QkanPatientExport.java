@@ -272,7 +272,9 @@ public class QkanPatientExport extends QkanPatientImport {
         }
         dbexec.setTable(iTable,null);
       } catch (Exception e) {
+        System.out.println(e);
         statMessage(STATE_ERROR,"データ一覧の取得失敗");
+        runStat = STATE_COMPLETE;
         return;
       }
 
@@ -605,7 +607,7 @@ public class QkanPatientExport extends QkanPatientImport {
       cmd[3] = dbUser;
       cmd[4] = "-pass";
       cmd[5] = dbPass;
-      cmd[6] = quot+dbOutPath+quot;
+      cmd[6] = quot+dbServer+":"+dbOutPath+quot;
       cmd[7] = quot+dbTmpPath+quot;
 
       try {
@@ -634,7 +636,7 @@ public class QkanPatientExport extends QkanPatientImport {
              //} else {
                cmd[1] = "-rep";
                cmd[6] = quot+dbTmpPath+quot;
-               cmd[7] = quot+dbOutPath+quot;
+               cmd[7] = quot+dbServer+":"+dbOutPath+quot;
              //}
              process = runtime.exec(cmd,null);
              tmpI = process.waitFor();

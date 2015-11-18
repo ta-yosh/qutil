@@ -23,6 +23,7 @@ public class DngXMLParse {
       contents = Pattern.compile("\\x5c").matcher(contents).replaceAll("/");
       contents = Pattern.compile("\\(").matcher(contents).replaceAll("_KAKKOL_");
       contents = Pattern.compile("\\)").matcher(contents).replaceAll("_KAKKOR_");
+      contents = Pattern.compile("\\$").matcher(contents).replaceAll("_DOLLER_");
       Hashtable hash0 = new Hashtable();
       hash = xmlParse(contents,hash0,"");
     } catch(Exception e) {

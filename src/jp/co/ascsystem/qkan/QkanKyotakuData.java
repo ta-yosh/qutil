@@ -65,6 +65,7 @@ public class QkanKyotakuData {
     private JPanel pn3 = new JPanel();
     private JPanel pnl = new JPanel(new BorderLayout()); 
     private JTable usrTbl;
+    private Vector totalRow;
     private boolean isSelectable=true;
     private DefaultTableModel dtm;
     private TableSorter2 sorter;
@@ -78,7 +79,6 @@ public class QkanKyotakuData {
       this.dbUri = dbUri;
       this.dbUser = dbUser;
       this.dbPass = dbPass;
-      initCode = new int[]  {0,1111,1111,1221,1223,1131,1241,1261};
       dbm = new DngDBAccess("firebird",dbUri,dbUser,dbPass);
       StringBuffer buf = new StringBuffer();
       buf.append("select PROVIDER_ID,PROVIDER_NAME from PROVIDER ");
@@ -115,6 +115,12 @@ public class QkanKyotakuData {
       careRate.put("23"," 要介護3");
       careRate.put("24"," 要介護4");
       careRate.put("25"," 要介護5");
+      pn.setOpaque(false);
+      pnl.setOpaque(false);
+      pn1.setOpaque(false);
+      pn2.setOpaque(false);
+      pn3.setOpaque(false);
+      tPanel.setOpaque(false);
     }
 
     public JPanel searchCondition() {
@@ -325,13 +331,13 @@ public class QkanKyotakuData {
         StringBuffer buf = new StringBuffer();
 
         buf.append("select PATIENT_FIRST_NAME,PATIENT_FAMILY_NAME,");
-        buf.append("SERVICE.PATIENT_ID,max(SERVICE_ID) as SID,");
+        buf.append("SERVICE.PATIENT_ID,SERVICE_ID as SID,");
         buf.append("SYSTEM_SERVICE_KIND_DETAIL,INSURED_ID,PATIENT_BIRTHDAY,");
         buf.append("substring(JOTAI_CODE from 1 for 1),max(JOTAI_CODE) as JOTAI,");
         buf.append("count(SERVICE.SERVICE_ID),INSURE_RATE,");
         buf.append("min(INSURE_VALID_START) as INSURE_VALID_START,");
         buf.append("max(INSURE_VALID_END) as INSURE_VALID_END,");
-        buf.append("max(BENEFIT_RATE) as BRATE");
+        buf.append("max(BENEFIT_RATE) as BRATE,SERVICE_USE_TYPE");
         buf.append(" from SERVICE inner join PATIENT on ");
         buf.append("(PATIENT.PATIENT_ID=SERVICE.PATIENT_ID and DELETE_FLAG=0)");
         buf.append(" inner join PATIENT_NINTEI_HISTORY on ");
@@ -390,6 +396,7 @@ public class QkanKyotakuData {
         buf.append(" group by SERVICE.PATIENT_ID,PATIENT_FIRST_NAME,");
         buf.append("PATIENT_FAMILY_NAME,PATIENT_BIRTHDAY,INSURED_ID,");
         buf.append("SYSTEM_SERVICE_KIND_DETAIL, ");
+        buf.append("SERVICE.SERVICE_ID,SERVICE_USE_TYPE,SERVICE_DATE,");
         buf.append("substring(JOTAI_CODE from 1 for 1),INSURE_RATE");
         buf.append(" order by PATIENT_FAMILY_NAME,PATIENT_FIRST_NAME,INSURED_ID,SYSTEM_SERVICE_KIND_DETAIL");
 
@@ -398,16 +405,69 @@ public class QkanKyotakuData {
         dbm.execQuery(sql);
         dbm.Close();
         Vector pdata = new Vector();
+        totalRow = new Vector();
+        int totalCount=0;
+        int totalFee1=0;
+        int totalFee2=0;
+        int totalFee5=0;
+        int trCols=0;
         DngDBAccess dbm2 = new DngDBAccess("firebird",dbUri,dbUser,dbPass);
+        int pNo=-1;
+        int sbp=-1;
+        int uTp=-1;
+        int ln = 0;
+        int sCount = 0;
+        int countLimit = 2;
+        String sids = "";
+        boolean monfin = false;
+        boolean limited = false;
+        String itemCode="";
+
         for (int i=0;i<dbm.Rows;i++){
-          int pointCode=0;
-          int sCount = Integer.parseInt(dbm.getData("COUNT",i).toString());
+          int lastP = pNo;
+          int lastSbp = sbp;
+          String lastCode = itemCode;
+          itemCode = "";
+          pNo = Integer.parseInt(dbm.getData(2,i).toString());
+          sbp = Integer.parseInt(dbm.getData(4,i).toString());
+          if (pNo!=lastP || sbp!=lastSbp) {
+            uTp = Integer.parseInt(dbm.getData("SERVICE_USE_TYPE",i).toString());
+            limited = false;
+            if (targetDay==0) {
+              if (!monfin && (lastP != -1 || lastSbp != -1) ) {
+                pNo = lastP;
+                sbp = lastSbp;
+                i--;
+                System.out.println("tbl Create start");
+              } else {
+                sids = dbm.getData("SID",i).toString();
+                sCount = Integer.parseInt(dbm.getData("COUNT",i).toString());
+                monfin=false;
+                if (i<dbm.Rows-1) continue;
+              }
+            }
+          }
+          else {
+            if (uTp!=Integer.parseInt(dbm.getData("SERVICE_USE_TYPE",i).toString())) {
+              if (targetDay>0) continue;
+              else if (monfin) continue;
+              else i--;
+              System.out.println("tbl create start");
+            } else {
+              if (targetDay==0) {
+                sids += ","+dbm.getData("SID",i).toString();
+                sCount += Integer.parseInt(dbm.getData("COUNT",i).toString());
+                if (i<dbm.Rows-1) continue;
+              }
+            }
+          }
+          monfin = true;
+
           String insStart = dbm.getData("INSURE_VALID_START",i).toString();
           String insEnd = dbm.getData("INSURE_VALID_END",i).toString();
           String insId = dbm.getData("INSURED_ID",i).toString();
 
           Vector pline = new Vector();
-          int pNo = new Integer(dbm.getData(2,i).toString()).intValue();
           //pline.addElement(dbm.getData(2,i).toString());
           int sNo = new Integer(dbm.getData(3,i).toString()).intValue();
           //pline.addElement(dbm.getData(3,i).toString());
@@ -451,7 +511,7 @@ public class QkanKyotakuData {
           //            Integer.parseInt(dbm.getData("SELF_PAY",i).toString());
           //            Integer.parseInt(dbm2.getData("SELF_PAY",i).toString());
 
-          pline.addElement(new Integer(i+1));
+          pline.addElement(new Integer(++ln));
           pline.addElement(insId);
           pline.addElement(nam);
           if (dbm.getData("PATIENT_BIRTHDAY",i)!=null) {
@@ -461,9 +521,8 @@ public class QkanKyotakuData {
             pline.addElement("");
           }
           String cR="1";
-          int sbp = Integer.parseInt(dbm.getData(4,i).toString());
           String kind = (sbp==13111) ? 
-                        "":"予防";
+                        "介護":"予防";
           if (targetDay>0) {
             if (dbm.getData("JOTAI",i)!=null) {
               cR = dbm.getData("JOTAI",i).toString();
@@ -477,6 +536,7 @@ public class QkanKyotakuData {
             buf.append("select SERVICE_ID,SYSTEM_BIND_PATH,");
             buf.append("extract(HOUR from DETAIL_VALUE),");
             buf.append("extract(MINUTE from DETAIL_VALUE)");
+            buf.append(",DETAIL_VALUE");
             buf.append(" from SERVICE_DETAIL_DATE_");
             buf.append(detYear);
             buf.append(" where SERVICE_ID=");
@@ -517,8 +577,10 @@ public class QkanKyotakuData {
             buf.append(detYear);
             buf.append(" where SERVICE_ID=");
             buf.append(sNo);
+/*
             buf.append(" and SYSTEM_BIND_PATH");
             buf.append(" in (14,1310103,1310104,1310105,1310107,1310108,1310109,1310110,1310111,1310112,1310113,1340101,1340102,1340103,1340104,1340105,1340106,1340107,1340108,1340109,1340110)");
+*/
             buf.append(" order by SYSTEM_BIND_PATH;");
             sql = buf.toString();
             System.out.println(sql);
@@ -527,13 +589,10 @@ public class QkanKyotakuData {
             dbm2.Close();
   
             System.out.println("dbm2:"+dbm2.Rows);
-            int inic=0;
-            int hId=0;
             double unitRate;
-            boolean again = false;
-            boolean cancer = false;
             int kaisei = 0;
             unitRate = (sbp==13111) ? tunitRate:yunitRate;
+            String[] ssCode = new String[] {"1","1","1","1","1","1"};
             for (int j=0;j<dbm2.Rows;j++){
               System.out.println("Rows start: "+j);
               int sbp0 = Integer.parseInt(dbm2.getData("SYSTEM_BIND_PATH",j).toString());
@@ -542,57 +601,32 @@ public class QkanKyotakuData {
                 System.out.println("kaisei = "+kaisei);
               }
               else if (sbp0==1310103 || sbp0==1340101 || sbp0==1310111 || sbp0==1340108) {
-                hId = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
-                System.out.println("hId = "+hId);
-                inic += initCode[hId];
+                ssCode[0] = dbm2.getData("DETAIL_VALUE",j).toString();
               } 
               else if (sbp0==1310104 || sbp0==1340102) {
-                if (dbm2.getData("DETAIL_VALUE",j).toString().equals("2")) inic++;
+                ssCode[1] = dbm2.getData("DETAIL_VALUE",j).toString();
               }
               else if (sbp0==1310105 || sbp0==1340103) {
-                if (dbm2.getData("DETAIL_VALUE",j).toString().equals("2")) inic++;
+                ssCode[4] = dbm2.getData("DETAIL_VALUE",j).toString();
               }
-              else if (sbp0==1310107 || sbp0==1340104) {
-                if (dbm2.getData("DETAIL_VALUE",j).toString().equals("2")) inic = inic-10;
-              }
-              else if (kaisei==0 && (sbp0==1310108 || sbp0==1340105) ) {
-                if (dbm2.getData("DETAIL_VALUE",j).toString().equals("2")) inic = inic+30;
-              }
-              else if (kaisei==0 && (sbp0==1310109 || sbp0==1340106) ) {
-                if (dbm2.getData("DETAIL_VALUE",j).toString().equals("2")) again=true;
+              else if (sbp0==16) {
+                ssCode[2] = dbm2.getData("DETAIL_VALUE",j).toString();
               }
               else if (sbp0==1310110 || sbp0==1340107) {
-                if (kaisei==0 && hId==4) {
-                  if (dbm2.getData("DETAIL_VALUE",j).toString().equals("2") && again) inic = inic+30;
-                  else if (dbm2.getData("DETAIL_VALUE",j).toString().equals("1") && again) inic = inic+2;
-                }
-                else if (kaisei==20090401) {
-                  if (dbm2.getData("DETAIL_VALUE",j).toString().equals("2")) cancer=true;
-                }
+                ssCode[3] = dbm2.getData("DETAIL_VALUE",j).toString();
               }
-              else if (hId==7 && (sbp0==1310112 || sbp0==1340109)) {
-                if (dbm2.getData("DETAIL_VALUE",j).toString().equals("2")) inic = inic+1;
-              }
-              else if (kaisei==20090401 && hId>=3 && hId<=6 && (sbp0==1310113 || sbp0==1340110)) {
-                if (dbm2.getData("DETAIL_VALUE",j).toString().equals("1")) {
-                  if (hId==4 && cancer) inic += 32; 
-                }
-                else if (dbm2.getData("DETAIL_VALUE",j).toString().equals("2")) {
-                  if (hId==3) inic += 30; 
-                  if (hId==4) inic += (cancer) ? 30:2; 
-                  if (hId==5) inic += 1;
-                  if (hId==6) inic += (sbp0==1310113) ? 2:1;
-                }
+              else if (sbp0==1310112 || sbp0==1340109) {
+                ssCode[5] = dbm2.getData("DETAIL_VALUE",j).toString();
               }
             }
-            System.out.println("inic : "+inic);
-            pointCode = inic;
+            for (int k=0;k<6;k++) itemCode += ssCode[k];
+            System.out.println("itemCode : "+itemCode);
             buf.delete(0,buf.length());
             buf.append("select service_unit,service_name from m_service_code ");
             buf.append("where system_service_kind_detail='");
             buf.append(sbp);
-            buf.append("' and  service_code_item='");
-            buf.append(pointCode);
+            buf.append("' and  system_service_code_item='");
+            buf.append(itemCode);
             buf.append("' and service_valid_end>='");
             buf.append(nStart);
             buf.append("' and service_valid_start<='");
@@ -619,6 +653,8 @@ public class QkanKyotakuData {
               }
               //if (hiyou%10>0) futan +=1;
               System.out.println("p = "+p+" hiyou = "+hiyou+" futan = "+futan);
+              if (hiyou>0) totalFee1 += hiyou;
+              if (futan>0) totalFee2 += futan;
               pline.addElement(sName);
               pline.addElement(new Integer(hiyou));
               pline.addElement(new Integer(futan));
@@ -683,9 +719,9 @@ public class QkanKyotakuData {
   
               buf.append(" where PATIENT_ID=");
               buf.append(pNo);
-              buf.append(" and INSURED_ID=");
+              buf.append(" and INSURED_ID='");
               buf.append(insId);
-              buf.append(" and extract(YEAR from TARGET_DATE)=");
+              buf.append("' and extract(YEAR from TARGET_DATE)=");
               buf.append(targetYear);
               buf.append(" and extract(MONTH from TARGET_DATE)=");
               buf.append(targetMonth);
@@ -745,8 +781,15 @@ public class QkanKyotakuData {
               dbm3.execQuery(buf.toString());
               dbm3.Close();
               if (dbm3.Rows>0) {
-                if (cRows>0) pline.addElement(new Integer(dbm2.getData("DETAIL_VALUE",0).toString()));
-                else pline.addElement(new Integer(dbm3.Rows));
+                if (cRows>0) {
+                  pline.addElement(new Integer(dbm2.getData("DETAIL_VALUE",0).toString()));
+                  totalCount += Integer.parseInt(dbm2.getData("DETAIL_VALUE",0).toString());
+                }
+                else {
+                  //pline.addElement(new Integer(dbm3.Rows));
+                  pline.addElement(new Integer(sCount));
+                  totalCount += sCount;
+                }
                 StringBuffer sb = new StringBuffer();
                 for (int l=0;l<dbm3.Rows;l++) {
                   sb.append((l>0) ? ", ":" ");
@@ -768,12 +811,16 @@ public class QkanKyotakuData {
                              +Integer.parseInt(dbm2.getData("DETAIL_VALUE",13).toString());
                    if (jikouhi>0) futan = jikouhi;
                   }
+                  if (hiyou>0) totalFee1 += hiyou;
+                  if (futan>0) totalFee2 += futan;
+                  if (kouhi>0) totalFee5 += kouhi;
                   pline.addElement(new Integer(hiyou));
                   pline.addElement(new Integer(futan));
                   pline.addElement(new Integer(kouhi));
                 }
               }
               else {
+                totalCount += sCount;
                 pline.addElement(new Integer(sCount));
                 pline.addElement("");
                 pline.addElement("");
@@ -782,6 +829,28 @@ public class QkanKyotakuData {
             }
           }
           pdata.addElement(pline);
+          trCols = pline.size();
+        }
+        System.out.println(trCols+"fields  "+totalCount+":"+totalFee1+":"+totalFee2+":"+totalFee5);
+        int cn1,cn2,cn3,cn4,cn5,cn6;
+        cn1= 6;
+        cn2= 8;
+        cn3= 9;
+        cn4= 10;
+        for (int c=0;c<trCols;c++) {
+          if (c==1) totalRow.addElement(new String("  合 計 値"));
+          else if (targetDay>0) {
+            if (c==cn2) totalRow.addElement(new Integer(totalFee1));
+            else if (c==cn3) totalRow.addElement(new Integer(totalFee2));
+            else totalRow.addElement(new String(""));
+          }
+          else {
+            if (c==cn1) totalRow.addElement(new Integer(totalCount));
+            else if (c==cn2) totalRow.addElement(new Integer(totalFee1));
+            else if (c==cn3) totalRow.addElement(new Integer(totalFee2));
+            else if (c==cn4) totalRow.addElement(new Integer(totalFee5));
+            else totalRow.addElement(new String(""));
+          }
         }
         scp = getScrollList(pdata,targetDay);
         pn2.add(scp);
@@ -790,10 +859,10 @@ public class QkanKyotakuData {
         if (targetDay>0) {
           JLabel lab1 = new JLabel("＊日単位での金額について：負担金額は端数処理の関係で月間金額とは異なる場合があります。 ");
           lab1.setFont(new Font("Dialog",Font.PLAIN,11));
-          //JLabel lab2 = new JLabel("　　　　　　　　　　　　　公費負担分は考慮しておりません。");
-          //lab2.setFont(new Font("Dialog",Font.PLAIN,11));
+          JLabel lab2 = new JLabel("　　　　　　　　　　　　また、回数限度は考慮しておりません。");
+          lab2.setFont(new Font("Dialog",Font.PLAIN,11));
           pnl.add(lab1,BorderLayout.NORTH);
-          //pnl.add(lab2,BorderLayout.CENTER);
+          pnl.add(lab2,BorderLayout.CENTER);
         } else {
           JLabel lab1 = new JLabel("＊月間での金額は、実績確定分のみ表示されます。 ");
           lab1.setFont(new Font("Dialog",Font.PLAIN,11));
@@ -881,6 +950,8 @@ public class QkanKyotakuData {
       int cid=0;
       DefaultTableCellRenderer ren = new DefaultTableCellRenderer();
       ren.setHorizontalAlignment(SwingConstants.RIGHT);
+      DefaultTableCellRenderer cen = new DefaultTableCellRenderer();
+      cen.setHorizontalAlignment(SwingConstants.CENTER);
       sorter.setColumnClass(0,Integer.class);
       sorter.setColumnClass(3,Integer.class);
       if (td==0) {
@@ -903,7 +974,9 @@ public class QkanKyotakuData {
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32);
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(60);
       if (td>0) {
+        usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
         usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(60);
+        usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
         usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(60);
         usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(160);
       } 
@@ -931,6 +1004,7 @@ public class QkanKyotakuData {
       scrPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
       scrPane.getVerticalScrollBar();
       scrPane.setPreferredSize(new Dimension(740,410));
+      scrPane.setBackground(new Color(210,250,230));
       return scrPane;
     }
 
@@ -980,17 +1054,23 @@ public class QkanKyotakuData {
       Arrays.fill(ctype,0);
       ctype[cid] = 2; // 0 - normal 1 - add comma 2 - align right
       width[cid++] = 4; //No.
+      ctype[cid] = 2;
       width[cid++] = 7; //被保険者番号
       width[cid++] = 16; //氏名
       ctype[cid] = 2; // 0 - normal 1 - add comma 2 - align right
       width[cid++] = 4; //年齢
+      ctype[cid] = 7;
       width[cid++] = 6; //要介護度
       if (targetDay>0) {
+        ctype[cid] = 7;
         width[cid++] = 6; //開始時刻
+        ctype[cid] = 7;
         width[cid++] = 6; //終了時刻
+        ctype[cid] = 7;
         width[cid++] = 14; //サービス名称
       } 
       if (targetDay==0) {
+        ctype[cid] = 7;
         width[cid++] = 3; //種類
         ctype[cid] = 2; // 0 - normal 1 - add comma 2 - align right
         width[cid++] = 3; //回数
@@ -1040,8 +1120,9 @@ public class QkanKyotakuData {
         } 
         sb.append(" 提供分");
         pdf.setSubTitle(sb.toString());
-      if (pdf.openPDF("居宅療養看護指導情報")) {
+      if (pdf.openPDF("居宅療養管理指導情報")) {
         pdf.setTable(usrTbl,width,ctype,0);
+        pdf.setRow(totalRow,width,ctype,0);
         pdf.flush();
         return fname;
       }

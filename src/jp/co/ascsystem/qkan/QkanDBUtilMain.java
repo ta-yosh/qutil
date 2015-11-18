@@ -21,13 +21,13 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JSeparator;
 import javax.swing.JOptionPane;
 import javax.swing.ImageIcon;
 import javax.swing.JProgressBar;
 import javax.swing.JPanel;
-import javax.swing.JButton;
 import javax.swing.JRadioButton;
 import javax.swing.JLabel;
 
@@ -37,9 +37,10 @@ public class QkanDBUtilMain {
 
   public static void main(String[] args) {
 
-    //final Color bgColor = new Color(200,200,200);
+    final Color bgColor = new Color(200,240,220);
     //final Color btnColor0 = new Color(235,235,235);
-    //final Color btnColor1 = new Color(250,250,246);
+    final Color Color1 = new Color(50,20,20);
+    //final Color btnColor1 = new Color(150,150,150);
     //final Color btnColor2 = new Color(250,246,250);
     //final Color btnColor3 = new Color(246,250,250);
     //final Color btnColor4 = new Color(250,246,246);
@@ -47,11 +48,11 @@ public class QkanDBUtilMain {
     //final Color btnColor6 = new Color(246,246,250);
     final QkanDBUtilMain idm = new QkanDBUtilMain();
     final JFrame fr = new JFrame();
-    fr.setTitle("給管鳥 データユーティリティ Ver1.7.2");
+    fr.setTitle("給管鳥 データユーティリティ ver2.0.5");
     fr.setIconImage(idm.icon);
     final Container contentPane = fr.getContentPane();
     contentPane.setLayout(new BorderLayout());
-    //contentPane.setBackground(bgColor);
+    contentPane.setBackground(bgColor);
 
     Dimension bSize1 = new Dimension(120,30);
     Dimension bSize2 = new Dimension(150,30);
@@ -62,6 +63,9 @@ public class QkanDBUtilMain {
     imb.setPreferredSize( bSize1 );
     imb.setMaximumSize( bSize1 );
     imb.setMinimumSize( bSize1 );
+    //imb.setOpaque(false);
+    //imb.setContentAreaFilled(false);
+    //imb.setBorderPainted(false);
     //imb.setBackground(btnColor1);
     //imb.setBorder(BorderFactory.createRaisedBevelBorder());
 
@@ -246,18 +250,22 @@ public class QkanDBUtilMain {
     cb.addActionListener(appExit);
     JPanel pn = new JPanel();
     pn.setLayout(new BoxLayout(pn,BoxLayout.Y_AXIS));
+    pn.setOpaque(false);
     pn.add(Box.createVerticalGlue());
     pn.add(new JSeparator(JSeparator.HORIZONTAL));
     pn.add(Box.createVerticalStrut(5));
 
     JPanel lpn1 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    lpn1.setOpaque(false);
     final JLabel paLabel =  new JLabel("利用者別データ");
+    paLabel.setForeground(Color1);
     lpn1.add(paLabel);
     pn.add(lpn1);
 
     Dimension size1 = new Dimension(470,36);
     Dimension size2 = new Dimension(470,80);
     JPanel bpn0 = new JPanel();
+    bpn0.setOpaque(false);
     bpn0.setLayout(new BoxLayout(bpn0,BoxLayout.X_AXIS));
     bpn0.setMinimumSize(size1);
     bpn0.setMaximumSize(size1);
@@ -273,11 +281,14 @@ public class QkanDBUtilMain {
     pn.add(Box.createVerticalStrut(5));
 
     JPanel lpn2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
-    final JLabel csLabel =  new JLabel("情報別CSV書き出し／印刷");
+    lpn2.setOpaque(false);
+    JLabel csLabel =  new JLabel("情報別CSV書き出し／印刷");
+    csLabel.setForeground(Color1);
     lpn2.add(csLabel);
     pn.add(lpn2);
  
     JPanel bpn1 = new JPanel();
+    bpn1.setOpaque(false);
     bpn1.setLayout(new BoxLayout(bpn1,BoxLayout.X_AXIS));
     bpn1.setMinimumSize(size1);
     bpn1.setMaximumSize(size1);
@@ -290,6 +301,7 @@ public class QkanDBUtilMain {
     pn.add(bpn1);
     pn.add(Box.createVerticalStrut(10));
     JPanel bpn2 = new JPanel(new GridLayout(2,3,5,5));
+    bpn2.setOpaque(false);
     bpn2.setMinimumSize(size2);
     bpn2.setMaximumSize(size2);
     bpn2.setPreferredSize(size2);
@@ -315,6 +327,7 @@ public class QkanDBUtilMain {
     pn.add(Box.createVerticalStrut(10));
     pn.add(new JSeparator(JSeparator.HORIZONTAL));
     JPanel bpn3 = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+    bpn3.setOpaque(false);
     bpn3.setMinimumSize(size1);
     bpn3.setMaximumSize(size1);
     bpn3.setPreferredSize(size1);
@@ -322,6 +335,7 @@ public class QkanDBUtilMain {
     pn.add(bpn3);
     pn.add(Box.createVerticalGlue());
     JPanel pn0 = new JPanel();
+    pn0.setOpaque(false);
     pn0.setLayout(new BoxLayout(pn0,BoxLayout.X_AXIS));
     pn0.add(Box.createHorizontalGlue());
     pn0.add(pn);
@@ -329,6 +343,7 @@ public class QkanDBUtilMain {
 
     JLabel sysTitle = new JLabel("給管鳥 データユーティリティ");
     sysTitle.setFont(new Font("SanSerif",Font.BOLD,15));
+    sysTitle.setForeground(Color1);
     contentPane.add(sysTitle,BorderLayout.NORTH);
     contentPane.add(pn0,BorderLayout.CENTER);
     contentPane.add(new JLabel("  "),BorderLayout.EAST);

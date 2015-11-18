@@ -53,6 +53,9 @@ public class QkanHouKaiData {
     private double yunitRate;
     private double spRate;
     private double smRate;
+    private double kaizenRate;
+    private String taKaizenCode[];
+    private String yaKaizenCode[];
     public int Rows;
     private DngGenericCombo cBox,ymBox,dBox;
     private JComboBox ymbox,dbox;
@@ -65,12 +68,15 @@ public class QkanHouKaiData {
     private JPanel pn3 = new JPanel();
     private JPanel pnl = new JPanel(new BorderLayout()); 
     private JTable usrTbl;
+    private Vector totalRow;
     private boolean isSelectable=true;
     private boolean spArea=false;
     private boolean smProv1=false;
     private boolean smProv2=false;
     private DefaultTableModel dtm;
     private TableSorter2 sorter;
+    private int kaizen1 = 0;
+    private int kaizen2 = 0;
 
     private Hashtable tValue = new Hashtable();
     private Hashtable yValue = new Hashtable();
@@ -122,6 +128,12 @@ public class QkanHouKaiData {
       careRate.put("23","Í×²ð¸î3");
       careRate.put("24","Í×²ð¸î4");
       careRate.put("25","Í×²ð¸î5");
+      pn.setOpaque(false);
+      pnl.setOpaque(false);
+      pn1.setOpaque(false);
+      pn2.setOpaque(false);
+      pn3.setOpaque(false);
+      tPanel.setOpaque(false);
     }
 
     public void setUnit(String dat) {
@@ -131,22 +143,29 @@ public class QkanHouKaiData {
                                "V","W","X","Y","Z","a","b","c","d","e",
                                "f","g","h","i","j","k","l","m"};
       tValue.put("1110101",(new String[] {"","¿ÈÂÎ²ð¸î","À¸³è±ç½õ","¿ÈÂÎÀ¸³è","ÄÌ±¡²ð½õ"}));
-      tValue.put("1110106",(new String[] {"","Ìµ¤·","3µé"}));
+      tValue.put("1110106",(new String[] {"","Ìµ","½éÇ¤"}));
       tValue.put("1110107",(new String[] {"","1¿Í","2¿Í"}));
       tValue.put("1110108",(new String[] {"","ÄÌ¾ï","ÁáÄ«","Ìë´Ö","¿¼Ìë"}));
-      tValue.put("1110109",(new String[] {"","Ìµ¤·","I·¿","II·¿","III·¿"}));
-      tValue.put("1110110",(new String[] {"","Ìµ¤·","Í­¤ê"}));
-      tValue.put("1110111",(new String[] {"","Ìµ¤·","Í­¤ê"}));
-      tValue.put("12",(new String[] {"","Ìµ¤·","Í­¤ê"}));
-      yValue.put("1610101",(new String[] {"","I·¿","II·¿","III·¿"}));
-      yValue.put("1610102",(new String[] {"","Ìµ¤·","3µé"}));
-      yValue.put("1610103",(new String[] {"","Ìµ¤·","Í­¤ê"}));
-      yValue.put("1610104",(new String[] {"","Ìµ¤·","Í­¤ê"}));
-      yValue.put("12",(new String[] {"","Ìµ¤·","Í­¤ê"}));
+      tValue.put("1110109",(new String[] {"","Ìµ","I","II","III"}));
+      tValue.put("1110110",(new String[] {"","Ìµ","Í­"}));
+      tValue.put("1110111",(new String[] {"","Ìµ","Í­"}));
+      tValue.put("1110112",(new String[] {"","Ìµ","Í­"}));
+      tValue.put("1110113",(new String[] {"","Ìµ","½éÇ¤"}));
+      tValue.put("12",(new String[] {"","Ìµ","Í­"}));
+      tValue.put("16",(new String[] {"","Ìµ","Í­"}));
+      tValue.put("KAIZEN",(new String[] {"","Ìµ","I","II","III"}));
+      yValue.put("1610101",(new String[] {"","I","II","III"}));
+      yValue.put("1610102",(new String[] {"","Ìµ","½éÇ¤"}));
+      yValue.put("1610103",(new String[] {"","Ìµ","Í­"}));
+      yValue.put("1610104",(new String[] {"","Ìµ","Í­"}));
+      yValue.put("1610105",(new String[] {"","Ìµ","Í­"}));
+      yValue.put("1610106",(new String[] {"","Ìµ","Í­"}));
+      yValue.put("12",(new String[] {"","Ìµ","Í­"}));
+      yValue.put("16",(new String[] {"","Ìµ","Í­"}));
+      yValue.put("KAIZEN",(new String[] {"","Ìµ","I","II","III"}));
       StringBuffer buf = new StringBuffer();
-      buf.append("select service_code_item,service_unit,system_service_kind_detail from m_service_code ");
-      buf.append("where service_code_item in (8000,8001,8100,8101,8110,8111,4000,4001)");
-      buf.append(" and system_service_kind_detail in (11111,16111) ");
+      buf.append("select service_code_item,service_unit,system_service_kind_detail,system_service_code_item from m_service_code ");
+      buf.append(" where system_service_kind_detail in (11111,16111) ");
       buf.append(" and SUBSTRING(system_service_code_item from 1 for 1)='Z'");
       buf.append(" and service_valid_start<='");
       buf.append(dat);
@@ -157,23 +176,23 @@ public class QkanHouKaiData {
       if (dbm.connect()) {
         dbm.execQuery(buf.toString());
         dbm.Close();
-        if (targetYear<2009 || targetYear==2009 && targetMonth<4) {
-          taUnit.put("SPECIAL",dbm.getData(1,0)); //ÆÃÊÌÃÏ°è(¡ó)
-          yaUnit.put("SPECIAL",dbm.getData(1,1)); //ÆÃÊÌÃÏ°è(¡ó)
-          yaUnit.put("SPECIAL2",dbm.getData(1,2)); //ÆÃÊÌÃÏ°è(¡ó)
-        } else if (targetYear>2009 || targetYear==2009 && targetMonth>=4) {
-          taUnit.put("1110110",(new int[] {0,0,Integer.parseInt(dbm.getData(1,1).toString())})); //½é´ü²Ã»»
-          taUnit.put("1110111",(new int[] {0,0,Integer.parseInt(dbm.getData(1,0).toString())})); //¶ÛµÞ»þ²Ã»»
-          taUnit.put("SPECIAL",dbm.getData(1,2)); //ÆÃÊÌÃÏ°è(¡ó)
-          taUnit.put("SMALL",dbm.getData(1,3));  //¾®µ¬ÌÏ(¡ó)
-          taUnit.put("12",(new int[] {0,0,Integer.parseInt(dbm.getData(1,4).toString())}));
-          yaUnit.put("1610104",(new int[] {0,0,Integer.parseInt(dbm.getData(1,5).toString())}));
-          yaUnit.put("SPECIAL",dbm.getData(1,6)); //ÆÃÊÌÃÏ°è(¡ó)
-          yaUnit.put("SPECIAL2",dbm.getData(1,7)); //ÆÃÊÌÃÏ°è(¡ó)
-          yaUnit.put("SMALL",dbm.getData(1,8));  //¾®µ¬ÌÏ(¡ó)
-          yaUnit.put("SMALL2",dbm.getData(1,9));  //¾®µ¬ÌÏ(¡ó)
-          yaUnit.put("12",(new int[] {0,0,Integer.parseInt(dbm.getData(1,10).toString()),0,Integer.parseInt(dbm.getData(1,11).toString())}));
-        }
+        taUnit.put("1110110",(new int[] {0,0,Integer.parseInt(dbm.getData(1,1).toString())})); //½é´ü²Ã»»
+        taUnit.put("1110111",(new int[] {0,0,Integer.parseInt(dbm.getData(1,0).toString())})); //¶ÛµÞ»þ²Ã»»
+        taUnit.put("1110112",(new int[] {0,0,Integer.parseInt(dbm.getData(1,2).toString())})); //À¸³èµ¡Ç½¸þ¾å²Ã»»
+        taUnit.put("KAIZEN",(new int[] {0,0,Integer.parseInt(dbm.getData(1,3).toString()),Integer.parseInt(dbm.getData(1,4).toString()),Integer.parseInt(dbm.getData(1,5).toString())}));
+        taUnit.put("SPECIAL",dbm.getData(1,6)); //ÆÃÊÌÃÏ°è(¡ó)
+        taUnit.put("SMALL",dbm.getData(1,7));  //¾®µ¬ÌÏ(¡ó)
+        taUnit.put("12",(new int[] {0,0,Integer.parseInt(dbm.getData(1,8).toString())}));
+        taKaizenCode = new String[] {"","",dbm.getData(3,3).toString(),dbm.getData(3,4).toString(),dbm.getData(3,5).toString()};
+        yaUnit.put("1610104",(new int[] {0,0,Integer.parseInt(dbm.getData(1,9).toString())}));
+        yaUnit.put("1610105",(new int[] {0,0,Integer.parseInt(dbm.getData(1,10).toString())}));
+        yaUnit.put("KAIZEN",(new int[] {0,0,Integer.parseInt(dbm.getData(1,11).toString()),Integer.parseInt(dbm.getData(1,12).toString()),Integer.parseInt(dbm.getData(1,13).toString())}));
+        yaUnit.put("SPECIAL",dbm.getData(1,14)); //ÆÃÊÌÃÏ°è(¡ó)
+        yaUnit.put("SPECIAL2",dbm.getData(1,15)); //ÆÃÊÌÃÏ°è(¡ó)
+        yaUnit.put("SMALL",dbm.getData(1,16));  //¾®µ¬ÌÏ(¡ó)
+        yaUnit.put("SMALL2",dbm.getData(1,17));  //¾®µ¬ÌÏ(¡ó)
+        yaUnit.put("12",(new int[] {0,0,Integer.parseInt(dbm.getData(1,18).toString()),0,Integer.parseInt(dbm.getData(1,19).toString())}));
+        yaKaizenCode = new String[] {"","",dbm.getData(3,11).toString(),dbm.getData(3,12).toString(),dbm.getData(3,13).toString()};
 
 
         buf.delete(0,buf.length());
@@ -185,31 +204,35 @@ public class QkanHouKaiData {
         buf.append("and provider_id='");
         buf.append(currentProvider);
         buf.append("' and system_service_kind_detail in ('11111','16111') ");
-        buf.append("and system_bind_path in (2,3) ");
+        buf.append("and system_bind_path in (2,3,4) ");
         buf.append("order by system_service_kind_detail");
         dbm.connect();
         dbm.execQuery(buf.toString());
         dbm.Close();
         System.out.println(buf.toString());
         int mountFlg[] = new int[] {0,0,0,0};  
-        if (dbm.Rows==2) {
+        if (dbm.Rows==3) {
           if (Integer.parseInt(dbm.getData(1,0).toString())==11111) {
             if (Integer.parseInt(dbm.getData(3,0).toString())==2 && 
                 Integer.parseInt(dbm.getData(3,1).toString())==2)
               smProv1 = true; 
+            kaizen1 = Integer.parseInt(dbm.getData(3,2).toString());
           } else {
             if (Integer.parseInt(dbm.getData(3,0).toString())==2 && 
                 Integer.parseInt(dbm.getData(3,1).toString())==2)
               smProv2 = true; 
+            kaizen2 = Integer.parseInt(dbm.getData(3,2).toString());
           }
         }
-        if (dbm.Rows==4) {
+        if (dbm.Rows==6) {
           if (Integer.parseInt(dbm.getData(3,0).toString())==2 && 
               Integer.parseInt(dbm.getData(3,1).toString())==2)
              smProv1 = true; 
-          if (Integer.parseInt(dbm.getData(3,2).toString())==2 && 
-              Integer.parseInt(dbm.getData(3,3).toString())==2)
+          if (Integer.parseInt(dbm.getData(3,3).toString())==2 && 
+              Integer.parseInt(dbm.getData(3,4).toString())==2)
              smProv2 = true; 
+          kaizen1 = Integer.parseInt(dbm.getData(3,2).toString());
+          kaizen2 = Integer.parseInt(dbm.getData(3,5).toString());
         }
         System.out.println(dbm.Rows+" Small1 = "+smProv1+"Small2 = "+smProv2);
       }
@@ -426,7 +449,6 @@ public class QkanHouKaiData {
         nStart = (new Integer(targetYear).toString())+"-"+(new Integer(targetMonth).toString())+"-"+(new Integer(targetDay).toString());
 
       if (targetYear>0) setUnit(nStart);
-      if (targetYear>2009 || targetYear==2009 && targetMonth>=4) kaisei=20090401;
       if (dbm.connect()) {
         StringBuffer buf = new StringBuffer();
 
@@ -495,11 +517,22 @@ public class QkanHouKaiData {
         dbm.execQuery(sql);
         dbm.Close();
         Vector pdata = new Vector();
-        DngDBAccess dbm2 = new DngDBAccess("firebird",dbUri,dbUser,dbPass);
+        totalRow = new Vector();
         int pNo=-1;
         int sbp=-1;
         int uTp=-1;
         int ln = 0;
+        int totalKaizen=0;
+        int totalFee1=0;
+        int totalFee2=0;
+        int totalFee3=0;
+        int totalFee4=0;
+        int totalFee5=0;
+        int totalCount=0;
+        int trCols=0;
+        int totalTime1=0;
+        int totalTime2=0;
+        
         String sids = "";
         boolean monfin = false;
         boolean second = false;
@@ -567,10 +600,68 @@ public class QkanHouKaiData {
             pline.addElement("");
           }
           String kind = (sbp==11111) ? 
-                        "":"Í½ËÉ";
+                        "²ð":"Í½";
           String cR="1";
-
+          double vt=0.0;
+          double vt2=0.0;
+          double sti =0.0;
+          boolean stio = true;
+          String stim="";
+          int kaizenVal = 0;
+          DngDBAccess dbm2 = new DngDBAccess("firebird",dbUri,dbUser,dbPass);
           if (targetDay==0) {
+            //½è¶ø²þÁ±¼èÆÀ----------------------------------------------
+            if ( (sbp==11111 && kaizen1>1) || (sbp==16111 && kaizen2>1) ) {
+              buf.delete(0,buf.length());
+              buf.append("select distinct extract(YEAR from CLAIM_DATE),");
+              buf.append("extract(MONTH from CLAIM_DATE) from CLAIM where PATIENT_ID=");
+              buf.append(pNo);
+              buf.append(" and extract(YEAR from TARGET_DATE)=");
+              buf.append(targetYear);
+              buf.append(" and extract(MONTH from TARGET_DATE)=");
+              buf.append(targetMonth);
+              buf.append(" and CATEGORY_NO=3 and PROVIDER_ID='");
+              buf.append(currentProvider);
+              buf.append("'");
+              System.out.println(buf.toString());
+
+              dbm2.connect();
+              dbm2.execQuery(buf.toString());
+              dbm2.Close();
+              if (dbm2.Rows>0) {
+                int cYear = Integer.parseInt(dbm2.getData(0,0).toString());
+                if (Integer.parseInt(dbm2.getData(1,0).toString())<4) cYear--;
+
+                buf.delete(0,buf.length());
+                buf.append("select DETAIL_VALUE from CLAIM_DETAIL_TEXT_"+cYear);
+                buf.append(" where SYSTEM_BIND_PATH=301009 and CLAIM_ID = (");
+                buf.append("select CLAIM_ID from CLAIM_DETAIL_TEXT_"+cYear);
+                buf.append(" where CLAIM_ID in (select CLAIM_ID from ");
+                buf.append("CLAIM where PATIENT_ID=");
+                buf.append(pNo);
+                buf.append(" and extract(YEAR from TARGET_DATE)=");
+                buf.append(targetYear);
+                buf.append(" and extract(MONTH from TARGET_DATE)=");
+                buf.append(targetMonth);
+                buf.append(" and CATEGORY_NO=3 and PROVIDER_ID='");
+                buf.append(currentProvider);
+                buf.append("') and detail_value='");
+                if (sbp==11111)
+                  buf.append(taKaizenCode[kaizen1]);
+                else
+                  buf.append(yaKaizenCode[kaizen2]);
+                buf.append("');");
+                System.out.println(buf.toString());
+                dbm2.connect();
+                dbm2.execQuery(buf.toString());
+                dbm2.Close();
+                if (dbm2.Rows>0) {
+                  kaizenVal = Integer.parseInt(dbm2.getData(0,0).toString());
+                }
+              }
+            }
+            //½è¶ø²þÁ±¼èÆÀ----------------------------------------------
+
             buf.delete(0,buf.length());
             buf.append("select JOTAI_CODE from PATIENT_NINTEI_HISTORY ");
             buf.append("where PATIENT_ID=");
@@ -583,18 +674,54 @@ public class QkanHouKaiData {
             buf.append(pNo);
             buf.append(")");
             System.out.println(buf.toString());
-            DngDBAccess dbm4 = new DngDBAccess("firebird",dbUri,dbUser,dbPass);
-            dbm4.connect();
-            dbm4.execQuery(buf.toString());
-            dbm4.Close();
-            if (dbm4.Rows>0 && dbm4.getData("JOTAI_CODE",0)!=null) {
-              cR = dbm4.getData("JOTAI_CODE",0).toString();
+            dbm2.connect();
+            dbm2.execQuery(buf.toString());
+            dbm2.Close();
+            if (dbm2.Rows>0 && dbm2.getData("JOTAI_CODE",0)!=null) {
+              cR = dbm2.getData("JOTAI_CODE",0).toString();
               String cRate = (String)careRate.get(cR);
               pline.addElement(cRate);
             } else {
               pline.addElement("");
             }
             pline.addElement(kind);
+            if (sbp==16111) {
+              buf.delete(0,buf.length());
+              buf.append("select SERVICE_ID,SYSTEM_BIND_PATH,");
+              buf.append("extract(HOUR from DETAIL_VALUE),");
+              buf.append("extract(MINUTE from DETAIL_VALUE)");
+              buf.append(" from SERVICE_DETAIL_DATE_");
+              buf.append(detYear);
+              buf.append(" where SERVICE_ID in ("+sids+")");
+              buf.append(" and SYSTEM_BIND_PATH");
+              buf.append(" in (3,4)");
+              buf.append(" order by SERVICE_ID,SYSTEM_BIND_PATH;");
+              sql = buf.toString();
+              System.out.println(sql);
+              dbm2.connect();
+              dbm2.execQuery(sql);
+              dbm2.Close();
+              for (int j=0;j<dbm2.Rows;j=j+2) {
+                if (dbm2.getData(2,j+1)!=null) {
+                  int s_hou = Integer.parseInt(dbm2.getData(2,j+1).toString());
+                  int s_min = Integer.parseInt(dbm2.getData(3,j+1).toString());
+                  s_hou -= Integer.parseInt(dbm2.getData(2,j).toString());
+                  s_min -= Integer.parseInt(dbm2.getData(3,j).toString());
+                  if (s_hou<0) s_hou = 24+s_hou;
+                  if (s_min<0) {
+                    s_min += 60;
+                    s_hou -= 1;
+                  }
+                  stim = (new Integer(s_hou)).toString()+":"
+                        +((s_min<10)? "0":"")
+                        +(new Integer(s_min)).toString();
+                  sti = (double)s_hou*60.0+(double)s_min;
+                } else {
+                  stio = false;
+                  break;
+                }
+              }
+            }
           }
           else if (targetDay>0) {
             if (dbm.getData("JOTAI_CODE",i)!=null) {
@@ -622,13 +749,18 @@ public class QkanHouKaiData {
             dbm2.execQuery(sql);
             dbm2.Close();
             String ti,hou,min;
+            int s_hou=0;
+            int s_min=0;
             if (dbm2.getData(2,0)!=null) {
               hou = dbm2.getData(2,0).toString();
               min = dbm2.getData(3,0).toString();
+              s_hou = Integer.parseInt(hou);
+              s_min = Integer.parseInt(min);
               if (hou.length()==1) hou = "0"+hou;
               if (min.length()==1) min = "0"+min;
               ti = hou+":"+min;
             } else {
+              stio = false;
               ti = "";
             }
             pline.addElement(ti);
@@ -638,6 +770,11 @@ public class QkanHouKaiData {
               if (hou.length()==1) hou = "0"+hou;
               if (min.length()==1) min = "0"+min;
               ti = hou+":"+min;
+              s_hou = Integer.parseInt(hou) - s_hou;
+              s_min = Integer.parseInt(min) - s_min;
+              vt = s_hou; 
+              if (s_min>0) vt2 = 1;
+              if (s_min<0) vt2 = -1;
             } else {
               ti = "";
             }
@@ -645,10 +782,43 @@ public class QkanHouKaiData {
           }
           buf.delete(0,buf.length());
           buf.append("select SYSTEM_BIND_PATH,");
-          if (targetDay==0) 
-            buf.append("max(DETAIL_VALUE) as DETAIL_VALUE");
-          else
-            buf.append("DETAIL_VALUE");
+          if (targetDay==0) {
+            //buf.append("max(DETAIL_VALUE) as DETAIL_VALUE,");
+            //buf.append("sum(DETAIL_VALUE) as DETAIL_VALUE2");
+            buf.append("max(DETAIL_VALUE) as DETAIL_VALUE,");
+            buf.append(" case when (SYSTEM_BIND_PATH=1110104) then ");
+            buf.append("COALESCE( (select sum(DETAIL_VALUE*20) from");
+            buf.append(" SERVICE_DETAIL_INTEGER_"+detYear);
+            buf.append(" where system_bind_path=1110104 and DETAIL_VALUE=1");
+            buf.append(" and SERVICE_ID in ("+sids+")),0) + COALESCE( (");
+            buf.append("select sum((DETAIL_VALUE-1)*30) from ");
+            buf.append("SERVICE_DETAIL_INTEGER_"+detYear+" where ");
+            buf.append("system_bind_path=1110104 and DETAIL_VALUE>1 and ");
+            buf.append("SERVICE_ID in ("+sids+")),0) when ");
+            buf.append("(SYSTEM_BIND_PATH=1110105) then COALESCE( (");
+            buf.append("select sum(DETAIL_VALUE*45) from ");
+            buf.append("SERVICE_DETAIL_INTEGER_"+detYear+" where ");
+            buf.append("system_bind_path=1110105 and DETAIL_VALUE=1 and ");
+            buf.append("SERVICE_ID in ("+sids+")),0) + COALESCE( (");
+            buf.append("select sum((DETAIL_VALUE-1)*25+45) from ");
+            buf.append("SERVICE_DETAIL_INTEGER_"+detYear+" where ");
+            buf.append("system_bind_path=1110105 and DETAIL_VALUE>1 and ");
+            buf.append("SERVICE_ID in ("+sids+")),0) ");
+            buf.append("else max(DETAIL_VALUE) end as DETAIL_VALUE2"); 
+          }
+          else {
+            buf.append("DETAIL_VALUE,");
+            buf.append("case when (SYSTEM_BIND_PATH=1110104) then     ");
+            buf.append("           case when (DETAIL_VALUE = 1) then '20' ");
+            buf.append("                else (DETAIL_VALUE-1)*30          ");
+            buf.append("           end                                    ");
+            buf.append("         when (SYSTEM_BIND_PATH=1110105) then     ");
+            buf.append("           case when (DETAIL_VALUE = 1) then '45' ");
+            buf.append("                else (DETAIL_VALUE-1)*25+45       ");
+            buf.append("           end                                    ");
+            buf.append("         else DETAIL_VALUE                        ");
+            buf.append("end as DETAIL_VALUE2"); 
+          }
           buf.append(" from SERVICE_DETAIL_INTEGER_");
           buf.append(detYear);
           buf.append(" where SERVICE_ID");
@@ -656,8 +826,10 @@ public class QkanHouKaiData {
             buf.append(" in ("+sids+")");
           else
             buf.append("="+sNo);
+/*
           buf.append(" and SYSTEM_BIND_PATH");
           buf.append(" in (12,14,1110101,1110104,1110105,1110106,1110107,1110108,1110109,1110110,1110111,1610101,1610102,1610103,1610104)");
+*/
           if (targetDay==0) 
             buf.append(" group by SYSTEM_BIND_PATH ");
           buf.append(" order by SYSTEM_BIND_PATH;");
@@ -676,25 +848,30 @@ public class QkanHouKaiData {
           int tPlus=0;
           int mPlus=0;
           int addUnit=0;
+          int addBas=0;
           int vtime=0;
           double unitRate;
           boolean hiwari = false;
           boolean smProv = false;
+          int kaizen = 0;
           ItemCode = "";
           if (sbp==11111) {
             smProv = smProv1;
+            kaizen = kaizen1;
             unitRate = tunitRate;
             Hashtable tVal = new Hashtable();
             tVal.put("1110101","");
-            tVal.put("1110104","0");
-            tVal.put("1110105","0");
+            tVal.put("1110104","0:00");
+            tVal.put("1110105","0:00");
             tVal.put("1110106","");
             tVal.put("1110107","");
             tVal.put("1110108","");
             tVal.put("1110109","");
             tVal.put("1110110","");
             tVal.put("1110111","");
-            String[] ssCode = new String[] {"0","0","0","0","0","0","0"};
+            tVal.put("1110112","");
+            tVal.put("1110113","");
+            String[] ssCode = new String[] {"1","1","1","1","1","1","1","1"};
             int ssCount = 0; 
             for (int j=0;j<dbm2.Rows;j++){
               System.out.println("Rows start: "+j);
@@ -704,24 +881,30 @@ public class QkanHouKaiData {
                 System.out.println("kaisei: "+kaisei);
               }
               else if (sbp0==1110104 || sbp0==1110105) {
-                int vt = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
-                double val = (double)vt/2.0; 
+                int t = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
+                int t2 = Integer.parseInt(dbm2.getData("DETAIL_VALUE2",j).toString());
+                if (ssCode[0].equals("2")) t2 -= 25;
                 //pline.addElement(Double.toString(val));
-                tVal.put(Integer.toString(sbp0),Double.toString(val));
+                String hou = (new Integer(t2/60)).toString();
+                String min = (new Integer(t2%60)).toString();
+                String val = hou+":"+((min.length()==1)? "0":"")+min;
+                tVal.put(Integer.toString(sbp0),val);
                 switch (sbp0) {
                   case 1110104:
-                    ssCode[1] = timeCode[vt];
+                    ssCode[1] = timeCode[t];
+                    totalTime1 += (double)t2;
                     break;
                   case 1110105:
-                    if (vt==0) ssCode[2] = "0";
-                    else if (vt==1) ssCode[2] = "1";
-                    else if (vt==2) ssCode[2] = "2";
+                    totalTime2 += (double)t2;
+                    if (t==0) ssCode[2] = "0";
+                    else if (t==1) ssCode[2] = "1";
+                    else if (t==2) ssCode[2] = "2";
                     else ssCode[2] = "3";
                     break;
                 }
                 ssCount=3;
               }
-              else if (kaisei!=0 &&(sbp0==12 || sbp0==1110110 || sbp0==1110111)) {
+              else if (sbp0==12 || sbp0==1110110 || sbp0==1110111 || sbp0==1110112) {
                 int key = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
                 String[] val = (String[])tValue.get(Integer.toString(sbp0)); 
                 //pline.addElement(val[key]);
@@ -729,81 +912,105 @@ public class QkanHouKaiData {
                 int[] add = (int[]) taUnit.get(dbm2.getData("SYSTEM_BIND_PATH",j).toString());
                 System.out.println("sbp = "+sbp0+" key = "+key+" add= "+add[key]);
                 if (sbp0==12) mountRate = (double)add[key]/100.0; 
-                else if (sbp0==1110110) {
+                else if (sbp0==1110110 || sbp0==1110112) {
                  System.out.println("targetDay="+targetDay+" firstDate="+firstDate.get(Integer.toString(pNo))); 
                  if (targetDay==Integer.parseInt(firstDate.get(Integer.toString(pNo)).toString()) && ! firsted.get(new Integer(pNo)).equals("true")) {
                      addUnit += add[key];
-                     if (add[key]>0) firsted.put(new Integer(pNo),"true");
+                     addBas += add[key];
+                     if (sbp0==1110112 && add[key]>0) firsted.put(new Integer(pNo),"true");
                  }
                 }
                 else addUnit += add[key];
               }
               else {
+                if (!tValue.containsKey(Integer.toString(sbp0))) continue;
                 int key = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
                 String[] val = (String[])tValue.get(Integer.toString(sbp0)); 
                 //pline.addElement(val[key]);
                 tVal.put(Integer.toString(sbp0),val[key]);
-                if (sbp0==1110106 && ssCount<3) ssCount=3;
-                if (sbp0==1110108 && ssCount<5) ssCount=5;
+                if (sbp0==1110101) ssCount=0;
+                if (sbp0==16 && ssCount<4) ssCount=4;
+                if (sbp0==1110107 && ssCount<5) ssCount=5;
+                if (sbp0==1110113) ssCount=3;
                 if (sbp0==1110108 && key > 2) 
                   ssCode[ssCount++] = (new Integer(key-1)).toString();
-                else
+                else if (ssCount<8)
                   ssCode[ssCount++] = dbm2.getData("DETAIL_VALUE",j).toString();
               }
               System.out.println("num"+sbp0+"num = "+dbm2.getData("DETAIL_VALUE",j));
             }
+            String[] val = (String[])tValue.get("KAIZEN");
+           if (targetDay==0 && kaizenVal!=0) {
+              tVal.put("KAIZEN","("+val[kaizen]+") "+Integer.toString(kaizenVal));
+              totalKaizen = totalKaizen + kaizenVal;
+            }
+            else {
+              tVal.put("KAIZEN",val[kaizen]);
+            }
             pline.addElement((String)tVal.get("1110101"));
             pline.addElement((String)tVal.get("1110104"));
             pline.addElement((String)tVal.get("1110105"));
-            pline.addElement((String)tVal.get("1110106"));
+            pline.addElement((String)tVal.get("1110113"));
             pline.addElement((String)tVal.get("1110107"));
             pline.addElement((String)tVal.get("1110108"));
             pline.addElement((String)tVal.get("1110109"));
-            if (kaisei!=0) {
-              pline.addElement((String)tVal.get("1110110"));
-              pline.addElement((String)tVal.get("1110111"));
-              pline.addElement((String)tVal.get("12"));
-            }
+            pline.addElement((String)tVal.get("1110110"));
+            pline.addElement((String)tVal.get("1110112"));
+            pline.addElement((String)tVal.get("1110111"));
+            pline.addElement((String)tVal.get("12"));
             pline.addElement("");
             pline.addElement("");
-            for (int ii=0;ii<7;ii++) ItemCode += ssCode[ii];
+            pline.addElement((String)tVal.get("KAIZEN"));
+            for (int ii=0;ii<8;ii++) ItemCode += ssCode[ii];
             System.out.println("ItemtCode : "+ItemCode);
             spRate = (double)Integer.parseInt(taUnit.get("SPECIAL").toString())/100.0; 
-            if (kaisei!=0) smRate = (double)Integer.parseInt(taUnit.get("SMALL").toString())/100.0; 
+            smRate = (double)Integer.parseInt(taUnit.get("SMALL").toString())/100.0; 
+            int[] add = (int[])taUnit.get("KAIZEN");
+            kaizenRate = (double)add[kaizen]/1000.0;
           }
           else {
             smProv = smProv2;
+            kaizen = kaizen2;
             unitRate = yunitRate;
             Hashtable yoVal = new Hashtable();
             yoVal.put("1610101","");
             yoVal.put("1610102","");
             yoVal.put("1610103","");
             yoVal.put("1610104","");
-            String[] ssCode = new String[] {"4","4","4","4"};
+            String[] ssCode = new String[] {"1",((cR.equals("12"))? "3":"4"),"1","1","1","1"};
             int ssCount = 0; 
             for (int j=0;j<dbm2.Rows;j++) {
               int sbp0 = Integer.parseInt(dbm2.getData("SYSTEM_BIND_PATH",j).toString());
               System.out.println("Rows start: "+j+" sbp0= "+sbp0);
+              if (sbp0==15) continue;
               if (sbp0==14) {
                 kaisei=Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
                 System.out.println("kaisei: "+kaisei);
               }
               else {
+                if (!yValue.containsKey(Integer.toString(sbp0))) continue;
                 int key = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
                 String[] val = (String[])yValue.get(Integer.toString(sbp0)); 
                 //pline.addElement(val[key]);
                 yoVal.put(Integer.toString(sbp0),val[key]);
-                if (sbp0!=12 && sbp0!=1610104)
-                  ssCode[ssCount++] = dbm2.getData("DETAIL_VALUE",j).toString();
-                if (ssCount==1) ssCount++;
+                if (sbp0==16) 
+                  ssCode[3] = dbm2.getData("DETAIL_VALUE",j).toString(); 
+                if (sbp0==1610101)
+                  ssCode[0] = dbm2.getData("DETAIL_VALUE",j).toString(); 
+                if (sbp0==1610102)
+                  ssCode[2] = dbm2.getData("DETAIL_VALUE",j).toString(); 
+                if (sbp0==1610103)
+                  ssCode[4] = dbm2.getData("DETAIL_VALUE",j).toString(); 
+                  
                 int[] add = (int[]) yaUnit.get(dbm2.getData("SYSTEM_BIND_PATH",j).toString());
                 if (sbp0==1610103 && key==2) hiwari=true;
-                if (kaisei!=0 && sbp0==12 && !second) mountRate = (double)add[key]/100.0; 
-                if (kaisei!=0 && sbp0==1610104) { 
+                if (sbp0==12 && !second) mountRate = (double)add[key]/100.0; 
+                if (sbp0>=1610104) { 
                   System.out.println("target = "+targetDay+" firstday = "+firstDate.get(Integer.toString(pNo))+" firsted = "+firsted.get(new Integer(pNo))+" add = "+add[key]);
                   if(targetDay==Integer.parseInt(firstDate.get(Integer.toString(pNo)).toString()) && ! firsted.get(new Integer(pNo)).equals("true")) {
                      addUnit += add[key];
-                     if (add[key]>0) firsted.put(new Integer(pNo),"true");
+                     addBas += add[key];
+                     if (sbp0==1610105 && add[key]>0) firsted.put(new Integer(pNo),"true");
                   }
                 }
               }
@@ -811,28 +1018,49 @@ public class QkanHouKaiData {
             }
             pline.addElement("");
             pline.addElement("");
-            pline.addElement("");
+            if (targetDay>0) {
+              sti = (double)(vt*60) + (double)(vt2*30);
+              stim = Integer.toString((int)((vt2>=0)? vt:vt-1))
+                    +":"+((vt2==0)? "00":"30");
+            }
+            if (stio) {
+              totalTime2 += sti;
+              pline.addElement(stim);
+            }
+            else
+              pline.addElement("");
+            String[] val = (String[])yValue.get("KAIZEN");
+            if (targetDay==0 && kaizenVal!=0) {
+              yoVal.put("KAIZEN","("+val[kaizen]+") "+Integer.toString(kaizenVal));
+              totalKaizen = totalKaizen + kaizenVal;
+            }
+            else {
+              yoVal.put("KAIZEN",val[kaizen]);
+            }
+
             pline.addElement((String)yoVal.get("1610102"));
             pline.addElement("");
             pline.addElement("");
             pline.addElement("");
-            if (kaisei!=0) {
-              pline.addElement((String)yoVal.get("1610104"));
-              pline.addElement("");
-              pline.addElement((String)yoVal.get("12"));
-            }
+            pline.addElement((String)yoVal.get("1610104"));
+            pline.addElement((String)yoVal.get("1610105"));
+            pline.addElement("");
+            pline.addElement((String)yoVal.get("12"));
             pline.addElement((String)yoVal.get("1610101"));
             pline.addElement((String)yoVal.get("1610103"));
-            for (int ii=0;ii<4;ii++) ItemCode += ssCode[ii];
+            pline.addElement((String)yoVal.get("KAIZEN"));
+            for (int ii=0;ii<5;ii++) ItemCode += ssCode[ii];
             System.out.println("ItemtCode : "+ItemCode);
+            int[] add = (int[])yaUnit.get("KAIZEN");
+            kaizenRate = (double)add[kaizen]/1000.0;
             if (!hiwari) {
               spRate = (double)Integer.parseInt(yaUnit.get("SPECIAL").toString())/100.0; 
-              if (kaisei!=0) smRate = (double)Integer.parseInt(yaUnit.get("SMALL").toString())/100.0; 
+              smRate = (double)Integer.parseInt(yaUnit.get("SMALL").toString())/100.0; 
             } else {
               spRate = (double)Integer.parseInt(yaUnit.get("SPECIAL2").toString())/100.0; 
-              if (kaisei!=0) smRate = (double)Integer.parseInt(yaUnit.get("SMALL2").toString())/100.0; 
-              if (kaisei!=0 && mountRate>0.0) {
-                int[] add = (int[]) yaUnit.get("12");
+              smRate = (double)Integer.parseInt(yaUnit.get("SMALL2").toString())/100.0; 
+              if (mountRate>0.0) {
+                add = (int[]) yaUnit.get("12");
                 mountRate = (double)add[4]/100.0; 
               }
             }
@@ -850,14 +1078,14 @@ public class QkanHouKaiData {
             buf.append(" and CATEGORY_NO=7 and PROVIDER_ID='");
             buf.append(currentProvider);
             buf.append("'");
-            DngDBAccess dbm5 = new DngDBAccess("firebird",dbUri,dbUser,dbPass);
-            dbm5.connect();
-            dbm5.execQuery(buf.toString());
-            dbm5.Close();
+            dbm2.connect();
+            dbm2.execQuery(buf.toString());
+            dbm2.Close();
             int cRows;
-            if (dbm5.Rows>0) { 
-              int cYear = Integer.parseInt(dbm5.getData(0,0).toString());
-              if (Integer.parseInt(dbm5.getData(1,0).toString())<4) cYear--; 
+            DngDBAccess dbm3 = new DngDBAccess("firebird",dbUri,dbUser,dbPass);
+            if (dbm2.Rows>0) { 
+              int cYear = Integer.parseInt(dbm2.getData(0,0).toString());
+              if (Integer.parseInt(dbm2.getData(1,0).toString())<4) cYear--; 
               buf.delete(0,buf.length());
               buf.append("select CLAIM_ID,SYSTEM_BIND_PATH,");
               buf.append("DETAIL_VALUE");
@@ -887,20 +1115,20 @@ public class QkanHouKaiData {
               buf.append(" order by SYSTEM_BIND_PATH;");
               sql = buf.toString();
               System.out.println(sql);
-              dbm2.connect();
-              dbm2.execQuery(sql);
-              dbm2.Close();
-              cRows = dbm2.Rows;
+              dbm3.connect();
+              dbm3.execQuery(sql);
+              dbm3.Close();
+              cRows = dbm3.Rows;
             }
             else cRows=0;
             if (cRows>0) {
-              System.out.println("Tani="+dbm2.getData("DETAIL_VALUE",1)+" Tanka="+dbm2.getData("DETAIL_VALUE",2)+"\n");
+              System.out.println("Tani="+dbm3.getData("DETAIL_VALUE",1)+" Tanka="+dbm3.getData("DETAIL_VALUE",2)+"\n");
               int other=0;
-              int clid = Integer.parseInt(dbm2.getData("CLAIM_ID",0).toString());
-              //if (!hiwari) pline.addElement(new Integer(dbm2.getData("DETAIL_VALUE",0).toString()));
+              int clid = Integer.parseInt(dbm3.getData("CLAIM_ID",0).toString());
+              //if (!hiwari) pline.addElement(new Integer(dbm3.getData("DETAIL_VALUE",0).toString()));
               //else {
-              DngDBAccess dbm3 = new DngDBAccess("firebird",dbUri,dbUser,dbPass);
-              if (dbm3.connect()) {
+              DngDBAccess dbm4 = new DngDBAccess("firebird",dbUri,dbUser,dbPass);
+              if (dbm4.connect()) {
                 buf.delete(0,buf.length());
                 if (hiwari) {
                   buf.append("select count(service_date),SERVICE_USE_TYPE from");
@@ -939,26 +1167,31 @@ public class QkanHouKaiData {
                 buf.append("') group by SERVICE_USE_TYPE");
                 buf.append(" order by SERVICE_USE_TYPE desc");
                 System.out.println(buf.toString());
-                dbm3.execQuery(buf.toString());
-                dbm3.Close();
-                if (dbm3.getData(0,0)!=null)
-                  pline.addElement(new Integer(dbm3.getData(0,0).toString()));
+                dbm4.execQuery(buf.toString());
+                dbm4.Close();
+                if (dbm4.getData(0,0)!=null) {
+                  pline.addElement(new Integer(dbm4.getData(0,0).toString()));
+                  totalCount +=Integer.parseInt(dbm4.getData(0,0).toString());
+                }
+                else 
+                  pline.addElement(new String(""));
               }
+              else pline.addElement(new String(""));
               //}
-              int hiyou = (int)(Float.parseFloat(dbm2.getData("DETAIL_VALUE",1).toString())*Float.parseFloat(dbm2.getData("DETAIL_VALUE",2).toString()));
-              int futan = Integer.parseInt(dbm2.getData("DETAIL_VALUE",4).toString());
+              int hiyou = (int)(Float.parseFloat(dbm3.getData("DETAIL_VALUE",1).toString())*Float.parseFloat(dbm3.getData("DETAIL_VALUE",2).toString()));
+              int futan = Integer.parseInt(dbm3.getData("DETAIL_VALUE",4).toString());
             
               int kouhiunit,kouhi,jikouhi;
               if (cRows>5) {
-                kouhiunit = Integer.parseInt(dbm2.getData("DETAIL_VALUE",5).toString())
-                       +Integer.parseInt(dbm2.getData("DETAIL_VALUE",8).toString())
-                       +Integer.parseInt(dbm2.getData("DETAIL_VALUE",11).toString());
-                kouhi = Integer.parseInt(dbm2.getData("DETAIL_VALUE",6).toString())
-                       +Integer.parseInt(dbm2.getData("DETAIL_VALUE",9).toString())
-                       +Integer.parseInt(dbm2.getData("DETAIL_VALUE",12).toString());
-                jikouhi = Integer.parseInt(dbm2.getData("DETAIL_VALUE",7).toString())
-                       +Integer.parseInt(dbm2.getData("DETAIL_VALUE",10).toString())
-                       +Integer.parseInt(dbm2.getData("DETAIL_VALUE",13).toString());
+                kouhiunit = Integer.parseInt(dbm3.getData("DETAIL_VALUE",5).toString())
+                       +Integer.parseInt(dbm3.getData("DETAIL_VALUE",8).toString())
+                       +Integer.parseInt(dbm3.getData("DETAIL_VALUE",11).toString());
+                kouhi = Integer.parseInt(dbm3.getData("DETAIL_VALUE",6).toString())
+                       +Integer.parseInt(dbm3.getData("DETAIL_VALUE",9).toString())
+                       +Integer.parseInt(dbm3.getData("DETAIL_VALUE",12).toString());
+                jikouhi = Integer.parseInt(dbm3.getData("DETAIL_VALUE",7).toString())
+                       +Integer.parseInt(dbm3.getData("DETAIL_VALUE",10).toString())
+                       +Integer.parseInt(dbm3.getData("DETAIL_VALUE",13).toString());
               } else {
                 kouhiunit = -1;
                 kouhi = 0;
@@ -980,19 +1213,24 @@ public class QkanHouKaiData {
               buf.append(clid);
               buf.append(") )");
               System.out.println(buf.toString());
-              dbm2.connect();
-              dbm2.execQuery(buf.toString());
-              dbm2.Close();
-              if (dbm2.Rows>0) {
+              dbm3.connect();
+              dbm3.execQuery(buf.toString());
+              dbm3.Close();
+              if (dbm3.Rows>0) {
                  for (int j=1;j<16;j=j+2) {
-                   if (dbm2.getData(j,0)!=null) 
-                     other += Integer.parseInt(dbm2.getData(j+1,0).toString());
+                   if (dbm3.getData(j,0)!=null) 
+                     other += Integer.parseInt(dbm3.getData(j+1,0).toString());
                  }
-                 if (dbm2.getData("OTHER_HIMOKU_NO6",0)!=null)
-                   other += Integer.parseInt(dbm2.getData("OTHER_PAY_NO6",0).toString());
+                 if (dbm3.getData("OTHER_HIMOKU_NO6",0)!=null)
+                   other += Integer.parseInt(dbm3.getData("OTHER_PAY_NO6",0).toString());
               }
 
               if (kouhiunit>0) futan = futan+ jikouhi;
+              if (hiyou>0) totalFee1 += hiyou;
+              if (futan>0) totalFee2 += futan;
+              if (other>0) totalFee3 += other;
+              if (other+futan>0) totalFee4 += other+futan;
+              if (kouhi>0) totalFee5 += kouhi;
               pline.addElement(new Integer(hiyou));
               pline.addElement(new Integer(futan));
               pline.addElement(new Integer(other));
@@ -1004,7 +1242,6 @@ public class QkanHouKaiData {
               //}
             }
             else { 
-              DngDBAccess dbm3 = new DngDBAccess("firebird",dbUri,dbUser,dbPass);
               if (dbm3.connect()) {
                 buf.delete(0,buf.length());
                 buf.append("select count(service_id),SERVICE_USE_TYPE,");
@@ -1043,15 +1280,35 @@ public class QkanHouKaiData {
                 dbm3.execQuery(buf.toString());
                 dbm3.Close();
                 if (dbm3.Rows>0) {
-                  if (dbm3.getData(0,0)!=null)
+                  if (dbm3.getData(0,0)!=null) {
                     pline.addElement(new Integer(dbm3.getData(0,0).toString()));
-                  else
+                    totalCount +=Integer.parseInt(dbm3.getData(0,0).toString());
+                  } else {
                     pline.addElement(new Integer(sCount));
+                    if (sCount>0) totalCount += sCount;
+                  }
+                  pline.addElement(new String(""));
+                  pline.addElement(new String(""));
+                  pline.addElement(new String(""));
+                  pline.addElement(new String(""));
+                  pline.addElement(new String(""));
                 }
                 else {
                     pline.addElement(new String("   -   "));
                     pline.addElement(new String("»»½ÐÉÔ²Ä"));
+                    pline.addElement(new String(""));
+                    pline.addElement(new String(""));
+                    pline.addElement(new String(""));
+                    pline.addElement(new String(""));
+                    pline.addElement(new String(""));
                 }
+              } else {
+                    pline.addElement(new String(""));
+                    pline.addElement(new String(""));
+                    pline.addElement(new String(""));
+                    pline.addElement(new String(""));
+                    pline.addElement(new String(""));
+                    pline.addElement(new String(""));
               }
             }
           }
@@ -1074,36 +1331,83 @@ public class QkanHouKaiData {
             if (dbm2.Rows>0) {
               StringBuffer sb = new StringBuffer();
               int p = (int) Integer.parseInt(dbm2.getData(0,0).toString());
-              sb.append("p = "+p+" ");
-              int pp = p;
+              sb.append("p = "+p+" add = "+addUnit);
+              int pp = p+addBas;
               if (spArea && !second) {
-                p = p + (int) ((double) p * spRate +0.50 );
-                sb.append("special = "+spRate+" ");
+                p = p + Math.round((float)((double) p * spRate));
+                sb.append(" special = "+spRate);
               }
-              if (kaisei!=0 && smProv && !second ) {
-                p = p + (int) ((double) p * smRate +0.50 );
-                sb.append("small = "+smRate+" ");
+              if (smProv && !second ) {
+                p = p + Math.round((float)((double) p * smRate));
+                sb.append(" small = "+smRate);
               }
-              if (kaisei!=0 && mountRate>0.0 && !second ) { 
-                addUnit += (int)( (double) p * mountRate + 0.50 );
-                sb.append("mount = "+mountRate+" ");
+              if (mountRate>0.0 && !second ) {
+                int mp = Math.round((float)((double) p * mountRate));
+                addUnit += mp;
+                sb.append(" mount = "+mp);
               }
               p += addUnit;
+              if (kaizenRate>0.0 && !second ) {
+                int kp = Math.round((float)((double) p * kaizenRate));
+                if (kaizen>2)
+                 kp = Math.round((float)((double)kp*(100-(kaizen-2)*10)/100.0));
+                p += kp;
+                sb.append(" kaizen = "+kp);
+              }
               int hiyou =(int)((double) p * unitRate);
               int futan = hiyou - (int)((double)hiyou/100.0*(double)insRate);
               //if (hiyou%10>0) futan +=1;
-              sb.append(" add = "+addUnit+" unitRate = "+unitRate+ " hiyou = "+hiyou+" futan = "+futan); 
+              sb.append(" unitRate = "+unitRate+ " hiyou = "+hiyou+" futan = "+futan); 
               System.out.println(sb.toString());
               if (hiwari && second && ItemCode.equals(lastCode)) {
                 pline.addElement(new String("   -   "));
                 pline.addElement(new String("   -   "));
               } else {
+                if (hiyou>0) totalFee1 += hiyou;
+                if (futan>0) totalFee2 += futan;
                 pline.addElement(new Integer(hiyou));
                 pline.addElement(new Integer(futan));
               }
             }
           }
           pdata.addElement(pline);
+          trCols = pline.size();
+        }
+        System.out.println(totalTime1+":"+totalTime2+":"+totalCount+":"+totalFee1+":"+totalFee2+":"+totalFee3+":"+totalFee4+":"+totalFee5);
+        int cn1,cn2,cn3,cn4,cn5,cn6; 
+        cn1= trCols-6; 
+        cn2= trCols-5; 
+        cn3= trCols-4;
+        cn4= trCols-3;
+        cn5= trCols-2;
+        cn6= trCols-1;
+        String hou = (new Integer(totalTime1/60)).toString();
+        String min = (new Integer(totalTime1%60)).toString();
+        String tt1 = hou+":"+((min.length()==1)? "0":"")+min;
+               hou = (new Integer(totalTime2/60)).toString();
+               min = (new Integer(totalTime2%60)).toString();
+        String tt2 = hou+":"+((min.length()==1)? "0":"")+min;
+        for (int c=0;c<trCols;c++) {
+          if (c==1) totalRow.addElement(new String("  ¹ç ·× ÃÍ"));
+          else if (targetDay>0) {
+            if (c == 8) totalRow.addElement(tt1);
+            else if (c == 9) totalRow.addElement(tt2);
+            else if (c==cn5) totalRow.addElement(new Integer(totalFee1));
+            else if (c==cn6) totalRow.addElement(new Integer(totalFee2));
+            else totalRow.addElement(new String(""));
+          }
+          else {
+            if (c == 6) totalRow.addElement(tt1);
+            else if (c == 7) totalRow.addElement(tt2);
+            else if (c==cn1-1) totalRow.addElement(new Integer(totalKaizen));
+            else if (c==cn1) totalRow.addElement(new Integer(totalCount));
+            else if (c==cn2) totalRow.addElement(new Integer(totalFee1));
+            else if (c==cn3) totalRow.addElement(new Integer(totalFee2));
+            else if (c==cn4) totalRow.addElement(new Integer(totalFee3));
+            else if (c==cn5) totalRow.addElement(new Integer(totalFee4));
+            else if (c==cn6) totalRow.addElement(new Integer(totalFee5));
+            else totalRow.addElement(new String(""));
+          }
         }
         scp = getScrollList(pdata,targetDay);
         pn2.add(scp);
@@ -1185,17 +1489,17 @@ public class QkanHouKaiData {
       fieldName.addElement("Ë¬Ìä¼ïÊÌ");
       fieldName.addElement("¿È»þ´Ö");
       fieldName.addElement("À¸»þ´Ö");
-      fieldName.addElement("3µé");
+      fieldName.addElement("½éÇ¤");
       fieldName.addElement("¿Í¿ô");
       fieldName.addElement("»þ´ÖÂÓ");
       fieldName.addElement("ÆÃÄê");
-      if (targetYear>2009 || targetYear==2009 && targetMonth>=4) {
-        fieldName.addElement("½é²ó");
-        fieldName.addElement("¶ÛµÞ");
-        fieldName.addElement("Ãæ»³´Ö");
-      }
+      fieldName.addElement("½é²ó");
+      fieldName.addElement("À¸³è");
+      fieldName.addElement("¶ÛµÞ");
+      fieldName.addElement("Ãæ»³´Ö");
       fieldName.addElement("²ð¸îÈñ");
       fieldName.addElement("Æü³ä");
+      fieldName.addElement("²þÁ±");
       if (td==0) {
         fieldName.addElement("²ó¿ô");
       }
@@ -1206,9 +1510,17 @@ public class QkanHouKaiData {
         fieldName.addElement("ÉéÃ´³Û¹ç·×");
         fieldName.addElement("¸øÈñÉéÃ´");
       }
+      JScrollPane scrPane = new JScrollPane();
+      scrPane.setPreferredSize(new Dimension(795,410));
+      scrPane.setFont(new Font("san-serif",Font.PLAIN,14));
+      scrPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+      scrPane.getHorizontalScrollBar();
+      scrPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+      scrPane.getVerticalScrollBar();
       dtm = new DefaultTableModel(data, fieldName);
       sorter = new TableSorter2(dtm);
       usrTbl = new JTable(sorter);
+      scrPane.getViewport().setView(usrTbl);
       sorter.setTableHeader(usrTbl.getTableHeader());
       sorter.setCellEditableAll(false);
       //sorter.setPrimaryKeyCol(0);
@@ -1221,36 +1533,25 @@ public class QkanHouKaiData {
       int cid=0;
       DefaultTableCellRenderer ren = new DefaultTableCellRenderer();
       ren.setHorizontalAlignment(SwingConstants.RIGHT);
+      DefaultTableCellRenderer cen = new DefaultTableCellRenderer();
+      cen.setHorizontalAlignment(SwingConstants.CENTER);
+      int numCols = usrTbl.getColumnCount();
       sorter.setColumnClass(0,Integer.class);
       sorter.setColumnClass(2,Integer.class);
       if (td==0) {
         sorter.setColumnClass(6,Double.class);
         sorter.setColumnClass(7,Double.class);
-        if (targetYear>2009 || targetYear==2009 && targetMonth>=4) {
-          sorter.setColumnClass(17,Integer.class);
-          sorter.setColumnClass(18,Integer.class);
-          sorter.setColumnClass(19,Integer.class);
-          sorter.setColumnClass(20,Integer.class);
-          sorter.setColumnClass(21,Integer.class);
-          sorter.setColumnClass(22,Integer.class);
-        } else {
-          sorter.setColumnClass(14,Integer.class);
-          sorter.setColumnClass(15,Integer.class);
-          sorter.setColumnClass(16,Integer.class);
-          sorter.setColumnClass(17,Integer.class);
-          sorter.setColumnClass(18,Integer.class);
-          sorter.setColumnClass(19,Integer.class);
-        }
+        sorter.setColumnClass(numCols-6,Integer.class);
+        sorter.setColumnClass(numCols-5,Integer.class);
+        sorter.setColumnClass(numCols-4,Integer.class);
+        sorter.setColumnClass(numCols-3,Integer.class);
+        sorter.setColumnClass(numCols-2,Integer.class);
+        sorter.setColumnClass(numCols-1,Integer.class);
       } else {
         sorter.setColumnClass(8,Double.class);
         sorter.setColumnClass(9,Double.class);
-        if (targetYear>2009 || targetYear==2009 && targetMonth>=4) {
-          sorter.setColumnClass(19,Integer.class);
-          sorter.setColumnClass(20,Integer.class);
-        } else {
-          sorter.setColumnClass(16,Integer.class);
-          sorter.setColumnClass(17,Integer.class);
-       }
+        sorter.setColumnClass(numCols-2,Integer.class);
+        sorter.setColumnClass(numCols-1,Integer.class);
       }
       usrTbl.getColumnModel().getColumn(0).setCellRenderer(ren);
       usrTbl.getColumnModel().getColumn(2).setCellRenderer(ren);
@@ -1261,23 +1562,38 @@ public class QkanHouKaiData {
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(60);
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32);
       if (td>0) {
+        usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
         usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(60);
+        usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
         usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(60);
       } 
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(65);
+      usrTbl.getColumnModel().getColumn(cid).setCellRenderer(ren);
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(47);
+      usrTbl.getColumnModel().getColumn(cid).setCellRenderer(ren);
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(47);
+      usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(30);
+      usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(30);
+      usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(40);
+      usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32);
-      if (targetYear>2009 || targetYear==2009 && targetMonth>=4) {
-        usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32);
-        usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32);
-        usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(40);
-      }
+      usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
+      usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32);
+      usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
+      usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32);
+      usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
+      usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32);
+      usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(40);
+      usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
+      usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(40);
+      usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32);
+      usrTbl.getColumnModel().getColumn(cid).setCellRenderer(ren);
+      usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(60);
       System.out.println("cid : "+cid);
       if (td==0) {
         usrTbl.getColumnModel().getColumn(cid).setCellRenderer(ren);
@@ -1297,14 +1613,6 @@ public class QkanHouKaiData {
         usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(60);
       }
       //usrTbl.getTableHeader().setReorderingAllowed(false);
-      JScrollPane scrPane = new JScrollPane();
-      scrPane.getViewport().setView(usrTbl);
-      scrPane.setFont(new Font("san-serif",Font.PLAIN,14));
-      scrPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-      scrPane.getHorizontalScrollBar();
-      scrPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-      scrPane.getVerticalScrollBar();
-      scrPane.setPreferredSize(new Dimension(795,410));
       return scrPane;
     }
 
@@ -1349,11 +1657,7 @@ public class QkanHouKaiData {
     public String PDFout() {
       int cid=0;
       int num=0;
-      if (targetDay==0) {
-        num=(targetYear>2009 || targetYear==2009 && targetMonth>=4)? 23:20;
-      } else {
-        num=(targetYear>2009 || targetYear==2009 && targetMonth>=4)? 21:18;
-      }
+      num=usrTbl.getColumnCount();
 
       float width[] = new float[num];
       int ctype[] = new int[num];
@@ -1363,28 +1667,44 @@ public class QkanHouKaiData {
       width[cid++] = 12; //»áÌ¾
       ctype[cid] = 2; // 0 - normal 1 - add comma 2 - align right
       width[cid++] = Float.parseFloat("3.5"); //Ç¯Îð
+      ctype[cid] = 7;
       width[cid++] = Float.parseFloat("6.5"); //Í×²ð¸îÅÙ
+      ctype[cid] = 7;
       width[cid++] = 4; //¼ïÎà
       if (targetDay>0) {
+        ctype[cid] = 7;
         width[cid++] = 6; //³«»Ï»þ¹ï
+        ctype[cid] = 7;
         width[cid++] = 6; //½ªÎ»»þ¹ï
       } 
+      ctype[cid] = 7;
       width[cid++] = Float.parseFloat("6.5"); //Ë¬Ìä¼ïÊÌ
       ctype[cid] = 2; // 0 - normal 1 - add comma 2 - align right
       width[cid++] = Float.parseFloat("4.5"); //¿ÈÂÎ»þ´Ö
       ctype[cid] = 2; // 0 - normal 1 - add comma 2 - align right
       width[cid++] = Float.parseFloat("4.5"); //À¸³è»þ´Ö
-      width[cid++] = Float.parseFloat("3.0"); //3µé
+      ctype[cid] = 2;
+      width[cid++] = Float.parseFloat("3.0"); //½éÇ¤
+      ctype[cid] = 2;
       width[cid++] = Float.parseFloat("3.2"); //¿Í¿ô
+      ctype[cid] = 7;
       width[cid++] = Float.parseFloat("4.5"); //»þ´ÖÂÓ
+      ctype[cid] = 7;
       width[cid++] = Float.parseFloat("3.2"); //ÆÃÄê
-      if (targetYear>2009 || targetYear==2009 && targetMonth>=4) {
-        width[cid++] = Float.parseFloat("3.2"); //½é²ó
-        width[cid++] = Float.parseFloat("3.2"); //¶ÛµÞ
-        width[cid++] = Float.parseFloat("4.5"); //Ãæ»³´Ö
-      }
+      ctype[cid] = 7;
+      width[cid++] = Float.parseFloat("3.2"); //½é²ó
+      ctype[cid] = 7;
+      width[cid++] = Float.parseFloat("3.2"); //À¸³èµ¡Ç½¸þ¾å
+      ctype[cid] = 7;
+      width[cid++] = Float.parseFloat("3.2"); //¶ÛµÞ
+      ctype[cid] = 7;
+      width[cid++] = Float.parseFloat("4.5"); //Ãæ»³´Ö
+      ctype[cid] = 7;
       width[cid++] = Float.parseFloat("4.5"); //Ë¬Ìä²ð¸îÈñ
+      ctype[cid] = 7;
       width[cid++] = Float.parseFloat("3.2"); //Æü³ä¤ê
+      ctype[cid] = 7;
+      width[cid++] = Float.parseFloat("6.0"); //²þÁ±
       if (targetDay==0) {
         ctype[cid] = 2; // 0 - normal 1 - add comma 2 - align right
         width[cid++] = Float.parseFloat("3.2"); //²ó¿ô
@@ -1438,8 +1758,11 @@ public class QkanHouKaiData {
         sb.append(" Äó¶¡Ê¬");
         pdf.setSubTitle(sb.toString());
       if (pdf.openPDF("Ë¬Ìä²ð¸î¾ðÊó")) {
+        //dtm.addRow(totalRow);
         pdf.setTable(usrTbl,width,ctype,0);
+        pdf.setRow(totalRow,width,ctype,0);
         pdf.flush();
+        //dtm.removeRow(dtm.getRowCount()-1);
         return fname;
       }
       else {

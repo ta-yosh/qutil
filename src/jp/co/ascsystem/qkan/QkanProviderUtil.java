@@ -281,6 +281,7 @@ public class QkanProviderUtil extends QkanPatientImport {
     } catch (Exception e) {
       System.out.println(e.toString());
       statMessage(STATE_ERROR,"データ一覧の取得失敗");
+      runStat = STATE_COMPLETE;
       return;
     }
 
