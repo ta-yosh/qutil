@@ -157,6 +157,7 @@ public class QkanHouKanData {
       tValue.put("1130121",(new String[] {"","無","有"}));
       tValue.put("1130122",(new String[] {"","無","ステ","病/診"}));
       tValue.put("1130123",(new String[] {"","無","有"}));
+      tValue.put("1130124",(new String[] {"","無","有"}));
       tValue.put("12",(new String[] {"","無","有"}));
       tValue.put("16",(new String[] {"","無","有"}));
       yValue.put("1630101",(new String[] {"","指定","病院/診療所"}));
@@ -166,7 +167,7 @@ public class QkanHouKanData {
       yValue.put("1630105",(new String[] {"","無","有"}));
       yValue.put("1630106",(new String[] {"","無","I","II"}));
       yValue.put("1630107",(new String[] {"","20分未満","30分未満","0.5"+tilde+"1時間","1"+tilde+"1.5時間"}));
-      yValue.put("1630108",(new String[] {"","看1介1","介2"}));
+      yValue.put("1630108",(new String[] {"","1人","2人"}));
       yValue.put("1630109",(new String[] {"","無","有"}));
       yValue.put("1630110",(new String[] {"","無","有"}));
       yValue.put("1630111",(new String[] {"","30分未満","30分以上"}));
@@ -175,6 +176,7 @@ public class QkanHouKanData {
       yValue.put("1630114",(new String[] {"","20分以上","40分以上","60分以上"}));
       yValue.put("1630115",(new String[] {"","無","有"}));
       yValue.put("1630116",(new String[] {"","無","有"}));
+      yValue.put("1630117",(new String[] {"","無","有"}));
       yValue.put("12",(new String[] {"","無","有"}));
       yValue.put("16",(new String[] {"","無","有"}));
       StringBuffer buf = new StringBuffer();
@@ -196,25 +198,25 @@ public class QkanHouKanData {
         taUnit.put("1130117",(new int[] {0,0,Integer.parseInt(dbm.getData(1,4).toString())})); //初回
         taUnit.put("1130118",(new int[] {0,0,Integer.parseInt(dbm.getData(1,5).toString())})); //退所時
         taUnit.put("1130119",(new int[] {0,0,Integer.parseInt(dbm.getData(1,6).toString())})); //介護連携
-        taUnit.put("1130120",(new int[] {0,0,Integer.parseInt(dbm.getData(1,7).toString())})); //減算
         taUnit.put("1130122",(new int[] {0,0,Integer.parseInt(dbm.getData(1,0).toString()),Integer.parseInt(dbm.getData(1,1).toString())})); //緊急時加算(定巡)
-        taUnit.put("1130113",(new int[] {0,Integer.parseInt(dbm.getData(1,8).toString()),Integer.parseInt(dbm.getData(1,8).toString()),Integer.parseInt(dbm.getData(1,9).toString())})); //サービス体制強化
-        taUnit.put("1130110",(new int[] {0,0,Integer.parseInt(dbm.getData(1,10).toString())})); //ターミナルケア
-/*
-          taUnit.put("SPECIAL",(new int[] {0,0,Integer.parseInt(dbm.getData(1,11)),Integer.parseInt(dbm.getData(1,12)),Integer.parseInt(dbm.getData(1,13))})); //特別地域(％)
-          taUnit.put("SMALL",(new int[] {0,0,Integer.parseInt(dbm.getData(1,14)),Integer.parseInt(dbm.getData(1,15)),Integer.parseInt(dbm.getData(1,16))}));  //小規模(％)
-*/
-        taUnit.put("SPECIAL",dbm.getData(1,11)); //特別地域(％)
-        taUnit.put("SMALL",dbm.getData(1,14));  //小規模(％)
-        taUnit.put("12",(new int[] {0,0,Integer.parseInt(dbm.getData(1,17).toString()),Integer.parseInt(dbm.getData(1,18).toString()),Integer.parseInt(dbm.getData(1,19).toString())}));
-        yaUnit.put("1630105",(new int[] {0,0,Integer.parseInt(dbm.getData(1,20).toString()),0,Integer.parseInt(dbm.getData(1,21).toString())})); //緊急
-        yaUnit.put("1630106",(new int[] {0,0,Integer.parseInt(dbm.getData(1,22).toString()),Integer.parseInt(dbm.getData(1,23).toString())})); //特別管理
-        yaUnit.put("1630112",(new int[] {0,0,Integer.parseInt(dbm.getData(1,24).toString())})); //初回
-        yaUnit.put("1630113",(new int[] {0,0,Integer.parseInt(dbm.getData(1,25).toString())})); //退所時
-        yaUnit.put("1630109",(new int[] {0,0,Integer.parseInt(dbm.getData(1,26).toString())})); //サービス体制強化
-        yaUnit.put("SPECIAL",dbm.getData(1,27)); //特別地域(％)
-        yaUnit.put("SMALL",dbm.getData(1,28));  //小規模(％)
-        yaUnit.put("12",(new int[] {0,0,Integer.parseInt(dbm.getData(1,29).toString())}));
+        taUnit.put("1130124",(new int[] {0,0,Integer.parseInt(dbm.getData(1,7).toString())})); //看護体制強化加算
+        taUnit.put("1130120",(new int[] {0,0,Integer.parseInt(dbm.getData(1,8).toString())})); //指示日数減算
+        taUnit.put("1130113",(new int[] {0,Integer.parseInt(dbm.getData(1,9).toString()),Integer.parseInt(dbm.getData(1,9).toString()),Integer.parseInt(dbm.getData(1,10).toString())})); //サービス体制強化
+        taUnit.put("1130110",(new int[] {0,0,Integer.parseInt(dbm.getData(1,11).toString())})); //ターミナルケア
+        //taUnit.put("SPECIAL",(new int[] {0,0,Integer.parseInt(dbm.getData(1,12).toString()),Integer.parseInt(dbm.getData(1,13).toString()),Integer.parseInt(dbm.getData(1,14).toString())})); //特別地域(％)
+        taUnit.put("SPECIAL",dbm.getData(1,12)); //特別地域(％)
+        //taUnit.put("SMALL",(new int[] {0,0,Integer.parseInt(dbm.getData(1,15).toString()),Integer.parseInt(dbm.getData(1,16).toString()),Integer.parseInt(dbm.getData(1,17).toString())}));  //小規模(％)
+        taUnit.put("SMALL",dbm.getData(1,15));  //小規模(％)
+        taUnit.put("12",(new int[] {0,0,Integer.parseInt(dbm.getData(1,18).toString()),Integer.parseInt(dbm.getData(1,19).toString()),Integer.parseInt(dbm.getData(1,20).toString())}));
+        yaUnit.put("1630105",(new int[] {0,0,Integer.parseInt(dbm.getData(1,21).toString()),0,Integer.parseInt(dbm.getData(1,22).toString())})); //緊急
+        yaUnit.put("1630106",(new int[] {0,0,Integer.parseInt(dbm.getData(1,23).toString()),Integer.parseInt(dbm.getData(1,24).toString())})); //特別管理
+        yaUnit.put("1630112",(new int[] {0,0,Integer.parseInt(dbm.getData(1,25).toString())})); //初回
+        yaUnit.put("1630113",(new int[] {0,0,Integer.parseInt(dbm.getData(1,26).toString())})); //退所時
+        yaUnit.put("1630117",(new int[] {0,0,Integer.parseInt(dbm.getData(1,27).toString())})); //退所時
+        yaUnit.put("1630109",(new int[] {0,0,Integer.parseInt(dbm.getData(1,28).toString())})); //サービス体制強化
+        yaUnit.put("SPECIAL",dbm.getData(1,29)); //特別地域(％)
+        yaUnit.put("SMALL",dbm.getData(1,30));  //小規模(％)
+        yaUnit.put("12",(new int[] {0,0,Integer.parseInt(dbm.getData(1,31).toString())}));
 
         buf.delete(0,buf.length());
         buf.append("select provider_id,system_service_kind_detail,");
@@ -447,6 +449,11 @@ public class QkanHouKanData {
     }
   
     public void setHouKanPanel(int targetYear,int targetMonth,int targetDay) {
+      Long diffTime;
+      double difft;
+      Calendar cal1 = Calendar.getInstance();
+      String date="Panel set start at "+cal1.get(Calendar.YEAR)+"."+(cal1.get(Calendar.MONTH) + 1) +"."+cal1.get(Calendar.DATE) +" "+cal1.get(Calendar.HOUR) + ":"+cal1.get(Calendar.MINUTE)+":"+cal1.get(Calendar.SECOND)+"."+cal1.get(Calendar.MILLISECOND);
+      System.out.println(date);
       Hashtable firsted= new Hashtable();
       pn2.setVisible(false);      
       pn2.removeAll();
@@ -472,7 +479,7 @@ public class QkanHouKanData {
 
         buf.append("select PATIENT_FIRST_NAME,PATIENT_FAMILY_NAME,");
         buf.append("SERVICE.PATIENT_ID,SERVICE.SERVICE_ID as SID,");
-        buf.append("SYSTEM_SERVICE_KIND_DETAIL,max(JOTAI_CODE) as JOTAI_CODE,PATIENT_BIRTHDAY,");
+        buf.append("SYSTEM_SERVICE_KIND_DETAIL,JOTAI_CODE,PATIENT_BIRTHDAY,");
         buf.append("count(SERVICE.SERVICE_ID),INSURE_RATE,");
         buf.append("min(INSURE_VALID_START) as INSURE_VALID_START,");
         buf.append("max(INSURE_VALID_END) as INSURE_VALID_END,");
@@ -481,7 +488,7 @@ public class QkanHouKanData {
         buf.append(",substring(SERVICE.LAST_TIME from 1 for 16) as LAST,");
         buf.append("SERVICE_DATE,");
         buf.append("SERVICE_DETAIL_DATE_");
-        buf.append(detYear+".DETAIL_VALUE as START");
+        buf.append(detYear+".DETAIL_VALUE as STARTT");
         buf.append(" from SERVICE ");
         buf.append(" inner join SERVICE_DETAIL_DATE_"+detYear+" on ");
         buf.append("SERVICE.SERVICE_ID=SERVICE_DETAIL_DATE_"+detYear);
@@ -490,17 +497,23 @@ public class QkanHouKanData {
         buf.append("(PATIENT.PATIENT_ID=SERVICE.PATIENT_ID and DELETE_FLAG=0)");
         buf.append(" inner join PATIENT_NINTEI_HISTORY on ");
         buf.append("(PATIENT_NINTEI_HISTORY.PATIENT_ID=SERVICE.PATIENT_ID and");
-        buf.append(" NINTEI_HISTORY_ID in ");
-        buf.append("(select NINTEI_HISTORY_ID from ");
+        buf.append(" NINTEI_HISTORY_ID = ");
+        buf.append("(select max(NINTEI_HISTORY_ID) from ");
         buf.append("PATIENT_NINTEI_HISTORY where PATIENT_ID=SERVICE.PATIENT_ID");
         buf.append(" and INSURE_VALID_END>='");
+        buf.append(nStart);
+        buf.append("' and SYSTEM_INSURE_VALID_END>='");
         buf.append(nStart);
         if (targetDay>0) {
           buf.append("' and INSURE_VALID_START<='");
           buf.append(nStart);
+          buf.append("' and SYSTEM_INSURE_VALID_START<='");
+          buf.append(nStart);
         }
         if (targetDay==0) {
           buf.append("' and INSURE_VALID_START<'");
+          buf.append(nEnd);
+          buf.append("' and SYSTEM_INSURE_VALID_START<'");
           buf.append(nEnd);
         }
 
@@ -524,9 +537,9 @@ public class QkanHouKanData {
         buf.append("PATIENT_FAMILY_NAME,PATIENT_BIRTHDAY,");
         buf.append("INSURE_RATE,SYSTEM_SERVICE_KIND_DETAIL");
         buf.append(",SERVICE.SERVICE_ID,LAST");
-        buf.append(",START,SERVICE_USE_TYPE,SERVICE_DATE");
+        buf.append(",STARTT,SERVICE_USE_TYPE,SERVICE_DATE,JOTAI_CODE");
         buf.append(" order by SYSTEM_SERVICE_KIND_DETAIL,SERVICE.PATIENT_ID");
-        buf.append(",LAST desc,SERVICE_DATE asc,START asc");
+        buf.append(",LAST desc,SERVICE_DATE asc,STARTT asc");
 
         String sql = buf.toString();
         System.out.println(sql);
@@ -612,43 +625,18 @@ public class QkanHouKanData {
           }
           String kind = (sbp==11311) ? 
                         "介":"予";
+          Calendar cal21 = Calendar.getInstance();
           String cR="1";
-          String timeId="1";
-          if (targetDay==0) {
-            buf.delete(0,buf.length());
-            buf.append("select JOTAI_CODE from PATIENT_NINTEI_HISTORY ");
-            buf.append("where PATIENT_ID=");
-            buf.append(pNo);
-            buf.append(" and NINTEI_HISTORY_ID=(select");
-            buf.append(" max(NINTEI_HISTORY_ID) from PATIENT_NINTEI_HISTORY ");
-            buf.append("where INSURE_VALID_END='");
-            buf.append(insEnd);
-            buf.append("' and PATIENT_ID=");
-            buf.append(pNo);
-            buf.append(")");
-            System.out.println(buf.toString());
-            DngDBAccess dbm4 = new DngDBAccess("firebird",dbUri,dbUser,dbPass);
-            dbm4.connect();
-            dbm4.execQuery(buf.toString());
-            dbm4.Close();
-            if (dbm4.Rows>0 && dbm4.getData("JOTAI_CODE",0)!=null) {
-              cR = dbm4.getData("JOTAI_CODE",0).toString();
-              String cRate = (String)careRate.get(cR);
-              pline.addElement(cRate);
-            } else {
-              pline.addElement("");
-            }
-            pline.addElement(kind);
+          if (dbm.getData("JOTAI_CODE",i)!=null) {
+          cR = dbm.getData("JOTAI_CODE",i).toString();
+          String cRate = (String)careRate.get(cR);
+          pline.addElement(cRate);
+          } else {
+            pline.addElement("");
           }
-          else if (targetDay>0) {
-            if (dbm.getData("JOTAI_CODE",i)!=null) {
-            cR = dbm.getData("JOTAI_CODE",i).toString();
-            String cRate = (String)careRate.get(cR);
-            pline.addElement(cRate);
-            } else {
-              pline.addElement("");
-            }
-            pline.addElement(kind);
+          pline.addElement(kind);
+          String timeId="1";
+          if (targetDay>0) {
             buf.delete(0,buf.length());
             buf.append("select SERVICE_ID,SYSTEM_BIND_PATH,");
             buf.append("extract(HOUR from DETAIL_VALUE),");
@@ -758,8 +746,8 @@ public class QkanHouKanData {
             tVal.put("1130121","");
             tVal.put("1130122","");
             tVal.put("1130123","");
-            tVal.put("SMALL","");
-            tVal.put("SPECIAL","");
+            tVal.put("SMALL",((smProv) ? "有":"無"));
+            tVal.put("SPECIAL",((spArea) ? "有":"無"));
             int ssCount = 0; 
             for (int j=0;j<dbm2.Rows;j++){
               System.out.println("Rows start: "+j);
@@ -771,24 +759,33 @@ public class QkanHouKanData {
               }
               else if (sbp0==9) calcOpt = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
 
-              else if (sbp0==12 || sbp0>=1130108 && sbp0<=1130110 || sbp0==1130113 || sbp0>=1130116 && sbp0<=1130120 || sbp0==1130122) {
+              else if (sbp0==12 || sbp0>=1130108 && sbp0<=1130110 || sbp0==1130113 || sbp0>=1130116 && sbp0<=1130120 || sbp0==1130122 || sbp0==1130124) {
                 int key = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
                 val = (String[])tValue.get(Integer.toString(sbp0)); 
                 //pline.addElement(val[key]);
                 tVal.put(Integer.toString(sbp0),val[key]);
                 int[] add = (int[]) taUnit.get(dbm2.getData("SYSTEM_BIND_PATH",j).toString());
+                int adu=0;
                 if (sbp0==12) mountRate = (double)add[key]/100.0; 
-                else if (sbp0==1130113 && key==2) addUnit += add[skubun];
+                else if (sbp0==1130113 && key==2) {
+                  adu = add[skubun];
+                  addUnit += add[skubun];
+                }
                 else {
-                  if (targetDay==Integer.parseInt(firstDate.get(Integer.toString(
-pNo)).toString()) && !((Vector)firsted.get(new Integer(pNo))).contains(new Integer(sbp0))) {
-                    if (sbp0==1130108) 
-                       addUnit += (skubun==1) ? add[key]:add[key+2];
-                    else addUnit += add[key];
+                  if (targetDay==Integer.parseInt(firstDate.get(Integer.toString(pNo)).toString()) && !((Vector)firsted.get(new Integer(pNo))).contains(new Integer(sbp0))) {
+                    if (sbp0==1130108) {
+                       adu = (skubun==1) ? add[key]:add[key+2];
+                       if (skubun==3) adu = 0;
+                       addUnit += adu;
+                    }
+                    else {
+                      adu = add[key];
+                      addUnit += add[key];
+                    }
                     if (add[key]>0) ((Vector)firsted.get(new Integer(pNo))).addElement(new Integer(sbp0));
                   }
                 }
-                System.out.println("sbp = "+sbp0+" key = "+key+" add= "+addUnit);
+                System.out.println("sbp = "+sbp0+" key = "+key+" add= "+addUnit+"("+adu+")");
               }
               else {
                 int key = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
@@ -800,6 +797,7 @@ pNo)).toString()) && !((Vector)firsted.get(new Integer(pNo))).contains(new Integ
                 switch (sbp0) {
                   case 1130103: skubun = key; 
                            ssCode[0]= (new Integer(key)).toString();
+                           if (skubun==3) ssCode[1]="1";
                            break;
                   case 1130111: ssCode[1]= (new Integer(key)).toString();
                                 if (ssCode[2]=="3") ssCode[1]="1";
@@ -842,10 +840,11 @@ pNo)).toString()) && !((Vector)firsted.get(new Integer(pNo))).contains(new Integ
             pline.addElement((String)tVal.get((skubun==3) ? 
                                    "1130122":"1130108" )); //緊急
             pline.addElement((String)tVal.get("1130116")); //特管
+            pline.addElement((String)tVal.get("1130124")); //体制強化
             pline.addElement((String)tVal.get("1130110")); //ターミナル
             pline.addElement((String)tVal.get("1130120")); //日数減算
             pline.addElement((String)tVal.get("1130121")); //2回越え
-            pline.addElement((String)tVal.get("16"));      //中山間
+            pline.addElement((String)tVal.get("16"));      //同一建物
             pline.addElement((String)tVal.get("12"));      //中山間
             pline.addElement((String)tVal.get("SMALL"));   //小規模
             for (int ii=0;ii<ssc;ii++) ItemCode += ssCode[ii];
@@ -876,6 +875,9 @@ pNo)).toString()) && !((Vector)firsted.get(new Integer(pNo))).contains(new Integ
             yoVal.put("1630114","");
             yoVal.put("1630115","");
             yoVal.put("1630116","");
+            yoVal.put("1630117","");
+            yoVal.put("SMALL",((smProv) ? "有":"無"));
+            yoVal.put("SPECIAL",((spArea) ? "有":"無"));
             int ssCount = 0; 
             for (int j=0;j<dbm2.Rows;j++) {
               int sbp0 = Integer.parseInt(dbm2.getData("SYSTEM_BIND_PATH",j).toString());
@@ -886,7 +888,7 @@ pNo)).toString()) && !((Vector)firsted.get(new Integer(pNo))).contains(new Integ
                 System.out.println("kaisei: "+kaisei);
               }
               else if (sbp0==9) calcOpt = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
-              else if (sbp0==12 || sbp0==1630105 || sbp0==163106 || sbp0==1630109 || sbp0==1630112 || sbp0==1630113 || sbp0==1630115 ) {
+              else if (sbp0==12 || sbp0==1630105 || sbp0==1630106 || sbp0==1630109 || sbp0==1630112 || sbp0==1630113 || sbp0==1630115 || sbp0==1630117 ) {
                 int key = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
                 String[] val = (String[])yValue.get(Integer.toString(sbp0)); 
                 //pline.addElement(val[key]);
@@ -896,8 +898,7 @@ pNo)).toString()) && !((Vector)firsted.get(new Integer(pNo))).contains(new Integ
                 if (sbp0==12) mountRate = (double)add[key]/100.0; 
                 else if (sbp0==1630109) addUnit += add[key];
                 else {
-                  if (targetDay==Integer.parseInt(firstDate.get(Integer.toString(
-pNo)).toString()) && !((Vector)firsted.get(new Integer(pNo))).contains(new Integer(sbp0))) {
+                  if (targetDay==Integer.parseInt(firstDate.get(Integer.toString(pNo)).toString()) && !((Vector)firsted.get(new Integer(pNo))).contains(new Integer(sbp0))) {
                     if (sbp0==1630105) 
                        addUnit += (skubun==1) ? add[key]:add[key+2];
                     else addUnit += add[key];
@@ -952,6 +953,7 @@ pNo)).toString()) && !((Vector)firsted.get(new Integer(pNo))).contains(new Integ
             pline.addElement((String)yoVal.get("1630113")); //退所
             pline.addElement((String)yoVal.get("1630105")); //緊急
             pline.addElement((String)yoVal.get("1630106")); //特管
+            pline.addElement((String)yoVal.get("1630117")); //体制強化
             pline.addElement(""); //
             pline.addElement(""); //
             pline.addElement((String)yoVal.get("1630116")); //2回越え
@@ -980,6 +982,7 @@ pNo)).toString()) && !((Vector)firsted.get(new Integer(pNo))).contains(new Integ
             dbm5.connect();
             dbm5.execQuery(buf.toString());
             dbm5.Close();
+            System.out.println(buf.toString());
             int cRows;
             if (dbm5.Rows>0) { 
               int cYear = Integer.parseInt(dbm5.getData(0,0).toString());
@@ -1034,7 +1037,9 @@ pNo)).toString()) && !((Vector)firsted.get(new Integer(pNo))).contains(new Integ
                 buf.append("PATIENT_NINTEI_HISTORY where PATIENT_ID=");
                 buf.append(pNo);
                 buf.append(" and INSURE_VALID_END>=SERVICE.SERVICE_DATE");
+                buf.append(" and SYSTEM_INSURE_VALID_END>=SERVICE.SERVICE_DATE");
                 buf.append(" and INSURE_VALID_START<=SERVICE.SERVICE_DATE");
+                buf.append(" and SYSTEM_INSURE_VALID_START<=SERVICE.SERVICE_DATE");
                 buf.append(")) where SERVICE.PATIENT_ID=");
                 buf.append(pNo);
                 buf.append(" and ((SYSTEM_SERVICE_KIND_DETAIL=11311 and ");
@@ -1210,6 +1215,10 @@ pNo)).toString()) && !((Vector)firsted.get(new Integer(pNo))).contains(new Integ
           }
           pdata.addElement(pline);
           trCols = pline.size();
+          Calendar cal22 = Calendar.getInstance();
+          diffTime = cal22.getTimeInMillis() - cal21.getTimeInMillis();
+          difft = Float.parseFloat( diffTime.toString() ) / 1000.000 ;
+          System.out.println("PID "+pNo+" [ " + difft + " sec. ]");
         }
         System.out.println(trCols+"fields  "+totalCount+":"+totalFee1+":"+totalFee2+":"+totalFee3+
 ":"+totalFee4+":"+totalFee5);
@@ -1224,8 +1233,8 @@ pNo)).toString()) && !((Vector)firsted.get(new Integer(pNo))).contains(new Integ
         for (int c=0;c<trCols;c++) {
           if (c==1) totalRow.addElement(new String("  合 計 値"));
           else if (targetDay>0) {
-            if (c==cn3) totalRow.addElement(new Integer(totalFee1));
-            else if (c==cn4) totalRow.addElement(new Integer(totalFee2));
+            if (c==cn5) totalRow.addElement(new Integer(totalFee1));
+            else if (c==cn6) totalRow.addElement(new Integer(totalFee2));
             else totalRow.addElement(new String(""));
           }
           else {
@@ -1270,6 +1279,11 @@ pNo)).toString()) && !((Vector)firsted.get(new Integer(pNo))).contains(new Integ
       }
       pnl.setVisible(true);
       pn2.setVisible(true);
+      Calendar cal2 = Calendar.getInstance();
+      date="Panel set end   at "+cal2.get(Calendar.YEAR)+"."+(cal2.get(Calendar.MONTH) + 1) +"."+cal2.get(Calendar.DATE) +" "+cal2.get(Calendar.HOUR) + ":"+cal2.get(Calendar.MINUTE)+":"+cal2.get(Calendar.SECOND)+"."+cal2.get(Calendar.MILLISECOND);
+      diffTime = cal2.getTimeInMillis() - cal1.getTimeInMillis();
+      difft = Float.parseFloat( diffTime.toString() ) / 1000.000 ;
+      System.out.println(date+" [ " + difft + " sec. ]");
       System.out.println("Panel created OK");
     }
 
@@ -1331,6 +1345,7 @@ pNo)).toString()) && !((Vector)firsted.get(new Integer(pNo))).contains(new Integ
       fieldName.addElement("退所");
       fieldName.addElement("緊急");
       fieldName.addElement("特管");
+      fieldName.addElement("体強");
       fieldName.addElement("ター");
       fieldName.addElement("日減");
       fieldName.addElement("2超");
@@ -1402,6 +1417,8 @@ pNo)).toString()) && !((Vector)firsted.get(new Integer(pNo))).contains(new Integ
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32);
       usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(60);
+      usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
+      usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32);
       usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32);
       usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
@@ -1526,13 +1543,13 @@ pNo)).toString()) && !((Vector)firsted.get(new Integer(pNo))).contains(new Integ
       ctype[cid] = 7;
       width[cid++] = Float.parseFloat("7.8"); //時間区分
       ctype[cid] = 7;
-      width[cid++] = Float.parseFloat("4.5"); //時間帯
+      width[cid++] = Float.parseFloat("4.0"); //時間帯
       ctype[cid] = 7;
       width[cid++] = Float.parseFloat("3.2"); //サー
       ctype[cid] = 7;
-      width[cid++] = Float.parseFloat("4.5"); //人数
+      width[cid++] = Float.parseFloat("3.6"); //人数
       ctype[cid] = 7;
-      width[cid++] = Float.parseFloat("4.5"); //二人目時間
+      width[cid++] = Float.parseFloat("6.8"); //二人目時間
       ctype[cid] = 7;
       width[cid++] = Float.parseFloat("3.0"); //長時間
       ctype[cid] = 7;
@@ -1547,6 +1564,8 @@ pNo)).toString()) && !((Vector)firsted.get(new Integer(pNo))).contains(new Integ
       width[cid++] = Float.parseFloat("3.2"); //緊急
       ctype[cid] = 7;
       width[cid++] = Float.parseFloat("3.0"); //特管
+      ctype[cid] = 7;
+      width[cid++] = Float.parseFloat("3.0"); //体制強化
       ctype[cid] = 7;
       width[cid++] = Float.parseFloat("3.0"); //ターミナル
       ctype[cid] = 7;
@@ -1564,16 +1583,16 @@ pNo)).toString()) && !((Vector)firsted.get(new Integer(pNo))).contains(new Integ
         width[cid++] = Float.parseFloat("3.0"); //回数
       }
       ctype[cid] = 1; // 0 - normal 1 - add comma 2 - align right
-      width[cid++] = Float.parseFloat("6.5"); //費用
+      width[cid++] = Float.parseFloat("6.0"); //費用
       ctype[cid] = 1; // 0 - normal 1 - add comma 2 - align right
       width[cid++] = Float.parseFloat("5.5"); //負担額
       if (targetDay==0) {
         ctype[cid] = 1; // 0 - normal 1 - add comma 2 - align right
-        width[cid++] = Float.parseFloat("5.5"); //その他負担額
+        width[cid++] = Float.parseFloat("5.0"); //その他負担額
         ctype[cid] = 1; // 0 - normal 1 - add comma 2 - align right
-        width[cid++] = Float.parseFloat("7.5"); //負担額合計
+        width[cid++] = Float.parseFloat("7.0"); //負担額合計
         ctype[cid] = 1; // 0 - normal 1 - add comma 2 - align right
-        width[cid++] = Float.parseFloat("6.5"); //公費負担額
+        width[cid++] = Float.parseFloat("5.8"); //公費負担額
       }
       //Calendar cal = Calendar.getInstance();
       //String date=cal.get(Calendar.YEAR)+""+(cal.get(Calendar.MONTH) + 1)

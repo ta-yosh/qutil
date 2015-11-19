@@ -1,19 +1,22 @@
-<?xml version="1.0" encoding="euc-jp"?> 
+<?xml version="1.0" encoding="utf-8"?> 
 <project basedir="." default="compile" name="compileMain"> 
   <property name="SrcDir" value="src" /> 
   <property name="ClassDir" value="classes" /> 
   <property name="JarName" value="QDBUtil.jar" /> 
   <path id="BuildClasspath">
-    <pathelement path="lib/firebirdsql-full.jar" />
-    <pathelement path="lib/iText.jar" />
+    <pathelement path="lib/jaybird-full-2.1.6.jar" />
+    <!--pathelement path="lib/firebirdsql-full.jar" /-->
+    <pathelement path="lib/iText-5.0.6.jar" />
     <pathelement path="lib/iTextAsian.jar" />
   </path>
   <target name="compile"> 
     <delete dir="${ClassDir}" /> 
     <mkdir dir="${ClassDir}" /> 
-    <javac srcdir="src" destdir="${ClassDir}" classpathref="BuildClasspath" nowarn="on" source="1.4" target="1.4"> 
+    <!--javac srcdir="src" destdir="${ClassDir}" classpathref="BuildClasspath" nowarn="on" source="1.4" target="1.5" encoding="euc-jp" --> 
+    <javac srcdir="src" destdir="${ClassDir}" classpathref="BuildClasspath" nowarn="on" source="1.6" target="1.6" encoding="euc-jp"> 
       <include name="jp/co/ascsystem/**/*" /> 
       <exclude name="jp/co/ascsystem/lib/DngPreviewHtml.java" /> 
+      <exclude name="jp/co/ascsystem/util/DngConnectTest.java" /> 
     </javac> 
     <copy todir="${ClassDir}">
       <fileset dir="${SrcDir}">
@@ -28,7 +31,7 @@
       <include name="resources/qkan.ico" /> 
       <manifest> 
         <attribute name="Main-Class" value="jp.co.ascsystem.qkan.QkanDBUtilMain" /> 
-        <attribute name="Class-Path" value=". lib/firebirdsql-full.jar lib/iText.jar lib/iTextAsian.jar" /> 
+        <attribute name="Class-Path" value=". lib/jaybird-full-2.1.6.jar lib/iText-5.0.6.jar lib/iTextAsian.jar" /> 
       </manifest> 
     </jar> 
     <delete dir="${ClassDir}" /> 

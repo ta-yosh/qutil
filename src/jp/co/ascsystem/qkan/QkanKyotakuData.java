@@ -312,6 +312,11 @@ public class QkanKyotakuData {
     }
   
     public void setKyotakuPanel(int targetYear,int targetMonth,int targetDay) {
+      Long diffTime;
+      double difft;
+      Calendar cal1 = Calendar.getInstance();
+      String date="Panel set start at "+cal1.get(Calendar.YEAR)+"."+(cal1.get(Calendar.MONTH) + 1) +"."+cal1.get(Calendar.DATE) +" "+cal1.get(Calendar.HOUR) + ":"+cal1.get(Calendar.MINUTE)+":"+cal1.get(Calendar.SECOND)+"."+cal1.get(Calendar.MILLISECOND);
+      System.out.println(date);
       pn2.setVisible(false);      
       pn2.removeAll();
       pnl.setVisible(false);      
@@ -333,29 +338,35 @@ public class QkanKyotakuData {
         buf.append("select PATIENT_FIRST_NAME,PATIENT_FAMILY_NAME,");
         buf.append("SERVICE.PATIENT_ID,SERVICE_ID as SID,");
         buf.append("SYSTEM_SERVICE_KIND_DETAIL,INSURED_ID,PATIENT_BIRTHDAY,");
-        buf.append("substring(JOTAI_CODE from 1 for 1),max(JOTAI_CODE) as JOTAI,");
+        buf.append("substring(JOTAI_CODE from 1 for 1),JOTAI_CODE as JOTAI,");
         buf.append("count(SERVICE.SERVICE_ID),INSURE_RATE,");
         buf.append("min(INSURE_VALID_START) as INSURE_VALID_START,");
         buf.append("max(INSURE_VALID_END) as INSURE_VALID_END,");
-        buf.append("max(BENEFIT_RATE) as BRATE,SERVICE_USE_TYPE");
+        buf.append("max(BENEFIT_RATE) as BRATE,SERVICE_USE_TYPE,extract(DAY from SERVICE_DATE) as DS");
         buf.append(" from SERVICE inner join PATIENT on ");
         buf.append("(PATIENT.PATIENT_ID=SERVICE.PATIENT_ID and DELETE_FLAG=0)");
         buf.append(" inner join PATIENT_NINTEI_HISTORY on ");
         buf.append("(PATIENT_NINTEI_HISTORY.PATIENT_ID=SERVICE.PATIENT_ID and");
-        buf.append(" NINTEI_HISTORY_ID in ");
-        buf.append("(select NINTEI_HISTORY_ID from ");
+        buf.append(" NINTEI_HISTORY_ID = ");
+        buf.append("(select max(NINTEI_HISTORY_ID) from ");
         buf.append("PATIENT_NINTEI_HISTORY where PATIENT_ID=SERVICE.PATIENT_ID ");
         //
         //buf.append(" and INSURE_VALID_END>=SERVICE.SERVICE_DATE");
         buf.append(" and INSURE_VALID_END>='");
         buf.append(nStart);
+        buf.append("' and SYSTEM_INSURE_VALID_END>='");
+        buf.append(nStart);
         if (targetDay>0) {
           buf.append("' and INSURE_VALID_START<='");
+          buf.append(nStart);
+          buf.append("' and SYSTEM_INSURE_VALID_START<='");
           buf.append(nStart);
           //buf.append("'");
         }
         if (targetDay==0) {
           buf.append("' and INSURE_VALID_START<'");
+          buf.append(nEnd);
+          buf.append("' and SYSTEM_INSURE_VALID_START<'");
           buf.append(nEnd);
         }
         //
@@ -397,8 +408,8 @@ public class QkanKyotakuData {
         buf.append("PATIENT_FAMILY_NAME,PATIENT_BIRTHDAY,INSURED_ID,");
         buf.append("SYSTEM_SERVICE_KIND_DETAIL, ");
         buf.append("SERVICE.SERVICE_ID,SERVICE_USE_TYPE,SERVICE_DATE,");
-        buf.append("substring(JOTAI_CODE from 1 for 1),INSURE_RATE");
-        buf.append(" order by PATIENT_FAMILY_NAME,PATIENT_FIRST_NAME,INSURED_ID,SYSTEM_SERVICE_KIND_DETAIL");
+        buf.append("substring(JOTAI_CODE from 1 for 1),JOTAI,INSURE_RATE");
+        buf.append(" order by PATIENT_FAMILY_NAME,PATIENT_FIRST_NAME,INSURED_ID,SYSTEM_SERVICE_KIND_DETAIL,SERVICE_USE_TYPE desc");
 
         String sql = buf.toString();
         System.out.println(sql);
@@ -419,9 +430,11 @@ public class QkanKyotakuData {
         int sCount = 0;
         int countLimit = 2;
         String sids = "";
+        String days = "";
         boolean monfin = false;
         boolean limited = false;
         String itemCode="";
+        StringBuffer sbD = new StringBuffer();
 
         for (int i=0;i<dbm.Rows;i++){
           int lastP = pNo;
@@ -442,6 +455,9 @@ public class QkanKyotakuData {
               } else {
                 sids = dbm.getData("SID",i).toString();
                 sCount = Integer.parseInt(dbm.getData("COUNT",i).toString());
+                if (Integer.parseInt(dbm.getData("DS",i).toString())<10) sbD.append("0");
+                sbD.append(dbm.getData("DS",i));
+                sbD.append("Æü");
                 monfin=false;
                 if (i<dbm.Rows-1) continue;
               }
@@ -457,6 +473,10 @@ public class QkanKyotakuData {
               if (targetDay==0) {
                 sids += ","+dbm.getData("SID",i).toString();
                 sCount += Integer.parseInt(dbm.getData("COUNT",i).toString());
+                sbD.append("¡¢");
+                if (Integer.parseInt(dbm.getData("DS",i).toString())<10) sbD.append("0");
+                sbD.append(dbm.getData("DS",i));
+                sbD.append("Æü");
                 if (i<dbm.Rows-1) continue;
               }
             }
@@ -468,48 +488,14 @@ public class QkanKyotakuData {
           String insId = dbm.getData("INSURED_ID",i).toString();
 
           Vector pline = new Vector();
-          //pline.addElement(dbm.getData(2,i).toString());
           int sNo = new Integer(dbm.getData(3,i).toString()).intValue();
-          //pline.addElement(dbm.getData(3,i).toString());
           String nam1=(dbm.getData(1,i)!=null) ? dbm.getData(1,i).toString()+" ":"";
           String nam2=(dbm.getData(0,i)!=null) ? dbm.getData(0,i).toString():"";
           String nam =" "+nam1+nam2;
 
-          //if (dbm.getData("BRATE",i)!=null) {
-          //  buf.delete(0,buf.length());
-          //  buf.append("select PATIENT_KOHI.BENEFIT_RATE as BRATE,SELF_PAY,");
-          //  buf.append("KOHI_SORT from PATIENT_KOHI,M_KOHI ");
-          //  buf.append("where PATIENT_KOHI.KOHI_TYPE=M_KOHI.KOHI_TYPE and ");
-          //  buf.append("PATIENT_ID='");
-          //  buf.append(pNo);
-          //  buf.append("' and PATIENT_KOHI.INSURE_TYPE='1' and ");
-          //  buf.append("PATIENT_KOHI.KOHI_VALID_END>='");
-          //  buf.append(nStart);
-          //  if (targetDay>0) {
-          //    buf.append("' and PATIENT_KOHI.KOHI_VALID_START<='");
-          //    buf.append(nStart);
-          //    //buf.append("'");
-          //  }
-          //  if (targetDay==0) {
-          //    buf.append("' and PATIENT_KOHI.KOHI_VALID_START<'");
-          //    buf.append(nEnd);
-          //  }
-          //  buf.append("' and PATIENT_KOHI.KOHI_LAW_NO not in ");
-          //  buf.append("(10,15,21,57,58,81) ");
-          //  buf.append("order by KOHI_SORT");
-          //  sql = buf.toString();
-          //  System.out.println(sql);
-          //  dbm2.connect();
-          //  dbm2.execQuery(sql);
-          //  dbm2.Close();
-          //} 
           int insRate = Integer.parseInt(dbm.getData("INSURE_RATE",i).toString());
           int bRate = (dbm.getData("BRATE",i)==null) ? 0: 
                       Integer.parseInt(dbm.getData("BRATE",i).toString());
-          //            Integer.parseInt(dbm2.getData("BRATE",i).toString());
-          //int self = (dbm.getData("BRATE",i)==null) ? 0: 
-          //            Integer.parseInt(dbm.getData("SELF_PAY",i).toString());
-          //            Integer.parseInt(dbm2.getData("SELF_PAY",i).toString());
 
           pline.addElement(new Integer(++ln));
           pline.addElement(insId);
@@ -523,14 +509,15 @@ public class QkanKyotakuData {
           String cR="1";
           String kind = (sbp==13111) ? 
                         "²ð¸î":"Í½ËÉ";
+          Calendar cal21 = Calendar.getInstance();
+          if (dbm.getData("JOTAI",i)!=null) {
+            cR = dbm.getData("JOTAI",i).toString();
+            String cRate = (String)careRate.get(cR);
+            pline.addElement(cRate);
+          } else {
+            pline.addElement("");
+          }
           if (targetDay>0) {
-            if (dbm.getData("JOTAI",i)!=null) {
-              cR = dbm.getData("JOTAI",i).toString();
-              String cRate = (String)careRate.get(cR);
-              pline.addElement(cRate);
-            } else {
-              pline.addElement("");
-            }
             //pline.addElement(kind);
             buf.delete(0,buf.length());
             buf.append("select SERVICE_ID,SYSTEM_BIND_PATH,");
@@ -577,10 +564,6 @@ public class QkanKyotakuData {
             buf.append(detYear);
             buf.append(" where SERVICE_ID=");
             buf.append(sNo);
-/*
-            buf.append(" and SYSTEM_BIND_PATH");
-            buf.append(" in (14,1310103,1310104,1310105,1310107,1310108,1310109,1310110,1310111,1310112,1310113,1340101,1340102,1340103,1340104,1340105,1340106,1340107,1340108,1340109,1340110)");
-*/
             buf.append(" order by SYSTEM_BIND_PATH;");
             sql = buf.toString();
             System.out.println(sql);
@@ -644,14 +627,8 @@ public class QkanKyotakuData {
               if (bRate>0) {
                 int bclaim = (int)((double)hiyou/100.0*(double)(bRate-insRate));
                 int bfutan = futan - bclaim;
-                //if (self>0) {
-                //  if (futan>=self) futan=self;
-                //  if (futan<self) futan=futan;
-                //} else {
-                  futan = bfutan;
-                //}
+                futan = bfutan;
               }
-              //if (hiyou%10>0) futan +=1;
               System.out.println("p = "+p+" hiyou = "+hiyou+" futan = "+futan);
               if (hiyou>0) totalFee1 += hiyou;
               if (futan>0) totalFee2 += futan;
@@ -661,29 +638,6 @@ public class QkanKyotakuData {
             }
           } 
           else if (targetDay==0) {
-            buf.delete(0,buf.length());
-            buf.append("select JOTAI_CODE from PATIENT_NINTEI_HISTORY ");
-            buf.append("where PATIENT_ID=");
-            buf.append(pNo);
-            buf.append(" and NINTEI_HISTORY_ID=(select");
-            buf.append(" max(NINTEI_HISTORY_ID) from PATIENT_NINTEI_HISTORY ");
-            buf.append("where INSURE_VALID_END='");
-            buf.append(insEnd);
-            buf.append("' and PATIENT_ID=");
-            buf.append(pNo);
-            buf.append(")");
-            System.out.println(buf.toString());
-            DngDBAccess dbm4 = new DngDBAccess("firebird",dbUri,dbUser,dbPass);
-            dbm4.connect();
-            dbm4.execQuery(buf.toString());
-            dbm4.Close();
-            if (dbm4.Rows>0 && dbm4.getData("JOTAI_CODE",0)!=null) {
-              cR = dbm4.getData("JOTAI_CODE",0).toString();
-              String cRate = (String)careRate.get(cR);
-              pline.addElement(cRate);
-            } else {
-              pline.addElement("");
-            }
             pline.addElement(kind);
 
             buf.delete(0,buf.length());
@@ -707,12 +661,11 @@ public class QkanKyotakuData {
               if (Integer.parseInt(dbm5.getData(1,0).toString())<4) cYear--;
 
               buf.delete(0,buf.length());
+
               buf.append("select CLAIM_ID,SYSTEM_BIND_PATH,");
               buf.append("DETAIL_VALUE");
               buf.append(" from CLAIM_DETAIL_TEXT_");
               buf.append(cYear);
-              //buf.append(" where CLAIM_ID = (select CLAIM_ID from CLAIM");
-
               buf.append(" where CLAIM_ID = (select CLAIM_ID from CLAIM_DETAIL_TEXT_");
               buf.append(cYear);
               buf.append(" where CLAIM_ID in (select CLAIM_ID from CLAIM");
@@ -730,12 +683,9 @@ public class QkanKyotakuData {
               buf.append("') and SYSTEM_BIND_PATH=701007 ");
               if (sbp==13111) buf.append("and DETAIL_VALUE='31')");
               else buf.append("and DETAIL_VALUE='34')");
-              //buf.append(" and SYSTEM_BIND_PATH");
-              //buf.append(" in (701008,701014,701015,701016,701017,701020)");
               buf.append(" and (SYSTEM_BIND_PATH=701008 or ");
               buf.append("SYSTEM_BIND_PATH>=701014 and ");
               buf.append("SYSTEM_BIND_PATH<=701026)");
-
               buf.append(" order by SYSTEM_BIND_PATH;");
               sql = buf.toString();
               System.out.println(sql);
@@ -745,91 +695,53 @@ public class QkanKyotakuData {
               cRows = dbm2.Rows;
             }
             else cRows=0;
-            DngDBAccess dbm3 = new DngDBAccess("firebird",dbUri,dbUser,dbPass);
-            if (dbm3.connect()) {
-              buf.delete(0,buf.length());
-              buf.append("select extract(DAY from SERVICE_DATE) from service");
-              buf.append(" inner join PATIENT_NINTEI_HISTORY on ");
-              buf.append("(PATIENT_NINTEI_HISTORY.PATIENT_ID=");
-              buf.append(pNo);
-              buf.append(" and NINTEI_HISTORY_ID in ");
-              buf.append("(select NINTEI_HISTORY_ID from ");
-              buf.append("PATIENT_NINTEI_HISTORY where PATIENT_ID=");
-              buf.append(pNo);
-              buf.append(" and INSURE_VALID_END>=SERVICE.SERVICE_DATE");
-              buf.append(" and INSURE_VALID_START<=SERVICE.SERVICE_DATE");
-              buf.append(")) where SERVICE.PATIENT_ID=");
-              buf.append(pNo);
-              buf.append(" and ((SYSTEM_SERVICE_KIND_DETAIL=13111 and ");
-              buf.append("substring(JOTAI_CODE from 1 for 1)=2) or ");
-              buf.append("(SYSTEM_SERVICE_KIND_DETAIL=13411 and ");
-              buf.append("substring(JOTAI_CODE from 1 for 1)=1))");
-              //buf.append(" and SYSTEM_SERVICE_KIND_DETAIL in (13111,13411)");
-              buf.append(" and SERVICE_USE_TYPE in (4,6)");
-              buf.append(" and extract(YEAR from SERVICE_DATE)=");
-              buf.append(targetYear);
-              buf.append(" and extract(MONTH from SERVICE_DATE)=");
-              buf.append(targetMonth);
-              buf.append(" and SERVICE_DATE<='");
-              buf.append(insEnd);
-              buf.append("' and SERVICE_DATE>='");
-              buf.append(insStart);
-              buf.append("' and SERVICE.PROVIDER_ID='");
-              buf.append(currentProvider);
-              buf.append("' group by extract(DAY from SERVICE_DATE)");
-              System.out.println(buf.toString());
-              dbm3.execQuery(buf.toString());
-              dbm3.Close();
-              if (dbm3.Rows>0) {
-                if (cRows>0) {
-                  pline.addElement(new Integer(dbm2.getData("DETAIL_VALUE",0).toString()));
-                  totalCount += Integer.parseInt(dbm2.getData("DETAIL_VALUE",0).toString());
-                }
-                else {
-                  //pline.addElement(new Integer(dbm3.Rows));
-                  pline.addElement(new Integer(sCount));
-                  totalCount += sCount;
-                }
-                StringBuffer sb = new StringBuffer();
-                for (int l=0;l<dbm3.Rows;l++) {
-                  sb.append((l>0) ? ", ":" ");
-                  if (Integer.parseInt(dbm3.getData(0,l).toString())<10) sb.append("0");
-                  sb.append(dbm3.getData(0,l));
-                  sb.append("Æü");
-                }
-                pline.addElement(sb.toString());
-                if (cRows>0) {
-                  int hiyou = (int)(Float.parseFloat(dbm2.getData("DETAIL_VALUE",1).toString())*Float.parseFloat(dbm2.getData("DETAIL_VALUE",2).toString()));
-                  int futan = Integer.parseInt(dbm2.getData("DETAIL_VALUE",4).toString());
-                  int jikouhi=0,kouhi=0;
-                  if (cRows>5) {
-                    kouhi = Integer.parseInt(dbm2.getData("DETAIL_VALUE",6).toString())
-                            +Integer.parseInt(dbm2.getData("DETAIL_VALUE",9).toString())
-                            +Integer.parseInt(dbm2.getData("DETAIL_VALUE",12).toString());
-                   jikouhi = Integer.parseInt(dbm2.getData("DETAIL_VALUE",7).toString())
-                             +Integer.parseInt(dbm2.getData("DETAIL_VALUE",10).toString())
-                             +Integer.parseInt(dbm2.getData("DETAIL_VALUE",13).toString());
-                   if (jikouhi>0) futan = jikouhi;
-                  }
-                  if (hiyou>0) totalFee1 += hiyou;
-                  if (futan>0) totalFee2 += futan;
-                  if (kouhi>0) totalFee5 += kouhi;
-                  pline.addElement(new Integer(hiyou));
-                  pline.addElement(new Integer(futan));
-                  pline.addElement(new Integer(kouhi));
-                }
+            days = sbD.toString();
+            sbD = new StringBuffer();
+            if (! days.equals("")) {
+              if (cRows>0) {
+                pline.addElement(new Integer(dbm2.getData("DETAIL_VALUE",0).toString()));
+                totalCount += Integer.parseInt(dbm2.getData("DETAIL_VALUE",0).toString());
               }
               else {
-                totalCount += sCount;
                 pline.addElement(new Integer(sCount));
-                pline.addElement("");
-                pline.addElement("");
-                pline.addElement("");
+                totalCount += sCount;
               }
+              pline.addElement(days);
+              if (cRows>0) {
+                int hiyou = (int)(Float.parseFloat(dbm2.getData("DETAIL_VALUE",1).toString())*Float.parseFloat(dbm2.getData("DETAIL_VALUE",2).toString()));
+                int futan = Integer.parseInt(dbm2.getData("DETAIL_VALUE",4).toString());
+                int jikouhi=0,kouhi=0;
+                if (cRows>5) {
+                  kouhi = Integer.parseInt(dbm2.getData("DETAIL_VALUE",6).toString())
+                          +Integer.parseInt(dbm2.getData("DETAIL_VALUE",9).toString())
+                          +Integer.parseInt(dbm2.getData("DETAIL_VALUE",12).toString());
+                 jikouhi = Integer.parseInt(dbm2.getData("DETAIL_VALUE",7).toString())
+                           +Integer.parseInt(dbm2.getData("DETAIL_VALUE",10).toString())
+                           +Integer.parseInt(dbm2.getData("DETAIL_VALUE",13).toString());
+                 if (jikouhi>0) futan = jikouhi;
+                }
+                if (hiyou>0) totalFee1 += hiyou;
+                if (futan>0) totalFee2 += futan;
+                if (kouhi>0) totalFee5 += kouhi;
+                pline.addElement(new Integer(hiyou));
+                pline.addElement(new Integer(futan));
+                pline.addElement(new Integer(kouhi));
+              }
+            }
+            else {
+              totalCount += sCount;
+              pline.addElement(new Integer(sCount));
+              pline.addElement("");
+              pline.addElement("");
+              pline.addElement("");
             }
           }
           pdata.addElement(pline);
           trCols = pline.size();
+          Calendar cal22 = Calendar.getInstance();
+          diffTime = cal22.getTimeInMillis() - cal21.getTimeInMillis();
+          difft = Float.parseFloat( diffTime.toString() ) / 1000.000 ;
+          System.out.println("PID "+pNo+" [ " + difft + " sec. ]");
         }
         System.out.println(trCols+"fields  "+totalCount+":"+totalFee1+":"+totalFee2+":"+totalFee5);
         int cn1,cn2,cn3,cn4,cn5,cn6;
@@ -880,6 +792,11 @@ public class QkanKyotakuData {
       }
       pnl.setVisible(true);
       pn2.setVisible(true);
+      Calendar cal2 = Calendar.getInstance();
+      date="Panel set end   at "+cal2.get(Calendar.YEAR)+"."+(cal2.get(Calendar.MONTH) + 1) +"."+cal2.get(Calendar.DATE) +" "+cal2.get(Calendar.HOUR) + ":"+cal2.get(Calendar.MINUTE)+":"+cal2.get(Calendar.SECOND)+"."+cal2.get(Calendar.MILLISECOND);
+      diffTime = cal2.getTimeInMillis() - cal1.getTimeInMillis();
+      difft = Float.parseFloat( diffTime.toString() ) / 1000.000 ;
+      System.out.println(date+" [ " + difft + " sec. ]");
     }
 
     public boolean isSelected() {

@@ -37,7 +37,7 @@ public class QkanDBUtilMain {
 
   public static void main(String[] args) {
 
-    final Color bgColor = new Color(200,240,220);
+    final Color bgColor = new Color(220,180,220);
     //final Color btnColor0 = new Color(235,235,235);
     final Color Color1 = new Color(50,20,20);
     //final Color btnColor1 = new Color(150,150,150);
@@ -48,7 +48,7 @@ public class QkanDBUtilMain {
     //final Color btnColor6 = new Color(246,246,250);
     final QkanDBUtilMain idm = new QkanDBUtilMain();
     final JFrame fr = new JFrame();
-    fr.setTitle("給管鳥 データユーティリティ ver2.0.5");
+    fr.setTitle("給管鳥 データユーティリティ ver3.1");
     fr.setIconImage(idm.icon);
     final Container contentPane = fr.getContentPane();
     contentPane.setLayout(new BorderLayout());

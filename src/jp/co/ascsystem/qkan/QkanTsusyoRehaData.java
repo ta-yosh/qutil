@@ -150,33 +150,35 @@ public class QkanTsusyoRehaData {
       System.out.println(buf.toString());
       if (dbm.connect()) {
         dbm.execQuery(buf.toString());
-        taUnit.put("1160105",(new int[] {0,0,Integer.parseInt(dbm.getData(1,0).toString())}));
-        taUnit.put("1160107",(new int[] {0,0,Integer.parseInt(dbm.getData(1,1).toString())}));
-        taUnit.put("1160111",(new int[] {0,0,Integer.parseInt(dbm.getData(1,2).toString())}));
-        taUnit.put("1160112",(new int[] {0,0,Integer.parseInt(dbm.getData(1,3).toString()),Integer.parseInt(dbm.getData(1,4).toString()),0}));
-        taUnit.put("1160114",(new int[] {0,0,Integer.parseInt(dbm.getData(1,5).toString())}));
-        taUnit.put("1160115",(new int[] {0,0,Integer.parseInt(dbm.getData(1,6).toString())}));
-        taUnit.put("1160118",(new int[] {0,0,Integer.parseInt(dbm.getData(1,15).toString())}));
-        taUnit.put("1160119",(new int[] {0,0,Integer.parseInt(dbm.getData(1,17).toString())}));
-        taUnit.put("1160120",(new int[] {0,0,Integer.parseInt(dbm.getData(1,18).toString())}));
-        taUnit.put("1160121",(new int[] {0,0,Integer.parseInt(dbm.getData(1,14).toString())}));
-        taUnit.put("1160122",(new int[] {0,0,Integer.parseInt(dbm.getData(1,9).toString()),Integer.parseInt(dbm.getData(1,10).toString())}));
-        taUnit.put("1160123",(new int[] {0,0,Integer.parseInt(dbm.getData(1,7).toString())}));
-        taUnit.put("12",(new int[] {0,0,Integer.parseInt(dbm.getData(1,19).toString())}));
-        taUnit.put("16",(new int[] {0,0,Integer.parseInt(dbm.getData(1,8).toString())}));
-        taUnit.put("KAIZEN",(new int[] {0,0,Integer.parseInt(dbm.getData(1,11).toString()),Integer.parseInt(dbm.getData(1,12).toString()),Integer.parseInt(dbm.getData(1,13).toString())}));
-        taKaizenCode = new String[] {"","",dbm.getData(3,11).toString(),dbm.getData(3,12).toString(),dbm.getData(3,13).toString()};
-        yaUnit.put("1660103",(new int[] {0,0,Integer.parseInt(dbm.getData(1,20).toString())}));
-        yaUnit.put("1660104",(new int[] {0,0,Integer.parseInt(dbm.getData(1,21).toString())}));
-        yaUnit.put("1660105",(new int[] {0,0,Integer.parseInt(dbm.getData(1,22).toString())}));
-        yaUnit.put("1660106",(new int[] {0,0,Integer.parseInt(dbm.getData(1,23).toString())}));
-        yaUnit.put("MULTI",(new int[] {0,0,0,Integer.parseInt(dbm.getData(1,24).toString()),0,Integer.parseInt(dbm.getData(1,25).toString()),Integer.parseInt(dbm.getData(1,26).toString()),Integer.parseInt(dbm.getData(1,27).toString())}));
-        yaUnit.put("1660107",(new int[] {0,0,Integer.parseInt(dbm.getData(1,36).toString())}));
-        yaUnit.put("1660108",(new int[] {0,0,Integer.parseInt(dbm.getData(1,28).toString()),Integer.parseInt(dbm.getData(1,30).toString()),0,Integer.parseInt(dbm.getData(1,29).toString()),Integer.parseInt(dbm.getData(1,31).toString())}));
-        yaUnit.put("KAIZEN",(new int[] {0,0,Integer.parseInt(dbm.getData(1,37).toString()),Integer.parseInt(dbm.getData(1,38).toString()),Integer.parseInt(dbm.getData(1,39).toString())}));
-        yaUnit.put("12",(new int[] {0,0,Integer.parseInt(dbm.getData(1,40).toString()),0,Integer.parseInt(dbm.getData(1,41).toString())}));
-        yaUnit.put("16",(new int[] {0,0,Integer.parseInt(dbm.getData(1,32).toString()),0,Integer.parseInt(dbm.getData(1,34).toString()),0,Integer.parseInt(dbm.getData(1,33).toString()),0,Integer.parseInt(dbm.getData(1,35).toString())}));
-        yaKaizenCode = new String[] {"","",dbm.getData(3,37).toString(),dbm.getData(3,38).toString(),dbm.getData(3,39).toString()};
+        taUnit.put("1160105",(new int[] {0,0,Integer.parseInt(dbm.getData(1,0).toString())})); //入浴
+        taUnit.put("1160111",(new int[] {0,0,Integer.parseInt(dbm.getData(1,1).toString()),Integer.parseInt(dbm.getData(1,4).toString()),Integer.parseInt(dbm.getData(1,5).toString())})); //リハマネ
+        taUnit.put("1160114",(new int[] {0,0,Integer.parseInt(dbm.getData(1,2).toString())})); //栄養
+        taUnit.put("1160115",(new int[] {0,0,Integer.parseInt(dbm.getData(1,3).toString())})); //口腔
+        taUnit.put("1160123",(new int[] {0,0,Integer.parseInt(dbm.getData(1,6).toString())})); //重度
+        taUnit.put("16",(new int[] {0,0,Integer.parseInt(dbm.getData(1,7).toString())})); //同一建物
+        taUnit.put("18",(new int[] {0,0,Integer.parseInt(dbm.getData(1,8).toString()),Integer.parseInt(dbm.getData(1,9).toString())*2})); //送迎
+        taUnit.put("1160112",(new int[] {0,0,Integer.parseInt(dbm.getData(1,10).toString())})); //短期
+        taUnit.put("1160125",(new int[] {0,0,Integer.parseInt(dbm.getData(1,11).toString())})); //中重度
+        taUnit.put("1160122",(new int[] {0,0,Integer.parseInt(dbm.getData(1,13).toString()),Integer.parseInt(dbm.getData(1,14).toString()),Integer.parseInt(dbm.getData(1,12).toString())})); //サービス
+        taUnit.put("KAIZEN",(new int[] {0,0,Integer.parseInt(dbm.getData(1,15).toString()),Integer.parseInt(dbm.getData(1,16).toString()),Integer.parseInt(dbm.getData(1,17).toString()),Integer.parseInt(dbm.getData(1,18).toString())})); //処遇改善
+        taUnit.put("1160121",(new int[] {0,0,Integer.parseInt(dbm.getData(1,19).toString())})); //若年
+        taUnit.put("1160126",(new int[] {0,0,Integer.parseInt(dbm.getData(1,20).toString())})); //社会参加
+        taUnit.put("1160119",(new int[] {0,0,Integer.parseInt(dbm.getData(1,21).toString())})); //理学
+        taUnit.put("1160120",(new int[] {0,0,Integer.parseInt(dbm.getData(1,22).toString()),Integer.parseInt(dbm.getData(1,23).toString())})); //認知症
+        taUnit.put("1160124",(new int[] {0,0,Integer.parseInt(dbm.getData(1,24).toString()),Integer.parseInt(dbm.getData(1,25).toString())})); //生活向上
+        taUnit.put("12",(new int[] {0,0,Integer.parseInt(dbm.getData(1,26).toString())})); //中山間
+        taKaizenCode = new String[] {"","",dbm.getData(3,15).toString(),dbm.getData(3,16).toString(),dbm.getData(3,17).toString(),dbm.getData(3,18).toString()};
+        yaUnit.put("1660103",(new int[] {0,0,Integer.parseInt(dbm.getData(1,27).toString())}));
+        yaUnit.put("1660104",(new int[] {0,0,Integer.parseInt(dbm.getData(1,28).toString())}));
+        yaUnit.put("1660105",(new int[] {0,0,Integer.parseInt(dbm.getData(1,29).toString())}));
+        yaUnit.put("1660106",(new int[] {0,0,Integer.parseInt(dbm.getData(1,30).toString())}));
+        yaUnit.put("MULTI",(new int[] {0,0,0,Integer.parseInt(dbm.getData(1,31).toString()),0,Integer.parseInt(dbm.getData(1,32).toString()),Integer.parseInt(dbm.getData(1,33).toString()),Integer.parseInt(dbm.getData(1,34).toString())}));
+        yaUnit.put("1660108",(new int[] {0,0,Integer.parseInt(dbm.getData(1,35).toString()),Integer.parseInt(dbm.getData(1,37).toString()),Integer.parseInt(dbm.getData(1,48).toString()),0,Integer.parseInt(dbm.getData(1,36).toString()),Integer.parseInt(dbm.getData(1,38).toString()),Integer.parseInt(dbm.getData(1,49).toString())}));
+        yaUnit.put("16",(new int[] {0,0,Integer.parseInt(dbm.getData(1,39).toString()),0,Integer.parseInt(dbm.getData(1,41).toString()),0,Integer.parseInt(dbm.getData(1,40).toString()),0,Integer.parseInt(dbm.getData(1,42).toString())}));
+        yaUnit.put("1660107",(new int[] {0,0,Integer.parseInt(dbm.getData(1,43).toString())}));
+        yaUnit.put("KAIZEN",(new int[] {0,0,Integer.parseInt(dbm.getData(1,45).toString()),Integer.parseInt(dbm.getData(1,46).toString()),Integer.parseInt(dbm.getData(1,47).toString()),Integer.parseInt(dbm.getData(1,44).toString())}));
+        yaUnit.put("12",(new int[] {0,0,Integer.parseInt(dbm.getData(1,50).toString()),0,Integer.parseInt(dbm.getData(1,51).toString())}));
+        yaKaizenCode = new String[] {"","",dbm.getData(3,45).toString(),dbm.getData(3,46).toString(),dbm.getData(3,47).toString(),dbm.getData(3,44).toString()};
         buf.delete(0,buf.length());
         buf.append("select provider_id,system_service_kind_detail,");
         buf.append("system_bind_path,detail_value from ");
@@ -206,25 +208,28 @@ public class QkanTsusyoRehaData {
         }
       }
       String osn = System.getProperty("os.name").substring(0,3);
-      tValue.put("1160104",(new String[] {"","1\uff5e2hr","2\uff5e3hr","3\uff5e4hr","4\uff5e6hr","6\uff5e8hr","8\uff5e9hr","9\uff5e10hr"}));
+      tValue.put("1160104",(new String[] {"","1\uff5e2hr","2\uff5e3hr","3\uff5e4hr","4\uff5e6hr","6\uff5e8hr","8\uff5e9hr","9\uff5e10hr","10\uff5e11hr","11\uff5e12hr","12\uff5e13hr","13\uff5e14hr"}));
       tValue.put("1160105",(new String[] {"","無","有"}));
-      tValue.put("1160107",(new String[] {"","無","有"}));
       tValue.put("1160109",(new String[] {"","無","超","欠"}));
-      tValue.put("1160111",(new String[] {"","無","有"}));
-      tValue.put("1160112",(new String[] {"","無","1月以内","1月越3月以内","3月越"}));
+      tValue.put("1160111",(new String[] {"","無","I","II(<=6)","II(>6)"}));
+      tValue.put("1160112",(new String[] {"","無","有"}));
       tValue.put("1160113",(new String[] {"","無","有"}));
       tValue.put("1160114",(new String[] {"","無","有"}));
       tValue.put("1160115",(new String[] {"","無","有"}));
       tValue.put("1160116",(new String[] {"","通常","通常老","大I","大I老","大II","大II老"}));
-      tValue.put("1160118",(new String[] {"","無","有"}));
       tValue.put("1160119",(new String[] {"","無","有"}));
-      tValue.put("1160120",(new String[] {"","無","有"}));
+      tValue.put("1160120",(new String[] {"","無","I","II"}));
       tValue.put("1160121",(new String[] {"","無","有"}));
-      tValue.put("1160122",(new String[] {"","無","I","II"}));
+      tValue.put("1160122",(new String[] {"","無","Iロ","II","Iイ"}));
       tValue.put("1160123",(new String[] {"","無","有"}));
-      tValue.put("KAIZEN",(new String[] {"","無","I","II","III"}));
+      tValue.put("1160124",(new String[] {"","無","3月以内","3超6月以内"}));
+      tValue.put("1160125",(new String[] {"","無","有"}));
+      tValue.put("1160126",(new String[] {"","無","有"}));
+      tValue.put("1160127",(new String[] {"","無","有"}));
+      tValue.put("KAIZEN",(new String[] {"","無","II","III","IV","I"}));
       tValue.put("12",(new String[] {"","無","有"}));
       tValue.put("16",(new String[] {"","無","有"}));
+      tValue.put("18",(new String[] {"","無","片","復"}));
       yValue.put("1660101",(new String[] {"","無","超","欠"}));
       yValue.put("1660102",(new String[] {"","無","有"}));
       yValue.put("1660103",(new String[] {"","無","有"}));
@@ -232,13 +237,14 @@ public class QkanTsusyoRehaData {
       yValue.put("1660105",(new String[] {"","無","有"}));
       yValue.put("1660106",(new String[] {"","無","有"}));
       yValue.put("1660107",(new String[] {"","無","有"}));
-      yValue.put("1660108",(new String[] {"","無","I","II","無","I","II"}));
+      yValue.put("1660108",(new String[] {"","無","I21","II1","I11","無","I22","II2","I12"}));
       yValue.put("1660109",(new String[] {"","無","有"}));
       yValue.put("1660110",(new String[] {"","病/診","施設"}));
-      yValue.put("KAIZEN",(new String[] {"","無","I","II","III"}));
-      yValue.put("MULTI",(new String[] {"","無","無","I","無","I","I","II"}));
+      yValue.put("KAIZEN",(new String[] {"","無","II","III","IV","I"}));
+      yValue.put("MULTI",(new String[] {"","無","無","I1","無","I2","I3","II"}));
       yValue.put("12",(new String[] {"","無","有","無","有"}));
       yValue.put("16",(new String[] {"","無","有","無","有","無","有","無","有"}));
+      yValue.put("18",(new String[] {"","無","有","無","有","無","有","無","有"}));
 
     }
 
@@ -431,6 +437,11 @@ public class QkanTsusyoRehaData {
     }
   
     public void setTsusyoPanel(int targetYear,int targetMonth,int targetDay) {
+      Long diffTime;
+      double difft;
+      Calendar cal1 = Calendar.getInstance();
+      String date="Panel set start at "+cal1.get(Calendar.YEAR)+"."+(cal1.get(Calendar.MONTH) + 1) +"."+cal1.get(Calendar.DATE) +" "+cal1.get(Calendar.HOUR) + ":"+cal1.get(Calendar.MINUTE)+":"+cal1.get(Calendar.SECOND)+"."+cal1.get(Calendar.MILLISECOND);
+      System.out.println(date);
       pn2.setVisible(false);      
       pn2.removeAll();
       pnl.setVisible(false);      
@@ -453,7 +464,7 @@ public class QkanTsusyoRehaData {
 
         buf.append("select PATIENT_FIRST_NAME,PATIENT_FAMILY_NAME,");
         buf.append("SERVICE.PATIENT_ID,SERVICE_ID as SID,");
-        buf.append("SYSTEM_SERVICE_KIND_DETAIL,max(JOTAI_CODE) as JOTAI_CODE,PATIENT_BIRTHDAY,");
+        buf.append("SYSTEM_SERVICE_KIND_DETAIL,JOTAI_CODE,PATIENT_BIRTHDAY,");
         buf.append("count(SERVICE.SERVICE_ID),INSURE_RATE,");
         buf.append("min(INSURE_VALID_START) as INSURE_VALID_START,");
         buf.append("max(INSURE_VALID_END) as INSURE_VALID_END");
@@ -466,18 +477,24 @@ public class QkanTsusyoRehaData {
         buf.append("(PATIENT.PATIENT_ID=SERVICE.PATIENT_ID and DELETE_FLAG=0)");
         buf.append(" inner join PATIENT_NINTEI_HISTORY on ");
         buf.append("(PATIENT_NINTEI_HISTORY.PATIENT_ID=SERVICE.PATIENT_ID and");
-        buf.append(" NINTEI_HISTORY_ID in ");
-        buf.append("(select NINTEI_HISTORY_ID from ");
+        buf.append(" NINTEI_HISTORY_ID = ");
+        buf.append("(select max(NINTEI_HISTORY_ID) from ");
         buf.append("PATIENT_NINTEI_HISTORY where PATIENT_ID=SERVICE.PATIENT_ID");
         buf.append(" and INSURE_VALID_END>='");
         buf.append(nStart);
+        buf.append("' and SYSTEM_INSURE_VALID_END>='");
+        buf.append(nStart);
         if (targetDay>0) {
           buf.append("' and INSURE_VALID_START<='");
+          buf.append(nStart);
+          buf.append("' and SYSTEM_INSURE_VALID_START<='");
           buf.append(nStart);
           //buf.append("'");
         }
         if (targetDay==0) {
           buf.append("' and INSURE_VALID_START<'");
+          buf.append(nEnd);
+          buf.append("' and SYSTEM_INSURE_VALID_START<'");
           buf.append(nEnd);
         }
 
@@ -500,7 +517,7 @@ public class QkanTsusyoRehaData {
         buf.append(currentProvider);
         buf.append("' group by SERVICE.PATIENT_ID,PATIENT_FIRST_NAME,");
         buf.append("PATIENT_FAMILY_NAME,PATIENT_BIRTHDAY,");
-        buf.append("INSURE_RATE,SYSTEM_SERVICE_KIND_DETAIL");
+        buf.append("INSURE_RATE,SYSTEM_SERVICE_KIND_DETAIL,JOTAI_CODE");
         buf.append(",SERVICE.SERVICE_ID,LAST,SERVICE_USE_TYPE,SERVICE_DATE");
         buf.append(" order by SYSTEM_SERVICE_KIND_DETAIL,SERVICE.PATIENT_ID");
         buf.append(",LAST desc,SERVICE_DATE asc");
@@ -585,6 +602,15 @@ public class QkanTsusyoRehaData {
           String kind = (sbp==11611) ? 
                         "介":"予";
           String cR="1";
+          if (dbm.getData("JOTAI_CODE",i)!=null) {
+            cR = dbm.getData("JOTAI_CODE",i).toString();
+            String cRate = (String)careRate.get(cR);
+            pline.addElement(cRate);
+          } else {
+            pline.addElement("");
+          }
+          pline.addElement(kind);
+          Calendar cal21 = Calendar.getInstance();
           int kaizenVal = 0;
           if (targetDay==0) {
             DngDBAccess dbm4 = new DngDBAccess("firebird",dbUri,dbUser,dbPass);
@@ -638,40 +664,8 @@ public class QkanTsusyoRehaData {
               }
             }
             //処遇改善取得ここまで----------------------------------------
-
-            buf.delete(0,buf.length());
-            buf.append("select JOTAI_CODE from PATIENT_NINTEI_HISTORY ");
-            buf.append("where PATIENT_ID=");
-            buf.append(pNo);
-            buf.append(" and NINTEI_HISTORY_ID=(select");
-            buf.append(" max(NINTEI_HISTORY_ID) from PATIENT_NINTEI_HISTORY ");
-            buf.append("where INSURE_VALID_END='");
-            buf.append(insEnd);
-            buf.append("' and PATIENT_ID=");
-            buf.append(pNo);
-            buf.append(")");
-            System.out.println(buf.toString());
-            dbm4.connect();
-            dbm4.execQuery(buf.toString());
-            dbm4.Close();
-            if (dbm4.Rows>0 && dbm4.getData("JOTAI_CODE",0)!=null) {
-              cR = dbm4.getData("JOTAI_CODE",0).toString();
-              String cRate = (String)careRate.get(cR);
-              pline.addElement(cRate);
-            } else {
-              pline.addElement("");
-            }
-            pline.addElement(kind);
           }
           else if (targetDay>0) {
-            if (dbm.getData("JOTAI_CODE",i)!=null) {
-            cR = dbm.getData("JOTAI_CODE",i).toString();
-            String cRate = (String)careRate.get(cR);
-            pline.addElement(cRate);
-            } else {
-              pline.addElement("");
-            }
-            pline.addElement(kind);
             buf.delete(0,buf.length());
             buf.append("select SERVICE_ID,SYSTEM_BIND_PATH,");
             buf.append("extract(HOUR from DETAIL_VALUE),");
@@ -759,9 +753,13 @@ public class QkanTsusyoRehaData {
             tVal.put("1160120","");
             tVal.put("1160121","");
             tVal.put("1160122","");
+            tVal.put("1160123","");
+            tVal.put("1160124","");
+            tVal.put("1160125","");
+            tVal.put("1160126","");
             tVal.put("12","");
             tVal.put("16","");
-            String[] ssCode = new String[] {"0","0","0","0",(String)careCode.get(cR)};
+            String[] ssCode = new String[] {"0","0","0","0","0",(String)careCode.get(cR)};
             int ssCount = 0;
             for (int j=0;j<dbm2.Rows;j++){
               System.out.println("Rows start: "+j);
@@ -769,6 +767,9 @@ public class QkanTsusyoRehaData {
               int sbp0 = Integer.parseInt(ssbp0);
               String sval = dbm2.getData("DETAIL_VALUE",j).toString();
               int ival = Integer.parseInt(sval);
+              if (ival==10) sval="A";
+              if (ival==11) sval="B";
+              if (ival==12) sval="C";
               String[] val;
               System.out.println("sbp = "+sbp0+" detailValu = "+ival);
               if (sbp0==15) continue;
@@ -778,10 +779,11 @@ public class QkanTsusyoRehaData {
                                break;
                 case 1160104 : ssCode[2] = sval; break;
                 case 1160109 : ssCode[3] = sval; break;
+                case 1160127 : ssCode[4] = sval; break;
               }
               if (sbp0==14 || sbp0==9) {
               }
-              else if (sbp0==1160116 || sbp0==1160104 || sbp0==1160109) {
+              else if (sbp0==1160116 || sbp0==1160104 || sbp0==1160109 || sbp0==1160127) {
                 val = (String[])tValue.get(ssbp0);
                 tVal.put(ssbp0,val[ival]);
               }
@@ -807,26 +809,29 @@ public class QkanTsusyoRehaData {
             pline.addElement((String)tVal.get("1160104")); //時間区分
             pline.addElement((String)tVal.get("1160116")); //施設区分
             pline.addElement((String)tVal.get("1160109")); //人員
-            pline.addElement((String)tVal.get("1160119")); //人員
+            pline.addElement((String)tVal.get("1160119")); //理学
             pline.addElement((String)tVal.get("1160105")); //入浴
-            pline.addElement((String)tVal.get("1160107")); //リハ指導
             pline.addElement((String)tVal.get("1160111")); //リハマネ
             pline.addElement((String)tVal.get("1160112")); //短期
             pline.addElement((String)tVal.get("1160121")); //若年
             pline.addElement((String)tVal.get("1160114")); //栄養
             pline.addElement((String)tVal.get("1160115")); //口腔
-            pline.addElement((String)tVal.get("1160118")); //個別
             pline.addElement((String)tVal.get("1160120")); //認知症
             pline.addElement((String)tVal.get("1160123")); //重度
             pline.addElement((String)tVal.get("1160122")); //サービス
+            pline.addElement((String)tVal.get("1160124")); //行為向上
+            pline.addElement((String)tVal.get("1160125")); //中重度
+            pline.addElement((String)tVal.get("1160126")); //社会参加支援
+            pline.addElement((String)tVal.get("1160127")); //リハ後継続
             pline.addElement((String)tVal.get("12"));      //中山間
+            pline.addElement((String)tVal.get("18"));      //送迎
             pline.addElement("");                          //運動
             pline.addElement("");                          //評価
             pline.addElement((String)tVal.get("16"));      //同住
             pline.addElement("");                          //日割
-            //pline.addElement("");                          //選択複数
+            pline.addElement("");                          //選択複数
             pline.addElement((String)tVal.get("KAIZEN")); //処遇改善
-            for (int k=0;k<5;k++) pointCode += ssCode[k];
+            for (int k=0;k<6;k++) pointCode += ssCode[k];
             System.out.println("pointCode : "+pointCode);
             int[] add = (int[])taUnit.get("KAIZEN");
             kaizenRate = (double)add[kaizen]/1000.0; 
@@ -863,7 +868,7 @@ public class QkanTsusyoRehaData {
                 case 1660110 : ssCode[0] = sval; break;
                 case 1660101 : ssCode[2] = sval; break;
                 case 1660102 : ssCode[3] = sval; break;
-                case 1660108 : ival += (cR.equals("13")) ? 3:0; break;
+                case 1660108 : ival += (cR.equals("13")) ? 4:0; break;
                 case 16 : ival += (cR.equals("13")) ? 2:0; 
                           ival += (ssCode[0].equals("2")) ? 2:0; break;
                 case 12 : ival += (ssCode[3].equals("2")) ? 2:0; break;
@@ -889,17 +894,17 @@ public class QkanTsusyoRehaData {
                 switch (sbp0) {
                   case 1660103 : if (ival==2) {
                                    multi += 1; 
-                                   //multi_less += add[ival];
+                                   multi_less += add[ival];
                                  }
                                  break;
                   case 1660104 : if (ival==2) {
                                    multi += 2;
-                                   //multi_less += add[ival];
+                                   multi_less += add[ival];
                                  }
                                  break;
                   case 1660105 : if (ival==2) {
                                    multi += 4;
-                                   //multi_less += add[ival];
+                                   multi_less += add[ival];
                                  }
                                  break;
                 }
@@ -913,41 +918,44 @@ public class QkanTsusyoRehaData {
             else {
               yoVal.put("KAIZEN",val[kaizen]);
             }
-            //val = (String[])yValue.get("MULTI");
-            //yoVal.put("MULTI",val[multi]);
+            val = (String[])yValue.get("MULTI");
+            yoVal.put("MULTI",val[multi]);
             pline.addElement("");                           //時間区分
             pline.addElement((String)yoVal.get("1660110")); //施設区分
             pline.addElement((String)yoVal.get("1660101")); //人員
             pline.addElement("");                           //理学
             pline.addElement("");                           //入浴
-            pline.addElement("");                           //リハ指導
             pline.addElement("");                           //リハマネ
             pline.addElement("");                           //短期
             pline.addElement((String)yoVal.get("1660107")); //若年
             pline.addElement((String)yoVal.get("1660104")); //栄養
             pline.addElement((String)yoVal.get("1660105")); //口腔
-            pline.addElement("");                           //個別
             pline.addElement("");                           //認知症
             pline.addElement("");                           //重度
             pline.addElement((String)yoVal.get("1660108")); //サービス
+            pline.addElement("");                           //行為向上
+            pline.addElement("");                           //中重度
+            pline.addElement("");                           //参加支援
+            pline.addElement("");                           //リハ後継続
             pline.addElement((String)yoVal.get("12"));      //中山間
+            pline.addElement("");      //送迎
             pline.addElement((String)yoVal.get("1660103")); //運動
             pline.addElement((String)yoVal.get("1660106")); //評価
             pline.addElement((String)yoVal.get("16"));      //同住
             pline.addElement((String)yoVal.get("1660102")); //日割
-            //pline.addElement((String)yoVal.get("MULTI"));   //選択複数
+            pline.addElement((String)yoVal.get("MULTI"));   //選択複数
             pline.addElement((String)yoVal.get("KAIZEN")); //処遇改善
             for (int k=0;k<4;k++) pointCode += ssCode[k];
             System.out.println("pointCode : "+pointCode);
-            int[] add = (int[])taUnit.get("KAIZEN");
+            int[] add = (int[])yaUnit.get("KAIZEN");
             kaizenRate = (double)add[kaizen]/1000.0;
-/*
+//
             add = (int[])yaUnit.get("MULTI");
             addUnit += add[multi];
             if (add[multi] != 0) addUnit -= multi_less;
             else multi_less = 0;
             System.out.println(" multi_add = "+add[multi]+" multi_less = -"+multi_less);
-*/
+//
          }
 
          if (targetDay==0) {
@@ -1028,7 +1036,9 @@ public class QkanTsusyoRehaData {
                   buf.append("PATIENT_NINTEI_HISTORY where PATIENT_ID=");
                   buf.append(pNo);
                   buf.append(" and INSURE_VALID_END>=SERVICE.SERVICE_DATE");
+                  buf.append(" and SYSTEM_INSURE_VALID_END>=SERVICE.SERVICE_DATE");
                   buf.append(" and INSURE_VALID_START<=SERVICE.SERVICE_DATE");
+                  buf.append(" and SYSTEM_INSURE_VALID_START<=SERVICE.SERVICE_DATE");
                   buf.append(")) where SERVICE.PATIENT_ID=");
                   buf.append(pNo);
                   buf.append(" and ((SYSTEM_SERVICE_KIND_DETAIL=11611 and ");
@@ -1133,7 +1143,9 @@ public class QkanTsusyoRehaData {
                 buf.append("PATIENT_NINTEI_HISTORY where PATIENT_ID=");
                 buf.append(pNo);
                 buf.append(" and INSURE_VALID_END>=SERVICE.SERVICE_DATE");
+                buf.append(" and SYSTEM_INSURE_VALID_END>=SERVICE.SERVICE_DATE");
                 buf.append(" and INSURE_VALID_START<=SERVICE.SERVICE_DATE");
+                buf.append(" and SYSTEM_INSURE_VALID_START<=SERVICE.SERVICE_DATE");
                 buf.append(")) where SERVICE.PATIENT_ID=");
                 buf.append(pNo);
                 buf.append(" and ((SYSTEM_SERVICE_KIND_DETAIL=11611 and ");
@@ -1192,7 +1204,8 @@ public class QkanTsusyoRehaData {
           }
           else if ( sbp==11611 && (cR.equals("12") || cR.equals("13"))) {
               int hiyou =(int)((double) addUnit * unitRate);
-              int futan = hiyou - (int)((double)hiyou/100.0*(double)insRate);
+              //int futan = hiyou - (int)((double)hiyou/100.0*(double)insRate);
+              int futan = (int)((double)hiyou/100.0*(double)(100-insRate));
               //if (hiyou%10>0) futan +=1;
               System.out.println("addUnit= "+addUnit+" uintRate = "+unitRate+" insRate = "+insRate+" hiyou = "+hiyou+" futan = "+futan);
               if (hiyou>0) totalFee1 += hiyou;
@@ -1223,12 +1236,13 @@ public class QkanTsusyoRehaData {
               addUnit += mp;
               p += addUnit;
               int kp = Math.round((float)((double) p * kaizenRate));
-              if (kaizen>2)
+              if (kaizen>2 || kaizen<5)
                 kp = Math.round((float)((double)kp*(100-(kaizen-2)*10)/100.0));
               System.out.println(" kaizen = "+kp);
               p += kp;
               int hiyou =(int)((double) p * unitRate);
-              int futan = hiyou - (int)((double)hiyou/100.0*(double)insRate);
+              //int futan = hiyou - (int)((double)hiyou/100.0*(double)insRate);
+              int futan = (int)((double)hiyou/100.0*(double)(100-insRate));
               //if (hiyou%10>0) futan +=1;
               System.out.println("hiyou = "+hiyou+" futan = "+futan);
               if (hiyou>0) totalFee1 += hiyou;
@@ -1239,6 +1253,10 @@ public class QkanTsusyoRehaData {
           }
           pdata.addElement(pline);
           trCols = pline.size();
+          Calendar cal22 = Calendar.getInstance();
+          diffTime = cal22.getTimeInMillis() - cal21.getTimeInMillis();
+          difft = Float.parseFloat( diffTime.toString() ) / 1000.000 ;
+          System.out.println("PID "+pNo+" [ " + difft + " sec. ]");
         }
         System.out.println(trCols+"fields  "+totalCount+":"+totalFee1+":"+totalFee2+":"+totalFee3+":"+totalFee4+":"+totalFee5);
         int cn1,cn2,cn3,cn4,cn5,cn6;
@@ -1300,6 +1318,11 @@ public class QkanTsusyoRehaData {
       }
       pnl.setVisible(true);
       pn2.setVisible(true);
+      Calendar cal2 = Calendar.getInstance();
+      date="Panel set end   at "+cal2.get(Calendar.YEAR)+"."+(cal2.get(Calendar.MONTH) + 1) +"."+cal2.get(Calendar.DATE) +" "+cal2.get(Calendar.HOUR) + ":"+cal2.get(Calendar.MINUTE)+":"+cal2.get(Calendar.SECOND)+"."+cal2.get(Calendar.MILLISECOND);
+      diffTime = cal2.getTimeInMillis() - cal1.getTimeInMillis();
+      difft = Float.parseFloat( diffTime.toString() ) / 1000.000 ;
+      System.out.println(date+" [ " + difft + " sec. ]");
 /*
  select CLAIM_ID,SYSTEM_BIND_PATH,substring(DETAIL_VALUE from 1 for 10) from CLAIM_DETAIL_TEXT_2007 where CLAIM_ID = (select CLAIM_ID from CLAIM  where extract(YEAR from CLAIM_DATE)=2007 and extract(MONTH from CLAIM_DATE)=6 and CATEGORY_NO=7) and SYSTEM_BIND_PATH in (701008,701014,101015,701016,701017) order by SYSTEM_BIND_PATH;
 */
@@ -1354,22 +1377,25 @@ public class QkanTsusyoRehaData {
       fieldName.addElement("人");
       fieldName.addElement("理学");
       fieldName.addElement("入浴");
-      fieldName.addElement("指導");
-      fieldName.addElement("マネ");
+      fieldName.addElement("リハマネ");
       fieldName.addElement("短期");
       fieldName.addElement("若年");
       fieldName.addElement("栄養");
       fieldName.addElement("口腔");
-      fieldName.addElement("個別");
       fieldName.addElement("認知");
       fieldName.addElement("重度");
       fieldName.addElement("サー");
+      fieldName.addElement("行為");
+      fieldName.addElement("中重");
+      fieldName.addElement("参加");
+      fieldName.addElement("継続");
       fieldName.addElement("中山間");
+      fieldName.addElement("送迎");
       fieldName.addElement("運動");
       fieldName.addElement("評価");
       fieldName.addElement("同住");
       fieldName.addElement("日割");
-      //fieldName.addElement("複数");
+      fieldName.addElement("複数");
       fieldName.addElement("処遇改善");
       if (td==0) {
         fieldName.addElement("回");
@@ -1443,11 +1469,9 @@ public class QkanTsusyoRehaData {
       usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32); //入浴
       usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
-      usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32); //指導
+      usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(46); //マネ
       usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
-      usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32); //マネ
-      usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
-      usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(80); //短期
+      usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32); //短期
       usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32); //若年
       usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
@@ -1455,15 +1479,23 @@ public class QkanTsusyoRehaData {
       usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32); //口腔
       usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
-      usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32); //個別
-      usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32); //認知
       usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32); //重度
       usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32); //サー
       usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
+      usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32); //向上
+      usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
+      usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32); //中重度
+      usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
+      usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32); //参加支援
+      usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
+      usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32); //継続
+      usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(40); //中山間
+      usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
+      usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32); //送迎
       usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32); //運動
       usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
@@ -1472,8 +1504,8 @@ public class QkanTsusyoRehaData {
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32); //同住
       usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32); //日割
-      //usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
-      //usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32); //複数
+      usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
+      usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32); //複数
       usrTbl.getColumnModel().getColumn(cid).setCellRenderer(ren);
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(60); //改善
       System.out.println("cid : "+cid);
@@ -1558,7 +1590,7 @@ public class QkanTsusyoRehaData {
       ctype[cid] = 2; // 0 - normal 1 - add comma 2 - align right
       width[cid++] = Float.parseFloat("3.2"); //年齢
       ctype[cid] = 7;
-      width[cid++] = Float.parseFloat("6.0"); //要介護度
+      width[cid++] = Float.parseFloat("5.6"); //要介護度
       ctype[cid] = 7; // 0 - normal 1 - add comma 2 - align right
       width[cid++] = Float.parseFloat("2.5"); //種類
       if (targetDay>0) {
@@ -1578,11 +1610,9 @@ public class QkanTsusyoRehaData {
       ctype[cid] = 7; // 0 - normal 1 - add comma 2 - align right
       width[cid++] = Float.parseFloat("3.0"); //入浴
       ctype[cid] = 7; // 0 - normal 1 - add comma 2 - align right
-      width[cid++] = Float.parseFloat("3.0"); //リハ指導
-      ctype[cid] = 7; // 0 - normal 1 - add comma 2 - align right
-      width[cid++] = Float.parseFloat("3.0"); //リハマネ
+      width[cid++] = Float.parseFloat("6.5"); //リハマネ
       ctype[cid] = 10; // 0 - normal 1 - add comma 2 - align right
-      width[cid++] = Float.parseFloat("8.5"); //短期
+      width[cid++] = Float.parseFloat("3.2"); //短期
       ctype[cid] = 7; // 0 - normal 1 - add comma 2 - align right
       width[cid++] = Float.parseFloat("3.0"); //若年
       ctype[cid] = 7; // 0 - normal 1 - add comma 2 - align right
@@ -1590,15 +1620,23 @@ public class QkanTsusyoRehaData {
       ctype[cid] = 7; // 0 - normal 1 - add comma 2 - align right
       width[cid++] = Float.parseFloat("3.0"); //口腔
       ctype[cid] = 7; // 0 - normal 1 - add comma 2 - align right
-      width[cid++] = Float.parseFloat("3.0"); //個別
-      ctype[cid] = 7; // 0 - normal 1 - add comma 2 - align right
       width[cid++] = Float.parseFloat("3.0"); //認知
       ctype[cid] = 7; // 0 - normal 1 - add comma 2 - align right
       width[cid++] = Float.parseFloat("3.0"); //重度
       ctype[cid] = 7; // 0 - normal 1 - add comma 2 - align right
       width[cid++] = Float.parseFloat("3.0"); //サービス
       ctype[cid] = 7; // 0 - normal 1 - add comma 2 - align right
+      width[cid++] = Float.parseFloat("3.0"); //向上
+      ctype[cid] = 7; // 0 - normal 1 - add comma 2 - align right
+      width[cid++] = Float.parseFloat("3.0"); //中重度
+      ctype[cid] = 7; // 0 - normal 1 - add comma 2 - align right
+      width[cid++] = Float.parseFloat("3.0"); //参加支援
+      ctype[cid] = 7; // 0 - normal 1 - add comma 2 - align right
+      width[cid++] = Float.parseFloat("3.0"); //リハ後継続
+      ctype[cid] = 7; // 0 - normal 1 - add comma 2 - align right
       width[cid++] = Float.parseFloat("4.5"); //中山間
+      ctype[cid] = 7; // 0 - normal 1 - add comma 2 - align right
+      width[cid++] = Float.parseFloat("3.0"); //送迎
       ctype[cid] = 7; // 0 - normal 1 - add comma 2 - align right
       width[cid++] = Float.parseFloat("3.0"); //運動
       ctype[cid] = 7; // 0 - normal 1 - add comma 2 - align right
@@ -1607,8 +1645,8 @@ public class QkanTsusyoRehaData {
       width[cid++] = Float.parseFloat("3.0"); //同住
       ctype[cid] = 7; // 0 - normal 1 - add comma 2 - align right
       width[cid++] = Float.parseFloat("3.0"); //日割
-      //ctype[cid] = 7; // 0 - normal 1 - add comma 2 - align right
-      //width[cid++] = Float.parseFloat("3.0"); //複数
+      ctype[cid] = 7; // 0 - normal 1 - add comma 2 - align right
+      width[cid++] = Float.parseFloat("3.0"); //複数
       ctype[cid] = 2; // 0 - normal 1 - add comma 2 - align right
       width[cid++] = Float.parseFloat("7.0"); //改善
       if (targetDay==0) {
@@ -1625,7 +1663,7 @@ public class QkanTsusyoRehaData {
         ctype[cid] = 1; // 0 - normal 1 - add comma 2 - align right
         width[cid++] = Float.parseFloat("6.0"); //負担額合計
         ctype[cid] = 1; // 0 - normal 1 - add comma 2 - align right
-        width[cid++] = Float.parseFloat("5.5"); //公費負担額
+        width[cid++] = Float.parseFloat("5.8"); //公費負担額
       }
       //Calendar cal = Calendar.getInstance();
       //String date=cal.get(Calendar.YEAR)+""+(cal.get(Calendar.MONTH) + 1)

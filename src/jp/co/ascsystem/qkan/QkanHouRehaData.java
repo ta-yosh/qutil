@@ -137,9 +137,11 @@ public class QkanHouRehaData {
 
       tValue.put("1140103",(new String[] {"","病院／診療所","介護老健施設"}));
       tValue.put("1140105",(new String[] {"","無","有"}));
-      tValue.put("1140106",(new String[] {"","無","1月以内","1月超3月以内"}));
+      tValue.put("1140106",(new String[] {"","無","有"}));
       tValue.put("1140107",(new String[] {"","無","有"}));
-      tValue.put("1140108",(new String[] {"","無","有"}));
+      tValue.put("1140109",(new String[] {"","無","有"}));
+      tValue.put("1140110",(new String[] {"","無","I型","II型"}));
+      tValue.put("1140112",(new String[] {"","無","有"}));
       tValue.put("12",(new String[] {"","無","有"}));
       tValue.put("16",(new String[] {"","無","有"}));
       yValue.put("1640101",(new String[] {"","病院／診療所","介護老健施設"}));
@@ -164,14 +166,15 @@ public class QkanHouRehaData {
       if (dbm.connect()) {
         dbm.execQuery(buf.toString());
         dbm.Close();
-        taUnit.put("1140108",(new int[] {0,0,Integer.parseInt(dbm.getData(1,0).toString())})); //訪問介護連携
-        taUnit.put("1140106",(new int[] {0,0,Integer.parseInt(dbm.getData(1,1).toString()),Integer.parseInt(dbm.getData(1,2).toString())})); //短期集中加算
+        taUnit.put("1140106",(new int[] {0,0,Integer.parseInt(dbm.getData(1,0).toString())})); //短期集中加算
+        taUnit.put("1140110",(new int[] {0,0,Integer.parseInt(dbm.getData(1,1).toString()),Integer.parseInt(dbm.getData(1,2).toString())})); //リハビリテーション・マネジメント加算
         taUnit.put("1140107",(new int[] {0,0,Integer.parseInt(dbm.getData(1,3).toString())})); //サービス提供体制強化加算
-        taUnit.put("12",(new int[] {0,0,Integer.parseInt(dbm.getData(1,4).toString())}));
-        yaUnit.put("1640105",(new int[] {0,0,Integer.parseInt(dbm.getData(1,5).toString())})); //訪問介護連携
-        yaUnit.put("1640103",(new int[] {0,0,Integer.parseInt(dbm.getData(1,6).toString())})); //短期集中加算
-        yaUnit.put("1640104",(new int[] {0,0,Integer.parseInt(dbm.getData(1,7).toString())})); //サービス体制強化
-        yaUnit.put("12",(new int[] {0,0,Integer.parseInt(dbm.getData(1,8).toString())}));
+        taUnit.put("1140112",(new int[] {0,0,Integer.parseInt(dbm.getData(1,4).toString())})); //社会参加支援加算
+        taUnit.put("12",(new int[] {0,0,Integer.parseInt(dbm.getData(1,5).toString())}));
+        yaUnit.put("1640105",(new int[] {0,0,Integer.parseInt(dbm.getData(1,6).toString())})); //訪問介護連携
+        yaUnit.put("1640103",(new int[] {0,0,Integer.parseInt(dbm.getData(1,7).toString())})); //短期集中加算
+        yaUnit.put("1640104",(new int[] {0,0,Integer.parseInt(dbm.getData(1,8).toString())})); //サービス体制強化
+        yaUnit.put("12",(new int[] {0,0,Integer.parseInt(dbm.getData(1,9).toString())}));
 
 
         buf.delete(0,buf.length());
@@ -405,6 +408,11 @@ public class QkanHouRehaData {
     }
   
     public void setHouRehaPanel(int targetYear,int targetMonth,int targetDay) {
+      Long diffTime;
+      double difft;
+      Calendar cal1 = Calendar.getInstance();
+      String date="Panel set start at "+cal1.get(Calendar.YEAR)+"."+(cal1.get(Calendar.MONTH) + 1) +"."+cal1.get(Calendar.DATE) +" "+cal1.get(Calendar.HOUR) + ":"+cal1.get(Calendar.MINUTE)+":"+cal1.get(Calendar.SECOND)+"."+cal1.get(Calendar.MILLISECOND);
+      System.out.println(date);
       pn2.setVisible(false);      
       pn2.removeAll();
       pnl.setVisible(false);      
@@ -428,7 +436,7 @@ public class QkanHouRehaData {
 
         buf.append("select PATIENT_FIRST_NAME,PATIENT_FAMILY_NAME,");
         buf.append("SERVICE.PATIENT_ID,SERVICE.SERVICE_ID as SID,");
-        buf.append("SYSTEM_SERVICE_KIND_DETAIL,max(JOTAI_CODE) as JOTAI_CODE,PATIENT_BIRTHDAY,");
+        buf.append("SYSTEM_SERVICE_KIND_DETAIL,JOTAI_CODE,PATIENT_BIRTHDAY,");
         buf.append("count(SERVICE.SERVICE_ID),INSURE_RATE,");
         buf.append("min(INSURE_VALID_START) as INSURE_VALID_START,");
         buf.append("max(INSURE_VALID_END) as INSURE_VALID_END,");
@@ -437,7 +445,7 @@ public class QkanHouRehaData {
         buf.append(",substring(SERVICE.LAST_TIME from 1 for 16) as LAST,");
         buf.append("SERVICE_DATE,");
         buf.append("SERVICE_DETAIL_DATE_");
-        buf.append(detYear+".DETAIL_VALUE as START");
+        buf.append(detYear+".DETAIL_VALUE as STARTT");
         buf.append(" from SERVICE ");
         buf.append(" inner join SERVICE_DETAIL_DATE_"+detYear+" on ");
         buf.append("SERVICE.SERVICE_ID=SERVICE_DETAIL_DATE_"+detYear);
@@ -446,17 +454,23 @@ public class QkanHouRehaData {
         buf.append("(PATIENT.PATIENT_ID=SERVICE.PATIENT_ID and DELETE_FLAG=0)");
         buf.append(" inner join PATIENT_NINTEI_HISTORY on ");
         buf.append("(PATIENT_NINTEI_HISTORY.PATIENT_ID=SERVICE.PATIENT_ID and");
-        buf.append(" NINTEI_HISTORY_ID in ");
-        buf.append("(select NINTEI_HISTORY_ID from ");
+        buf.append(" NINTEI_HISTORY_ID = ");
+        buf.append("(select max(NINTEI_HISTORY_ID) from ");
         buf.append("PATIENT_NINTEI_HISTORY where PATIENT_ID=SERVICE.PATIENT_ID");
         buf.append(" and INSURE_VALID_END>='");
+        buf.append(nStart);
+        buf.append("' and SYSTEM_INSURE_VALID_END>='");
         buf.append(nStart);
         if (targetDay>0) {
           buf.append("' and INSURE_VALID_START<='");
           buf.append(nStart);
+          buf.append("' and SYSTEM_INSURE_VALID_START<='");
+          buf.append(nStart);
         }
         if (targetDay==0) {
           buf.append("' and INSURE_VALID_START<'");
+          buf.append(nEnd);
+          buf.append("' and SYSTEM_INSURE_VALID_START<'");
           buf.append(nEnd);
         }
 
@@ -480,9 +494,9 @@ public class QkanHouRehaData {
         buf.append("PATIENT_FAMILY_NAME,PATIENT_BIRTHDAY,");
         buf.append("INSURE_RATE,SYSTEM_SERVICE_KIND_DETAIL");
         buf.append(",SERVICE.SERVICE_ID,LAST");
-        buf.append(",START,SERVICE_USE_TYPE,SERVICE_DATE");
+        buf.append(",STARTT,SERVICE_USE_TYPE,SERVICE_DATE,JOTAI_CODE");
         buf.append(" order by SYSTEM_SERVICE_KIND_DETAIL,SERVICE.PATIENT_ID");
-        buf.append(",LAST desc,SERVICE_DATE asc,START asc");
+        buf.append(",LAST desc,SERVICE_DATE asc,STARTT asc");
 
 
         String sql = buf.toString();
@@ -567,43 +581,18 @@ public class QkanHouRehaData {
           }
           String kind = (sbp==11411) ? 
                         "介":"予";
+          Calendar cal21 = Calendar.getInstance();
           String cR="1";
-
-          if (targetDay==0) {
-            buf.delete(0,buf.length());
-            buf.append("select JOTAI_CODE from PATIENT_NINTEI_HISTORY ");
-            buf.append("where PATIENT_ID=");
-            buf.append(pNo);
-            buf.append(" and NINTEI_HISTORY_ID=(select");
-            buf.append(" max(NINTEI_HISTORY_ID) from PATIENT_NINTEI_HISTORY ");
-            buf.append("where INSURE_VALID_END='");
-            buf.append(insEnd);
-            buf.append("' and PATIENT_ID=");
-            buf.append(pNo);
-            buf.append(")");
-            System.out.println(buf.toString());
-            DngDBAccess dbm4 = new DngDBAccess("firebird",dbUri,dbUser,dbPass);
-            dbm4.connect();
-            dbm4.execQuery(buf.toString());
-            dbm4.Close();
-            if (dbm4.Rows>0 && dbm4.getData("JOTAI_CODE",0)!=null) {
-              cR = dbm4.getData("JOTAI_CODE",0).toString();
-              String cRate = (String)careRate.get(cR);
-              pline.addElement(cRate);
-            } else {
-              pline.addElement("");
-            }
-            pline.addElement(kind);
+          if (dbm.getData("JOTAI_CODE",i)!=null) {
+            cR = dbm.getData("JOTAI_CODE",i).toString();
+            String cRate = (String)careRate.get(cR);
+            pline.addElement(cRate);
+          } else {
+            pline.addElement("");
           }
-          else if (targetDay>0) {
-            if (dbm.getData("JOTAI_CODE",i)!=null) {
-              cR = dbm.getData("JOTAI_CODE",i).toString();
-              String cRate = (String)careRate.get(cR);
-              pline.addElement(cRate);
-            } else {
-              pline.addElement("");
-            }
-            pline.addElement(kind);
+          pline.addElement(kind);
+
+          if (targetDay>0) {
             buf.delete(0,buf.length());
             buf.append("select SERVICE_ID,SYSTEM_BIND_PATH,");
             buf.append("extract(HOUR from DETAIL_VALUE),");
@@ -683,7 +672,8 @@ public class QkanHouRehaData {
             tVal.put("1140105","");
             tVal.put("1140106","");
             tVal.put("1140107","");
-            tVal.put("1140108","");
+            tVal.put("1140110","");
+            tVal.put("1140112","");
             for (int j=0;j<dbm2.Rows;j++){
               System.out.println("Rows start: "+j);
               int sbp0 = Integer.parseInt(dbm2.getData("SYSTEM_BIND_PATH",j).toString());
@@ -691,7 +681,7 @@ public class QkanHouRehaData {
                 kaisei=Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
                 System.out.println("kaisei: "+kaisei);
               }
-              else if (sbp0==12 || sbp0==1140106 || sbp0==1140107 || sbp0==1140108) {
+              else if (sbp0==12 || sbp0==1140106 || sbp0==1140107 || sbp0==1140110) {
                 int key = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
                 String[] val = (String[])tValue.get(Integer.toString(sbp0)); 
                 //pline.addElement(val[key]);
@@ -701,10 +691,6 @@ public class QkanHouRehaData {
                 else if(sbp0==1140106) {
                   if (!added) addUnit += add[key];
                   if (add[key]>0) added = true;
-                }
-                else if(sbp0==1140108) {
-                  if (!added2) addUnit += add[key];
-                  if (add[key]>0) added2 = true;
                 }
                 else addUnit += add[key];
                 System.out.println("sbp = "+sbp0+" key = "+key+" add= "+addUnit);
@@ -730,7 +716,9 @@ public class QkanHouRehaData {
             pline.addElement((String)tVal.get("16"));
             pline.addElement((String)tVal.get("1140106"));
             pline.addElement((String)tVal.get("1140107"));
-            pline.addElement((String)tVal.get("1140108"));
+            pline.addElement((String)tVal.get("1140110"));
+            pline.addElement((String)tVal.get("1140112"));
+            pline.addElement("");
             pline.addElement((String)tVal.get("12"));
             for (int ii=0;ii<ssc;ii++) ItemCode += ssCode[ii];
             System.out.println("ItemtCode : "+ItemCode);
@@ -785,6 +773,8 @@ public class QkanHouRehaData {
             pline.addElement((String)yoVal.get("16"));
             pline.addElement((String)yoVal.get("1640103"));
             pline.addElement((String)yoVal.get("1640104"));
+            pline.addElement("");
+            pline.addElement("");
             pline.addElement((String)yoVal.get("1640105"));
             pline.addElement((String)yoVal.get("12"));
             for (int ii=0;ii<ssc;ii++) ItemCode += ssCode[ii];
@@ -862,7 +852,9 @@ public class QkanHouRehaData {
                 buf.append("PATIENT_NINTEI_HISTORY where PATIENT_ID=");
                 buf.append(pNo);
                 buf.append(" and INSURE_VALID_END>=SERVICE.SERVICE_DATE");
+                buf.append(" and SYSTEM_INSURE_VALID_END>=SERVICE.SERVICE_DATE");
                 buf.append(" and INSURE_VALID_START<=SERVICE.SERVICE_DATE");
+                buf.append(" and SYSTEM_INSURE_VALID_START<=SERVICE.SERVICE_DATE");
                 buf.append(")) where SERVICE.PATIENT_ID=");
                 buf.append(pNo);
                 buf.append(" and ((SYSTEM_SERVICE_KIND_DETAIL=11411 and ");
@@ -972,7 +964,9 @@ public class QkanHouRehaData {
                 buf.append("PATIENT_NINTEI_HISTORY where PATIENT_ID=");
                 buf.append(pNo);
                 buf.append(" and INSURE_VALID_END>=SERVICE.SERVICE_DATE");
+                buf.append(" and SYSTEM_INSURE_VALID_END>=SERVICE.SERVICE_DATE");
                 buf.append(" and INSURE_VALID_START<=SERVICE.SERVICE_DATE");
+                buf.append(" and SYSTEM_INSURE_VALID_START<=SERVICE.SERVICE_DATE");
                 buf.append(")) where SERVICE.PATIENT_ID=");
                 buf.append(pNo);
                 buf.append(" and ((SYSTEM_SERVICE_KIND_DETAIL=11411 and ");
@@ -1071,6 +1065,10 @@ public class QkanHouRehaData {
           }
           pdata.addElement(pline);
           trCols = pline.size();
+          Calendar cal22 = Calendar.getInstance();
+          diffTime = cal22.getTimeInMillis() - cal21.getTimeInMillis();
+          difft = Float.parseFloat( diffTime.toString() ) / 1000.000 ;
+          System.out.println("PID "+pNo+" [ " + difft + " sec. ]");
         }
         System.out.println(totalCount+":"+totalFee1+":"+totalFee2+":"+totalFee3+":"+totalFee4+":"+totalFee5);
         int cn1,cn2,cn3,cn4,cn5,cn6;
@@ -1128,6 +1126,11 @@ public class QkanHouRehaData {
       }
       pnl.setVisible(true);
       pn2.setVisible(true);
+      Calendar cal2 = Calendar.getInstance();
+      date="Panel set end   at "+cal2.get(Calendar.YEAR)+"."+(cal2.get(Calendar.MONTH) + 1) +"."+cal2.get(Calendar.DATE) +" "+cal2.get(Calendar.HOUR) + ":"+cal2.get(Calendar.MINUTE)+":"+cal2.get(Calendar.SECOND)+"."+cal2.get(Calendar.MILLISECOND);
+      diffTime = cal2.getTimeInMillis() - cal1.getTimeInMillis();
+      difft = Float.parseFloat( diffTime.toString() ) / 1000.000 ;
+      System.out.println(date+" [ " + difft + " sec. ]");
       System.out.println("Panel created OK");
     }
 
@@ -1179,8 +1182,10 @@ public class QkanHouRehaData {
       fieldName.addElement("同住");
       fieldName.addElement("短期");
       fieldName.addElement("サー");
-      fieldName.addElement("中山間");
+      fieldName.addElement("リハマネ");
+      fieldName.addElement("社参支援");
       fieldName.addElement("連携");
+      fieldName.addElement("中山間");
       if (td==0) {
         fieldName.addElement("回数");
       }
@@ -1240,13 +1245,17 @@ public class QkanHouRehaData {
       usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32);
       usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
-      usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(80);
+      usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32);
+      usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
+      usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32);
+      usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
+      usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(60);
+      usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
+      usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(60);
       usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32);
       usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(40);
-      usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
-      usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32);
       System.out.println("cid : "+cid);
       if (td==0) {
         usrTbl.getColumnModel().getColumn(cid).setCellRenderer(ren);
@@ -1343,13 +1352,17 @@ public class QkanHouRehaData {
       ctype[cid] = 7;
       width[cid++] = Float.parseFloat("3.2"); //同住
       ctype[cid] = 7;
-      width[cid++] = Float.parseFloat("7.0"); //短期
+      width[cid++] = Float.parseFloat("3.2"); //短期
       ctype[cid] = 7;
       width[cid++] = Float.parseFloat("3.2"); //サー
       ctype[cid] = 7;
-      width[cid++] = Float.parseFloat("4.0"); //中山間
+      width[cid++] = Float.parseFloat("6.0"); //リハマネ
+      ctype[cid] = 7;
+      width[cid++] = Float.parseFloat("6.0"); //社会参加支援
       ctype[cid] = 7;
       width[cid++] = Float.parseFloat("3.2"); //訪問介護連携
+      ctype[cid] = 7;
+      width[cid++] = Float.parseFloat("6.0"); //中山間
       if (targetDay==0) {
         ctype[cid] = 2; // 0 - normal 1 - add comma 2 - align right
         width[cid++] = Float.parseFloat("3.0"); //回数
