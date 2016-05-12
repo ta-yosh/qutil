@@ -45,6 +45,7 @@ public class QkanTsusyoData {
     public int targetYear=0;
     public int targetMonth=0;
     public int targetDay=0;
+    public boolean KAI16 = false;
     public String targetDate=null;
     private String data[][];
     private int ymdata[][];
@@ -200,94 +201,104 @@ public class QkanTsusyoData {
       buf.append("' and service_valid_end>='");
       buf.append(dat);
       buf.append("' order by system_service_kind_detail,service_code_item");
-      System.out.println(buf.toString());
+      System.out.println("KAI16="+KAI16+"\n"+buf.toString());
       if (dbm.connect()) {
+        int COLU = 0;
         dbm.execQuery(buf.toString());
         dbm.Close();
         taUnit.put("1150119", (new int[] {0,0,
-          Integer.parseInt(dbm.getData(1,0).toString())})); //¸ÄÊÌ£±
+          Integer.parseInt(dbm.getData(1,COLU++).toString())})); //¸ÄÊÌ£±
         taUnit.put("1150120", (new int[] {0,0,
-          Integer.parseInt(dbm.getData(1,1).toString())})); //¸ÄÊÌ£²
+          Integer.parseInt(dbm.getData(1,COLU++).toString())})); //¸ÄÊÌ£²
         taUnit.put("1150106", (new int[] {0,0,
-          Integer.parseInt(dbm.getData(1,2).toString())})); //ÆþÍá
+          Integer.parseInt(dbm.getData(1,COLU++).toString())})); //ÆþÍá
         taUnit.put("1150121", (new int[] {0,0,
-          Integer.parseInt(dbm.getData(1,3).toString())})); //Ç§ÃÎ¾É
+          Integer.parseInt(dbm.getData(1,COLU++).toString())})); //Ç§ÃÎ¾É
         taUnit.put("1150122", (new int[] {0,0,
-          Integer.parseInt(dbm.getData(1,4).toString())})); //Ãæ½ÅÅÙ
+          Integer.parseInt(dbm.getData(1,COLU++).toString())})); //Ãæ½ÅÅÙ
         taUnit.put("1150116", (new int[] {0,0,
-          Integer.parseInt(dbm.getData(1,5).toString())})); //±ÉÍÜ
+          Integer.parseInt(dbm.getData(1,COLU++).toString())})); //±ÉÍÜ
         taUnit.put("1150112", (new int[] {0,0,
-          Integer.parseInt(dbm.getData(1,6).toString())})); //¸ý¹Ð
+          Integer.parseInt(dbm.getData(1,COLU++).toString())})); //¸ý¹Ð
         taUnit.put("16", (new int[] {0,0,
-          Integer.parseInt(dbm.getData(1,7).toString())})); //Æ±°ì½»µï
+          Integer.parseInt(dbm.getData(1,COLU++).toString())})); //Æ±°ì½»µï
         taUnit.put("18", (new int[] {0,0,
-          Integer.parseInt(dbm.getData(1,8).toString()),    //Á÷·Þ¸º»»ÊÒÆ»
-          Integer.parseInt(dbm.getData(1,9).toString())*2})); //Á÷·Þ¸º»»±ýÉü
-        taUnit.put("1150123", (new int[] {0,0,
-          Integer.parseInt(dbm.getData(1,10).toString())})); //¸ÄÊÌÁ÷·Þ¶¯²½
-        taUnit.put("1150124", (new int[] {0,0,
-          Integer.parseInt(dbm.getData(1,11).toString())})); //ÆþÍá¶¯²½
+          Integer.parseInt(dbm.getData(1,COLU++).toString()),    //Á÷·Þ¸º»»ÊÒÆ»
+          Integer.parseInt(dbm.getData(1,COLU++).toString())*2})); //Á÷·Þ¸º»»±ýÉü
+        if (!KAI16) {
+          System.out.println("KAI16="+KAI16+"\n");
+          taUnit.put("1150123", (new int[] {0,0,
+            Integer.parseInt(dbm.getData(1,COLU++).toString())})); //¸ÄÊÌÁ÷·Þ¶¯²½
+          taUnit.put("1150124", (new int[] {0,0,
+            Integer.parseInt(dbm.getData(1,COLU++).toString())})); //ÆþÍá¶¯²½
+        }
         taUnit.put("1150117", (new int[] {0,0,
-          Integer.parseInt(dbm.getData(1,13).toString()),    //¥µ¡¼¥Ó¥¹I2(¥í)
-          Integer.parseInt(dbm.getData(1,14).toString()),    //¥µ¡¼¥Ó¥¹II
-          Integer.parseInt(dbm.getData(1,15).toString()),    //¥µ¡¼¥Ó¥¹III
-          Integer.parseInt(dbm.getData(1,12).toString())})); //¥µ¡¼¥Ó¥¹I1(¥¤)
+          Integer.parseInt(dbm.getData(1,COLU+1).toString()),    //¥µ¡¼¥Ó¥¹I2(¥í)
+          Integer.parseInt(dbm.getData(1,COLU+2).toString()),    //¥µ¡¼¥Ó¥¹II
+          (!KAI16) ? Integer.parseInt(dbm.getData(1,COLU+3).toString()):0,    //¥µ¡¼¥Ó¥¹III
+          Integer.parseInt(dbm.getData(1,COLU).toString())})); //¥µ¡¼¥Ó¥¹I1(¥¤)
+        COLU += (!KAI16) ? 4:3;
         taUnit.put("KAIZEN", (new int[] {0,0,
-          Integer.parseInt(dbm.getData(1,16).toString()),     //½è¶ø²þÁ±II
-          Integer.parseInt(dbm.getData(1,17).toString()),    //½è¶ø²þÁ±III
-          Integer.parseInt(dbm.getData(1,18).toString()),    //½è¶ø²þÁ±IV
-          Integer.parseInt(dbm.getData(1,19).toString())})); //½è¶ø²þÁ±I
+          Integer.parseInt(dbm.getData(1,COLU++).toString()),     //½è¶ø²þÁ±II
+          Integer.parseInt(dbm.getData(1,COLU++).toString()),    //½è¶ø²þÁ±III
+          Integer.parseInt(dbm.getData(1,COLU++).toString()),    //½è¶ø²þÁ±IV
+          Integer.parseInt(dbm.getData(1,COLU++).toString())})); //½è¶ø²þÁ±I
         taUnit.put("1150115", (new int[] {0,0,
-          Integer.parseInt(dbm.getData(1,20).toString())})); //¼ãÇ¯
+          Integer.parseInt(dbm.getData(1,COLU++).toString())})); //¼ãÇ¯
         taUnit.put("12",(new int[] {0,0,
-          Integer.parseInt(dbm.getData(1,21).toString())})); //Ãæ»³´Ö
+          Integer.parseInt(dbm.getData(1,COLU++).toString())})); //Ãæ»³´Ö
+        COLU = (!KAI16) ? 16:13;
         taKaizenCode = new String[] {"","",
-          dbm.getData(3,16).toString(),     //½è¶ø²þÁ±II
-          dbm.getData(3,17).toString(),     //½è¶ø²þÁ±III
-          dbm.getData(3,18).toString(),    //½è¶ø²þÁ±IV
-          dbm.getData(3,19).toString() //½è¶ø²þÁ±I
+          dbm.getData(3,COLU++).toString(),     //½è¶ø²þÁ±II
+          dbm.getData(3,COLU++).toString(),     //½è¶ø²þÁ±III
+          dbm.getData(3,COLU++).toString(),    //½è¶ø²þÁ±IV
+          dbm.getData(3,COLU++).toString() //½è¶ø²þÁ±I
         };
+        COLU = (!KAI16) ? 22:19;
 
         yaUnit.put("1650104", (new int[] {0,0,
-          Integer.parseInt(dbm.getData(1,22).toString())})); //Í½±¿Æ°
+          Integer.parseInt(dbm.getData(1,COLU++).toString())})); //Í½±¿Æ°
         yaUnit.put("1650105", (new int[] {0,0,
-          Integer.parseInt(dbm.getData(1,23).toString())})); //Í½±ÉÍÜ
+          Integer.parseInt(dbm.getData(1,COLU++).toString())})); //Í½±ÉÍÜ
         yaUnit.put("1650106", (new int[] {0,0,
-          Integer.parseInt(dbm.getData(1,24).toString())})); //Í½¸ý¹Ð
+          Integer.parseInt(dbm.getData(1,COLU++).toString())})); //Í½¸ý¹Ð
         yaUnit.put("1650107", (new int[] {0,0,
-          Integer.parseInt(dbm.getData(1,25).toString())})); //Í½É¾²Á
+          Integer.parseInt(dbm.getData(1,COLU++).toString())})); //Í½É¾²Á
         yaUnit.put("MULTI", (new int[] {0,0,0,
-          Integer.parseInt(dbm.getData(1,26).toString()),0,  //Í½Ê£¿ôI1
-          Integer.parseInt(dbm.getData(1,27).toString()),    //Í½Ê£¿ôI2
-          Integer.parseInt(dbm.getData(1,28).toString()),    //Í½Ê£¿ôI3
-          Integer.parseInt(dbm.getData(1,29).toString())})); //Í½Ê£¿ôII
+          Integer.parseInt(dbm.getData(1,COLU++).toString()),0,  //Í½Ê£¿ôI1
+          Integer.parseInt(dbm.getData(1,COLU++).toString()),    //Í½Ê£¿ôI2
+          Integer.parseInt(dbm.getData(1,COLU++).toString()),    //Í½Ê£¿ôI3
+          Integer.parseInt(dbm.getData(1,COLU++).toString())})); //Í½Ê£¿ôII
         yaUnit.put("1650103", (new int[] {0,0,
-          Integer.parseInt(dbm.getData(1,30).toString())})); //Í½¸þ¾å
+          Integer.parseInt(dbm.getData(1,COLU++).toString())})); //Í½¸þ¾å
         yaUnit.put("1650109", (new int[] {0,0,
-          Integer.parseInt(dbm.getData(1,31).toString()),    //Í½¥µ¡¼¥Ó¥¹I21(¥í)
-          Integer.parseInt(dbm.getData(1,33).toString()),    //Í½¥µ¡¼¥Ó¥¹II1
-          Integer.parseInt(dbm.getData(1,37).toString()),0,  //Í½¥µ¡¼¥Ó¥¹I11(¥¤)
-          Integer.parseInt(dbm.getData(1,32).toString()),    //Í½¥µ¡¼¥Ó¥¹I22(¥í)
-          Integer.parseInt(dbm.getData(1,34).toString()),    //Í½¥µ¡¼¥Ó¥¹II2
-          Integer.parseInt(dbm.getData(1,38).toString())})); //Í½¥µ¡¼¥Ó¥¹I12(¥¤)
+          Integer.parseInt(dbm.getData(1,COLU++).toString()),    //Í½¥µ¡¼¥Ó¥¹I21(¥í)
+          Integer.parseInt(dbm.getData(1,COLU+1).toString()),    //Í½¥µ¡¼¥Ó¥¹II1
+          Integer.parseInt(dbm.getData(1,COLU+5).toString()),0,  //Í½¥µ¡¼¥Ó¥¹I11(¥¤)
+          Integer.parseInt(dbm.getData(1,COLU).toString()),    //Í½¥µ¡¼¥Ó¥¹I22(¥í)
+          Integer.parseInt(dbm.getData(1,COLU+2).toString()),    //Í½¥µ¡¼¥Ó¥¹II2
+          Integer.parseInt(dbm.getData(1,COLU+6).toString())})); //Í½¥µ¡¼¥Ó¥¹I12(¥¤)
         yaUnit.put("16", (new int[] {0,0,
-          Integer.parseInt(dbm.getData(1,35).toString()),0,  //Í½Æ±°ì½»½ê
-          Integer.parseInt(dbm.getData(1,36).toString())})); //Í½Æ±°ì½»½ê
+          Integer.parseInt(dbm.getData(1,COLU+3).toString()),0,  //Í½Æ±°ì½»½ê
+          Integer.parseInt(dbm.getData(1,COLU+4).toString())})); //Í½Æ±°ì½»½ê
+        COLU += 7;
         yaUnit.put("1650108", (new int[] {0,0,
-          Integer.parseInt(dbm.getData(1,39).toString())})); //Í½¼ãÇ¯
+          Integer.parseInt(dbm.getData(1,COLU++).toString())})); //Í½¼ãÇ¯
         yaUnit.put("KAIZEN", (new int[] {0,0,
-          Integer.parseInt(dbm.getData(1,41).toString()),     //½è¶ø²þÁ±II
-          Integer.parseInt(dbm.getData(1,42).toString()),    //½è¶ø²þÁ±III
-          Integer.parseInt(dbm.getData(1,43).toString()),    //½è¶ø²þÁ±IV
-          Integer.parseInt(dbm.getData(1,40).toString())})); //½è¶ø²þÁ±I
+          Integer.parseInt(dbm.getData(1,COLU+1).toString()),     //½è¶ø²þÁ±II
+          Integer.parseInt(dbm.getData(1,COLU+2).toString()),    //½è¶ø²þÁ±III
+          Integer.parseInt(dbm.getData(1,COLU+3).toString()),    //½è¶ø²þÁ±IV
+          Integer.parseInt(dbm.getData(1,COLU).toString())})); //½è¶ø²þÁ±I
+        COLU += 4;
         yaUnit.put("12", (new int[] {0,0,
-          Integer.parseInt(dbm.getData(1,44).toString()),    //Í½Ãæ»³´Ö
-          Integer.parseInt(dbm.getData(1,45).toString())})); //Í½Ãæ»³´ÖÆü³ä
+          Integer.parseInt(dbm.getData(1,COLU++).toString()),    //Í½Ãæ»³´Ö
+          Integer.parseInt(dbm.getData(1,COLU).toString())})); //Í½Ãæ»³´ÖÆü³ä
+        COLU -= 4;
         yaKaizenCode = new String[] {"","",
-          dbm.getData(3,41).toString(),     //½è¶ø²þÁ±II
-          dbm.getData(3,42).toString(),    //½è¶ø²þÁ±III
-          dbm.getData(3,43).toString(),    //½è¶ø²þÁ±IV 
-          dbm.getData(3,40).toString() //½è¶ø²þÁ±I
+          dbm.getData(3,COLU++).toString(),     //½è¶ø²þÁ±II
+          dbm.getData(3,COLU++).toString(),    //½è¶ø²þÁ±III
+          dbm.getData(3,COLU).toString(),    //½è¶ø²þÁ±IV 
+          dbm.getData(3,COLU-3).toString() //½è¶ø²þÁ±I
         };
         buf.delete(0,buf.length());
         buf.append("select provider_id,system_service_kind_detail,");
@@ -513,6 +524,7 @@ public class QkanTsusyoData {
       Hashtable firsted= new Hashtable();
       Long diffTime;
       double difft;
+      KAI16 = ((targetYear==2016 && targetMonth>=4) || (targetYear>2016) ) ? true : false;
       Calendar cal1 = Calendar.getInstance();
       String date="Panel set start at "+cal1.get(Calendar.YEAR)+"."+(cal1.get(Calendar.MONTH) + 1) +"."+cal1.get(Calendar.DATE) +" "+cal1.get(Calendar.HOUR) + ":"+cal1.get(Calendar.MINUTE)+":"+cal1.get(Calendar.SECOND)+"."+cal1.get(Calendar.MILLISECOND);
       System.out.println(date);
@@ -1011,8 +1023,10 @@ public class QkanTsusyoData {
             pline.addElement((String)tVal.get("1150121"));
             pline.addElement((String)tVal.get("1150122"));
             pline.addElement((String)tVal.get("18"));
-            pline.addElement((String)tVal.get("1150123"));
-            pline.addElement((String)tVal.get("1150124"));
+            if (!KAI16) {
+              pline.addElement((String)tVal.get("1150123"));
+              pline.addElement((String)tVal.get("1150124"));
+            }
             pline.addElement("");
             pline.addElement("");
             pline.addElement("");
@@ -1120,8 +1134,10 @@ public class QkanTsusyoData {
             pline.addElement(""); //
             pline.addElement(""); //
             pline.addElement(""); //
-            pline.addElement(""); //
-            pline.addElement(""); //
+            if (!KAI16) {
+              pline.addElement(""); //
+              pline.addElement(""); //
+            }
             pline.addElement((String)yoVal.get("1650103")); //À¸³è
             pline.addElement((String)yoVal.get("1650104")); //±¿Æ°
             pline.addElement((String)yoVal.get("1650107")); //É¾²Á
@@ -1582,8 +1598,10 @@ public class QkanTsusyoData {
       fieldName.addElement("Ç§ÃÎ");
       fieldName.addElement("Ãæ½Å");
       fieldName.addElement("Á÷¸º");
-      fieldName.addElement("Á÷¶¯");
-      fieldName.addElement("Íá¶¯");
+      if (!KAI16) {
+        fieldName.addElement("Á÷¶¯");
+        fieldName.addElement("Íá¶¯");
+      }
       fieldName.addElement("À¸³è");
       fieldName.addElement("±¿Æ°");
       fieldName.addElement("É¾²Á");
@@ -1685,10 +1703,12 @@ public class QkanTsusyoData {
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32);
       usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32);
+      if (!KAI16) {
       usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32);
       usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32);
+      }
       usrTbl.getColumnModel().getColumn(cid).setCellRenderer(ren);
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(60);
       usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
@@ -1821,10 +1841,12 @@ public class QkanTsusyoData {
       width[cid++] = Float.parseFloat("3.0"); //Ãæ½ÅÅÙ
       ctype[cid] = 7;
       width[cid++] = Float.parseFloat("3.0"); //Á÷·Þ¸º¤µ¤ó
-      ctype[cid] = 7;
-      width[cid++] = Float.parseFloat("3.0"); //Á÷·Þ¶¯
-      ctype[cid] = 7;
-      width[cid++] = Float.parseFloat("3.0"); //ÆþÍá¶¯²½
+      if (!KAI16) {
+        ctype[cid] = 7;
+        width[cid++] = Float.parseFloat("3.0"); //Á÷·Þ¶¯
+        ctype[cid] = 7;
+        width[cid++] = Float.parseFloat("3.0"); //ÆþÍá¶¯²½
+      }
       ctype[cid] = 7;
       width[cid++] = Float.parseFloat("3.0"); //À¸³è
       ctype[cid] = 7;
