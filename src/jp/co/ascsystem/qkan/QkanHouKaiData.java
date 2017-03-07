@@ -46,6 +46,7 @@ public class QkanHouKaiData {
     public int targetMonth=0;
     public int targetDay=0;
     public String targetDate=null;
+    public boolean KAI17=false;
     private String data[][];
     private int ymdata[][];
     private int ddata[];
@@ -154,7 +155,8 @@ public class QkanHouKaiData {
       tValue.put("1110114",(new String[] {"","Ìµ","Í­"}));
       tValue.put("12",(new String[] {"","Ìµ","Í­"}));
       tValue.put("16",(new String[] {"","Ìµ","Í­"}));
-      tValue.put("KAIZEN",(new String[] {"","Ìµ","II","III","IV","I"}));
+      if (!KAI17) tValue.put("KAIZEN",(new String[] {"","Ìµ","II","III","IV","I","Ìµ"}));
+      else tValue.put("KAIZEN",(new String[] {"","Ìµ","III","IV","V","II","I"}));
       yValue.put("1610101",(new String[] {"","I","II","III"}));
       yValue.put("1610102",(new String[] {"","Ìµ","½éÇ¤"}));
       yValue.put("1610103",(new String[] {"","Ìµ","Í­"}));
@@ -163,7 +165,8 @@ public class QkanHouKaiData {
       yValue.put("1610106",(new String[] {"","Ìµ","Í­"}));
       yValue.put("12",(new String[] {"","Ìµ","Í­"}));
       yValue.put("16",(new String[] {"","Ìµ","Í­"}));
-      yValue.put("KAIZEN",(new String[] {"","Ìµ","II","III","IV","I"}));
+      if (!KAI17) yValue.put("KAIZEN",(new String[] {"","Ìµ","II","III","IV","I","Ìµ"}));
+      else yValue.put("KAIZEN",(new String[] {"","Ìµ","III","IV","V","II","I"}));
       StringBuffer buf = new StringBuffer();
       buf.append("select service_code_item,service_unit,system_service_kind_detail,system_service_code_item from m_service_code ");
       buf.append(" where system_service_kind_detail in (11111,16111) ");
@@ -180,22 +183,38 @@ public class QkanHouKaiData {
         taUnit.put("1110110",(new int[] {0,0,Integer.parseInt(dbm.getData(1,1).toString())})); //½é´ü²Ã»»
         taUnit.put("1110111",(new int[] {0,0,Integer.parseInt(dbm.getData(1,0).toString())})); //¶ÛµÞ»þ²Ã»»
         taUnit.put("1110112",(new int[] {0,0,Integer.parseInt(dbm.getData(1,2).toString())})); //À¸³èµ¡Ç½¸þ¾å²Ã»»
-        taUnit.put("KAIZEN",(new int[] {0,0,Integer.parseInt(dbm.getData(1,4).toString()),Integer.parseInt(dbm.getData(1,5).toString()),Integer.parseInt(dbm.getData(1,6).toString()),Integer.parseInt(dbm.getData(1,3).toString())}));
-        taUnit.put("SPECIAL",dbm.getData(1,7)); //ÆÃÊÌÃÏ°è(¡ó)
-        taUnit.put("SMALL",dbm.getData(1,8));  //¾®µ¬ÌÏ(¡ó)
-        taUnit.put("12",(new int[] {0,0,Integer.parseInt(dbm.getData(1,9).toString())}));
-        taKaizenCode = new String[] {"","",dbm.getData(3,3).toString(),dbm.getData(3,4).toString(),dbm.getData(3,5).toString(),dbm.getData(3,6).toString()};
-        yaUnit.put("1610104",(new int[] {0,0,Integer.parseInt(dbm.getData(1,10).toString())})); //½é²ó
-        yaUnit.put("1610105",(new int[] {0,0,Integer.parseInt(dbm.getData(1,11).toString())})); //µ¡Ç½¸þ¾å
-        yaUnit.put("KAIZEN",(new int[] {0,0,Integer.parseInt(dbm.getData(1,13).toString()),Integer.parseInt(dbm.getData(1,14).toString()),Integer.parseInt(dbm.getData(1,15).toString()),Integer.parseInt(dbm.getData(1,12).toString())}));
-        yaUnit.put("SPECIAL",dbm.getData(1,16)); //ÆÃÊÌÃÏ°è(¡ó)
-        yaUnit.put("SPECIAL2",dbm.getData(1,17)); //ÆÃÊÌÃÏ°è(¡ó)
-        yaUnit.put("SMALL",dbm.getData(1,18));  //¾®µ¬ÌÏ(¡ó)
-        yaUnit.put("SMALL2",dbm.getData(1,19));  //¾®µ¬ÌÏ(¡ó)
-        yaUnit.put("12",(new int[] {0,0,Integer.parseInt(dbm.getData(1,20).toString()),0,Integer.parseInt(dbm.getData(1,21).toString())}));
-        yaKaizenCode = new String[] {"","",dbm.getData(3,13).toString(),dbm.getData(3,14).toString(),dbm.getData(3,15).toString(),dbm.getData(3,12).toString()};
-
-
+        if (!KAI17) {
+          taUnit.put("KAIZEN",(new int[] {0,0,Integer.parseInt(dbm.getData(1,3).toString()),Integer.parseInt(dbm.getData(1,4).toString()),Integer.parseInt(dbm.getData(1,5).toString()),Integer.parseInt(dbm.getData(1,6).toString()),0}));
+          taUnit.put("SPECIAL",dbm.getData(1,7)); //ÆÃÊÌÃÏ°è(¡ó)
+          taUnit.put("SMALL",dbm.getData(1,8));  //¾®µ¬ÌÏ(¡ó)
+          taUnit.put("12",(new int[] {0,0,Integer.parseInt(dbm.getData(1,9).toString())}));
+          taKaizenCode = new String[] {"","",dbm.getData(3,3).toString(),dbm.getData(3,4).toString(),dbm.getData(3,5).toString(),dbm.getData(3,6).toString(),""};
+          yaUnit.put("1610104",(new int[] {0,0,Integer.parseInt(dbm.getData(1,10).toString())})); //½é²ó
+          yaUnit.put("1610105",(new int[] {0,0,Integer.parseInt(dbm.getData(1,11).toString())})); //µ¡Ç½¸þ¾å
+          yaUnit.put("KAIZEN",(new int[] {0,0,Integer.parseInt(dbm.getData(1,13).toString()),Integer.parseInt(dbm.getData(1,14).toString()),Integer.parseInt(dbm.getData(1,15).toString()),Integer.parseInt(dbm.getData(1,12).toString()),0}));
+          yaUnit.put("SPECIAL",dbm.getData(1,16)); //ÆÃÊÌÃÏ°è(¡ó)
+          yaUnit.put("SPECIAL2",dbm.getData(1,17)); //ÆÃÊÌÃÏ°è(¡ó)
+          yaUnit.put("SMALL",dbm.getData(1,18));  //¾®µ¬ÌÏ(¡ó)
+          yaUnit.put("SMALL2",dbm.getData(1,19));  //¾®µ¬ÌÏ(¡ó)
+          yaUnit.put("12",(new int[] {0,0,Integer.parseInt(dbm.getData(1,20).toString()),0,Integer.parseInt(dbm.getData(1,21).toString())}));
+          yaKaizenCode = new String[] {"","",dbm.getData(3,13).toString(),dbm.getData(3,14).toString(),dbm.getData(3,15).toString(),dbm.getData(3,12).toString(),""};
+        }
+        else {
+          taUnit.put("KAIZEN",(new int[] {0,0,Integer.parseInt(dbm.getData(1,3).toString()),Integer.parseInt(dbm.getData(1,4).toString()),Integer.parseInt(dbm.getData(1,5).toString()),Integer.parseInt(dbm.getData(1,6).toString()),Integer.parseInt(dbm.getData(1,7).toString())}));
+          taUnit.put("SPECIAL",dbm.getData(1,8)); //ÆÃÊÌÃÏ°è(¡ó)
+          taUnit.put("SMALL",dbm.getData(1,9));  //¾®µ¬ÌÏ(¡ó)
+          taUnit.put("12",(new int[] {0,0,Integer.parseInt(dbm.getData(1,10).toString())}));
+          taKaizenCode = new String[] {"","",dbm.getData(3,3).toString(),dbm.getData(3,4).toString(),dbm.getData(3,5).toString(),dbm.getData(3,6).toString(),dbm.getData(3,7).toString()};
+          yaUnit.put("1610104",(new int[] {0,0,Integer.parseInt(dbm.getData(1,11).toString())})); //½é²ó
+          yaUnit.put("1610105",(new int[] {0,0,Integer.parseInt(dbm.getData(1,12).toString())})); //µ¡Ç½¸þ¾å
+          yaUnit.put("KAIZEN",(new int[] {0,0,Integer.parseInt(dbm.getData(1,15).toString()),Integer.parseInt(dbm.getData(1,16).toString()),Integer.parseInt(dbm.getData(1,17).toString()),Integer.parseInt(dbm.getData(1,14).toString()),Integer.parseInt(dbm.getData(1,13).toString())}));
+          yaUnit.put("SPECIAL",dbm.getData(1,16)); //ÆÃÊÌÃÏ°è(¡ó)
+          yaUnit.put("SPECIAL2",dbm.getData(1,17)); //ÆÃÊÌÃÏ°è(¡ó)
+          yaUnit.put("SMALL",dbm.getData(1,18));  //¾®µ¬ÌÏ(¡ó)
+          yaUnit.put("SMALL2",dbm.getData(1,19));  //¾®µ¬ÌÏ(¡ó)
+          yaUnit.put("12",(new int[] {0,0,Integer.parseInt(dbm.getData(1,20).toString()),0,Integer.parseInt(dbm.getData(1,21).toString())}));
+          yaKaizenCode = new String[] {"","",dbm.getData(3,15).toString(),dbm.getData(3,16).toString(),dbm.getData(3,17).toString(),dbm.getData(3,14).toString(),dbm.getData(3,13).toString()};
+        }
         buf.delete(0,buf.length());
         buf.append("select provider_id,system_service_kind_detail,");
         buf.append("system_bind_path,detail_value from ");
@@ -434,6 +453,7 @@ public class QkanHouKaiData {
       Hashtable firsted= new Hashtable();
       Long diffTime;
       double difft;
+      KAI17 = ((targetYear==2017 && targetMonth>=4) || (targetYear>2017) ) ? true : false;
       Calendar cal1 = Calendar.getInstance();
       String date="Panel set start at "+cal1.get(Calendar.YEAR)+"."+(cal1.get(Calendar.MONTH) + 1) +"."+cal1.get(Calendar.DATE) +" "+cal1.get(Calendar.HOUR) + ":"+cal1.get(Calendar.MINUTE)+":"+cal1.get(Calendar.SECOND)+"."+cal1.get(Calendar.MILLISECOND);
       System.out.println(date);
@@ -961,6 +981,7 @@ public class QkanHouKaiData {
             smRate = (double)Integer.parseInt(taUnit.get("SMALL").toString())/100.0; 
             int[] add = (int[])taUnit.get("KAIZEN");
             kaizenRate = (double)add[kaizen]/1000.0;
+            System.out.println("all kaizen rate: "+add[2]+" "+add[3]+" "+add[4]+" "+add[5]+" "+add[6]);
           }
           else {
             smProv = smProv2;
@@ -1049,6 +1070,7 @@ public class QkanHouKaiData {
             System.out.println("ItemtCode : "+ItemCode);
             int[] add = (int[])yaUnit.get("KAIZEN");
             kaizenRate = (double)add[kaizen]/1000.0;
+            System.out.println("all kaizen rate: "+add[2]+" "+add[3]+" "+add[4]+" "+add[5]+" "+add[6]);
             if (!hiwari) {
               spRate = (double)Integer.parseInt(yaUnit.get("SPECIAL").toString())/100.0; 
               smRate = (double)Integer.parseInt(yaUnit.get("SMALL").toString())/100.0; 
@@ -1349,7 +1371,7 @@ public class QkanHouKaiData {
               p += addUnit;
               if (kaizenRate>0.0 && !second ) {
                 int kp = Math.round((float)((double) p * kaizenRate));
-                if (kaizen>2)
+                if (kaizen>2 && kaizen<5)
                  kp = Math.round((float)((double)kp*(100-(kaizen-2)*10)/100.0));
                 p += kp;
                 sb.append(" kaizen = "+kp);
