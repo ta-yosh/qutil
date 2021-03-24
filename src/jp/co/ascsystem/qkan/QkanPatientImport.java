@@ -57,6 +57,7 @@ public class QkanPatientImport {
     public int runStat=STATE_SUCCESS;
     public boolean vStat = true;
     boolean isMbInPath;
+    File srcFile;
 
     public QkanPatientImport() {
         propertyFile = getPropertyFile(); 
@@ -124,11 +125,16 @@ public class QkanPatientImport {
           }
           if (isMbInPath && ! isCsv) {
             dbPath0 = new File(dbPath).getParent()+"/importwork.fdb";
+            File df = new File(dbPath0);
             try {
-            new DngFileUtil().fileCopy(realInPath,dbPath0);
+              new DngFileUtil().fileCopy2(srcFile,df);
             } catch(Exception err) {
-               statMessage(STATE_ERROR,"作業領域の確保ができません。\n取り込み元ファイルを取り込み先ファイルと同じ階層に置いて実行しなおしてみて下さい。");
-               return null;
+              try {
+                srcFile.renameTo(df);
+              } catch(NullPointerException nerr) {
+                statMessage(STATE_ERROR,"作業領域の確保ができません。\n取り込み元ファイルを取り込み先ファイルと同じ階層に置いて実行しなおしてみて下さい。");
+                return null;
+              }
             }
           }
           if (isCsv) {
@@ -140,23 +146,43 @@ public class QkanPatientImport {
           }
 
           if (iTable.Rows<0) {
-            statMessage(STATE_ERROR,"取り込み元ファイルに接続できません。\nファイルのアクセス権をご確認ください。");
+            if (isCsv) {
+              statMessage(STATE_ERROR,"取り込み元CSVファイルが開けません。\nファイルのアクセス権をご確認ください。");
+            } else {
+              statMessage(STATE_ERROR,"取り込み元データベースに接続できません。\nデータベースファイルのアクセス権をご確認ください。");
+              if (isMbInPath) {
+                if (srcFile.exists())
+                  new File(dbPath0).delete();
+                else
+                  new File(dbPath0).renameTo(srcFile);
+              }
+            }
             return null;
           }
           if (iTable.Rows==0) {
             statMessage(STATE_ERROR,"選択したファイルはデータが存在しないか、または、このツールでは取り込み出来ないファイルです。");
+            if (isMbInPath && ! isCsv ) {
+              if (srcFile.exists())
+                new File(dbPath0).delete();
+              else
+                new File(dbPath0).renameTo(srcFile);
+            }
             continue;
           }
           kstat = true;
         }
-
       } 
       else contentPane.removeAll();
 
         ActionListener exitNow = new ActionListener() {
           public void actionPerformed(ActionEvent e) {
             runStat = STATE_COMPLETE;
-            if (isMbInPath && ! isCsv ) new File(dbPath0).delete();
+            if (isMbInPath && ! isCsv ) {
+              if (srcFile.exists())
+                new File(dbPath0).delete();
+              else
+                new File(dbPath0).renameTo(srcFile);
+            }
             if (isCalled) {
               fr.dispose();
               parent.setEnabled(true);
@@ -299,6 +325,7 @@ public class QkanPatientImport {
         chooser.setInitPath((dbPath0!=null) ? dbPath0:dbPath); 
         File file = chooser.getFile();
         path = file.getPath();
+        srcFile = file;
         isMbInPath = chooser.isMbPath;
       } catch(Exception e) {
         if (!isCalled) {

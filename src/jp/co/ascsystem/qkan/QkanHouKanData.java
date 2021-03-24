@@ -145,7 +145,7 @@ public class QkanHouKanData {
       tValue.put("1130109",(new String[] {"","無","有"}));
       tValue.put("1130110",(new String[] {"","無","有"}));
       tValue.put("1130111",(new String[] {"","20分未満","30分未満","0.5"+tilde+"1時間","1"+tilde+"1.5時間"}));
-      tValue.put("1130112",(new String[] {"","1人","2人"}));
+      tValue.put("1130112",(new String[] {"","1人","2人(看護師)","2人(補助者)"}));
       tValue.put("1130113",(new String[] {"","無","有"}));
       tValue.put("1130114",(new String[] {"","無","有"}));
       tValue.put("1130115",(new String[] {"","30分未満","30分以上"}));
@@ -157,9 +157,10 @@ public class QkanHouKanData {
       tValue.put("1130121",(new String[] {"","無","有"}));
       tValue.put("1130122",(new String[] {"","無","ステ","病/診"}));
       tValue.put("1130123",(new String[] {"","無","有"}));
-      tValue.put("1130124",(new String[] {"","無","有"}));
+      tValue.put("1130124",(new String[] {"","無","I型","II型"}));
       tValue.put("12",(new String[] {"","無","有"}));
       tValue.put("16",(new String[] {"","無","有"}));
+      tValue.put("23",(new String[] {"","無","20人以上","50人以上"}));
       yValue.put("1630101",(new String[] {"","指定","病院/診療所"}));
       yValue.put("1630102",(new String[] {"","正看等","準看","PT,OT,ST"}));
       yValue.put("1630103",(new String[] {"","20分未満","30分未満","0.5"+tilde+"1時間","1"+tilde+"1.5時間"}));
@@ -167,7 +168,7 @@ public class QkanHouKanData {
       yValue.put("1630105",(new String[] {"","無","有"}));
       yValue.put("1630106",(new String[] {"","無","I","II"}));
       yValue.put("1630107",(new String[] {"","20分未満","30分未満","0.5"+tilde+"1時間","1"+tilde+"1.5時間"}));
-      yValue.put("1630108",(new String[] {"","1人","2人"}));
+      yValue.put("1630108",(new String[] {"","1人","2人(看護師)","2人(補助者)"}));
       yValue.put("1630109",(new String[] {"","無","有"}));
       yValue.put("1630110",(new String[] {"","無","有"}));
       yValue.put("1630111",(new String[] {"","30分未満","30分以上"}));
@@ -179,6 +180,7 @@ public class QkanHouKanData {
       yValue.put("1630117",(new String[] {"","無","有"}));
       yValue.put("12",(new String[] {"","無","有"}));
       yValue.put("16",(new String[] {"","無","有"}));
+      yValue.put("23",(new String[] {"","無","20人以上","50人以上"}));
       StringBuffer buf = new StringBuffer();
       buf.append("select service_code_item,service_unit,system_service_kind_detail from m_service_code ");
       //buf.append("where service_code_item in (8000,8100,8110,3100,3200,4000,7000,6101)");
@@ -199,24 +201,26 @@ public class QkanHouKanData {
         taUnit.put("1130118",(new int[] {0,0,Integer.parseInt(dbm.getData(1,5).toString())})); //退所時
         taUnit.put("1130119",(new int[] {0,0,Integer.parseInt(dbm.getData(1,6).toString())})); //介護連携
         taUnit.put("1130122",(new int[] {0,0,Integer.parseInt(dbm.getData(1,0).toString()),Integer.parseInt(dbm.getData(1,1).toString())})); //緊急時加算(定巡)
-        taUnit.put("1130124",(new int[] {0,0,Integer.parseInt(dbm.getData(1,7).toString())})); //看護体制強化加算
-        taUnit.put("1130120",(new int[] {0,0,Integer.parseInt(dbm.getData(1,8).toString())})); //指示日数減算
-        taUnit.put("1130113",(new int[] {0,Integer.parseInt(dbm.getData(1,9).toString()),Integer.parseInt(dbm.getData(1,9).toString()),Integer.parseInt(dbm.getData(1,10).toString())})); //サービス体制強化
-        taUnit.put("1130110",(new int[] {0,0,Integer.parseInt(dbm.getData(1,11).toString())})); //ターミナルケア
-        //taUnit.put("SPECIAL",(new int[] {0,0,Integer.parseInt(dbm.getData(1,12).toString()),Integer.parseInt(dbm.getData(1,13).toString()),Integer.parseInt(dbm.getData(1,14).toString())})); //特別地域(％)
-        taUnit.put("SPECIAL",dbm.getData(1,12)); //特別地域(％)
-        //taUnit.put("SMALL",(new int[] {0,0,Integer.parseInt(dbm.getData(1,15).toString()),Integer.parseInt(dbm.getData(1,16).toString()),Integer.parseInt(dbm.getData(1,17).toString())}));  //小規模(％)
-        taUnit.put("SMALL",dbm.getData(1,15));  //小規模(％)
-        taUnit.put("12",(new int[] {0,0,Integer.parseInt(dbm.getData(1,18).toString()),Integer.parseInt(dbm.getData(1,19).toString()),Integer.parseInt(dbm.getData(1,20).toString())}));
-        yaUnit.put("1630105",(new int[] {0,0,Integer.parseInt(dbm.getData(1,21).toString()),0,Integer.parseInt(dbm.getData(1,22).toString())})); //緊急
-        yaUnit.put("1630106",(new int[] {0,0,Integer.parseInt(dbm.getData(1,23).toString()),Integer.parseInt(dbm.getData(1,24).toString())})); //特別管理
-        yaUnit.put("1630112",(new int[] {0,0,Integer.parseInt(dbm.getData(1,25).toString())})); //初回
-        yaUnit.put("1630113",(new int[] {0,0,Integer.parseInt(dbm.getData(1,26).toString())})); //退所時
-        yaUnit.put("1630117",(new int[] {0,0,Integer.parseInt(dbm.getData(1,27).toString())})); //退所時
-        yaUnit.put("1630109",(new int[] {0,0,Integer.parseInt(dbm.getData(1,28).toString())})); //サービス体制強化
-        yaUnit.put("SPECIAL",dbm.getData(1,29)); //特別地域(％)
-        yaUnit.put("SMALL",dbm.getData(1,30));  //小規模(％)
-        yaUnit.put("12",(new int[] {0,0,Integer.parseInt(dbm.getData(1,31).toString())}));
+        taUnit.put("1130124",(new int[] {0,0,Integer.parseInt(dbm.getData(1,8).toString()),Integer.parseInt(dbm.getData(1,7).toString())})); //看護体制強化加算
+        taUnit.put("1130120",(new int[] {0,0,Integer.parseInt(dbm.getData(1,9).toString())})); //指示日数減算
+        taUnit.put("23",(new int[] {0,0,Integer.parseInt(dbm.getData(1,10).toString()),Integer.parseInt(dbm.getData(1,11).toString())})); //同一建物
+        taUnit.put("1130113",(new int[] {0,Integer.parseInt(dbm.getData(1,12).toString()),Integer.parseInt(dbm.getData(1,12).toString()),Integer.parseInt(dbm.getData(1,13).toString())})); //サービス体制強化
+        taUnit.put("1130110",(new int[] {0,0,Integer.parseInt(dbm.getData(1,14).toString())})); //ターミナルケア
+        //taUnit.put("SPECIAL",(new int[] {0,0,Integer.parseInt(dbm.getData(1,15).toString()),Integer.parseInt(dbm.getData(1,16).toString()),Integer.parseInt(dbm.getData(1,17).toString())})); //特別地域(％)
+        taUnit.put("SPECIAL",dbm.getData(1,15)); //特別地域(％)
+        //taUnit.put("SMALL",(new int[] {0,0,Integer.parseInt(dbm.getData(1,18).toString()),Integer.parseInt(dbm.getData(1,19).toString()),Integer.parseInt(dbm.getData(1,20).toString())}));  //小規模(％)
+        taUnit.put("SMALL",dbm.getData(1,18));  //小規模(％)
+        taUnit.put("12",(new int[] {0,0,Integer.parseInt(dbm.getData(1,21).toString()),Integer.parseInt(dbm.getData(1,22).toString()),Integer.parseInt(dbm.getData(1,23).toString())}));
+        yaUnit.put("1630105",(new int[] {0,0,Integer.parseInt(dbm.getData(1,24).toString()),0,Integer.parseInt(dbm.getData(1,25).toString())})); //緊急
+        yaUnit.put("1630106",(new int[] {0,0,Integer.parseInt(dbm.getData(1,26).toString()),Integer.parseInt(dbm.getData(1,27).toString())})); //特別管理
+        yaUnit.put("1630112",(new int[] {0,0,Integer.parseInt(dbm.getData(1,28).toString())})); //初回
+        yaUnit.put("1630113",(new int[] {0,0,Integer.parseInt(dbm.getData(1,29).toString())})); //退所時
+        yaUnit.put("1630117",(new int[] {0,0,Integer.parseInt(dbm.getData(1,30).toString())})); //看護体制強化
+        yaUnit.put("23",(new int[] {0,0,Integer.parseInt(dbm.getData(1,31).toString()),Integer.parseInt(dbm.getData(1,32).toString())})); //同一建物
+        yaUnit.put("1630109",(new int[] {0,0,Integer.parseInt(dbm.getData(1,33).toString())})); //サービス体制強化
+        yaUnit.put("SPECIAL",dbm.getData(1,34)); //特別地域(％)
+        yaUnit.put("SMALL",dbm.getData(1,35));  //小規模(％)
+        yaUnit.put("12",(new int[] {0,0,Integer.parseInt(dbm.getData(1,36).toString())}));
 
         buf.delete(0,buf.length());
         buf.append("select provider_id,system_service_kind_detail,");
@@ -600,6 +604,7 @@ public class QkanHouKanData {
 
           monfin = true;
           double mountRate=0;
+          double doitsu=0;
           int sCount = Integer.parseInt(dbm.getData("COUNT",i).toString());
           int insRate = Integer.parseInt(dbm.getData("INSURE_RATE",i).toString());
           String insStart = dbm.getData("INSURE_VALID_START",i).toString();
@@ -722,8 +727,8 @@ public class QkanHouKanData {
           if (sbp==11311) {
             smProv = smProv1;
             unitRate = tunitRate;
-            int ssc = 11;
-            String[] ssCode = new String[] {"1",timeId,"1","1","1","1","1","1","1",((cR=="25")? "2":"1"),"1"};
+            int ssc = 10;
+            String[] ssCode = new String[] {"1",timeId,"1","1","1","1","1","1",((cR=="25")? "2":"1"),"1"};
             Hashtable tVal = new Hashtable();
             tVal.put("12","");
             tVal.put("1130103","");
@@ -759,7 +764,7 @@ public class QkanHouKanData {
               }
               else if (sbp0==9) calcOpt = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
 
-              else if (sbp0==12 || sbp0>=1130108 && sbp0<=1130110 || sbp0==1130113 || sbp0>=1130116 && sbp0<=1130120 || sbp0==1130122 || sbp0==1130124) {
+              else if (sbp0==12 || sbp0==23 || sbp0>=1130108 && sbp0<=1130110 || sbp0==1130113 || sbp0>=1130116 && sbp0<=1130120 || sbp0==1130122 || sbp0==1130124) {
                 int key = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
                 val = (String[])tValue.get(Integer.toString(sbp0)); 
                 //pline.addElement(val[key]);
@@ -767,9 +772,12 @@ public class QkanHouKanData {
                 int[] add = (int[]) taUnit.get(dbm2.getData("SYSTEM_BIND_PATH",j).toString());
                 int adu=0;
                 if (sbp0==12) mountRate = (double)add[key]/100.0; 
-                else if (sbp0==1130113 && key==2) {
-                  adu = add[skubun];
-                  addUnit += add[skubun];
+                else if (sbp0==23) doitsu = (double)add[key]/100.0; 
+                else if (sbp0==1130113) {
+                  if (key==2) {
+                    adu = add[skubun];
+                    addUnit += add[skubun];
+                  }
                 }
                 else {
                   if (targetDay==Integer.parseInt(firstDate.get(Integer.toString(pNo)).toString()) && !((Vector)firsted.get(new Integer(pNo))).contains(new Integer(sbp0))) {
@@ -807,19 +815,17 @@ public class QkanHouKanData {
                            break;
                   case 1130121: ssCode[3]= (new Integer(key)).toString();
                            break;
-                  case 16: ssCode[4]= (new Integer(key)).toString();
-                           break;
-                  case 1130106: ssCode[5] = 
+                  case 1130106: ssCode[4] = 
                               (key>2)? (new Integer(key-1)).toString()
                                       :(new Integer(key)).toString(); 
                            break;
-                  case 1130112: ssCode[6]= (new Integer(key)).toString();
+                  case 1130112: ssCode[5]= (new Integer(key)).toString();
                            break;
-                  case 1130115: ssCode[7]= (new Integer(key)).toString();
+                  case 1130115: ssCode[6]= (new Integer(key)).toString();
                            break;
-                  case 1130114: ssCode[8]= (new Integer(key)).toString();
+                  case 1130114: ssCode[7]= (new Integer(key)).toString();
                            break;
-                  case 1130123: ssCode[10]= (new Integer(key)).toString();
+                  case 1130123: ssCode[9]= (new Integer(key)).toString();
                            break;
                 }
               }
@@ -827,7 +833,7 @@ public class QkanHouKanData {
             }
             pline.addElement((String)tVal.get("1130103")); //施設区分
             pline.addElement((String)tVal.get("1130104")); //職員区分
-            pline.addElement((String)tVal.get("1130111")); //時間区分
+            pline.addElement((skubun != 3) ? (String)tVal.get("1130111"):""); //時間区分
             pline.addElement((String)tVal.get("1130106")); //時間帯
             pline.addElement((String)tVal.get("1130113")); //サービス
             pline.addElement((String)tVal.get("1130112")); //訪問人数
@@ -844,7 +850,7 @@ public class QkanHouKanData {
             pline.addElement((String)tVal.get("1130110")); //ターミナル
             pline.addElement((String)tVal.get("1130120")); //日数減算
             pline.addElement((String)tVal.get("1130121")); //2回越え
-            pline.addElement((String)tVal.get("16"));      //同一建物
+            pline.addElement((String)tVal.get("23"));      //同一建物
             pline.addElement((String)tVal.get("12"));      //中山間
             pline.addElement((String)tVal.get("SMALL"));   //小規模
             for (int ii=0;ii<ssc;ii++) ItemCode += ssCode[ii];
@@ -853,8 +859,8 @@ public class QkanHouKanData {
             smRate = (double)Integer.parseInt(taUnit.get("SMALL").toString())/100.0; 
           }
           else {
-            int ssc = 9;
-            String[] ssCode = new String[] {"1","1","1","1","1","1","1","1","1"};
+            int ssc = 8;
+            String[] ssCode = new String[] {"1","1","1","1","1","1","1","1"};
             smProv = smProv2;
             unitRate = yunitRate;
             Hashtable yoVal = new Hashtable();
@@ -888,7 +894,7 @@ public class QkanHouKanData {
                 System.out.println("kaisei: "+kaisei);
               }
               else if (sbp0==9) calcOpt = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
-              else if (sbp0==12 || sbp0==1630105 || sbp0==1630106 || sbp0==1630109 || sbp0==1630112 || sbp0==1630113 || sbp0==1630115 || sbp0==1630117 ) {
+              else if (sbp0==12 || sbp0==23 || sbp0==1630105 || sbp0==1630106 || sbp0==1630109 || sbp0==1630112 || sbp0==1630113 || sbp0==1630115 || sbp0==1630117 ) {
                 int key = Integer.parseInt(dbm2.getData("DETAIL_VALUE",j).toString());
                 String[] val = (String[])yValue.get(Integer.toString(sbp0)); 
                 //pline.addElement(val[key]);
@@ -896,6 +902,7 @@ public class QkanHouKanData {
                 int[] add = (int[]) yaUnit.get(dbm2.getData("SYSTEM_BIND_PATH",j).toString());
                 System.out.println("sbp = "+sbp0+" key = "+key+" add= "+add[key]);
                 if (sbp0==12) mountRate = (double)add[key]/100.0; 
+                else if (sbp0==23) doitsu = (double)add[key]/100.0; 
                 else if (sbp0==1630109) addUnit += add[key];
                 else {
                   if (targetDay==Integer.parseInt(firstDate.get(Integer.toString(pNo)).toString()) && !((Vector)firsted.get(new Integer(pNo))).contains(new Integer(sbp0))) {
@@ -913,8 +920,6 @@ public class QkanHouKanData {
                 //pline.addElement(val[key]);
                 yoVal.put(Integer.toString(sbp0),val[key]);
                 switch (sbp0) {
-                  case 16: ssCode[3]= (new Integer(key)).toString();
-                           break;
                   case 1630101: skubun = key; 
                            ssCode[0]= (new Integer(key)).toString();
                            break;
@@ -922,15 +927,17 @@ public class QkanHouKanData {
                            break;
                   case 1630102: ssCode[2]= (new Integer(key)).toString();
                            break;
-                  case 1630104: ssCode[4]= (new Integer(key)).toString();
+                  case 1630104: ssCode[3]= 
+                              (key>2)? (new Integer(key-1)).toString()
+                                      :(new Integer(key)).toString(); 
                            break;
-                  case 1630108: ssCode[5]= (new Integer(key)).toString();
+                  case 1630108: ssCode[4]= (new Integer(key)).toString();
                            break;
-                  case 1630111: ssCode[6]= (new Integer(key)).toString();
+                  case 1630111: ssCode[5]= (new Integer(key)).toString();
                            break;
-                  case 1630110: ssCode[7]= (new Integer(key)).toString();
+                  case 1630110: ssCode[6]= (new Integer(key)).toString();
                            break;
-                  case 1630116: ssCode[8]= (new Integer(key)).toString();
+                  case 1630116: ssCode[7]= (new Integer(key)).toString();
                            break;
                   case 1630114:
                            if (ssCode[2]=="3") yoVal.put("1630107",val[key]);
@@ -957,7 +964,7 @@ public class QkanHouKanData {
             pline.addElement(""); //
             pline.addElement(""); //
             pline.addElement((String)yoVal.get("1630116")); //2回越え
-            pline.addElement((String)yoVal.get("16"));      //同住
+            pline.addElement((String)yoVal.get("23"));      //同住
             pline.addElement((String)yoVal.get("12"));      //中山間
             pline.addElement((String)yoVal.get("SMALL"));   //小規模
             for (int ii=0;ii<ssc;ii++) ItemCode += ssCode[ii];
@@ -1183,6 +1190,9 @@ public class QkanHouKanData {
               StringBuffer sb = new StringBuffer();
               int p = (int) Integer.parseInt(dbm2.getData(0,0).toString());
               sb.append("p = "+p+"  add = "+addUnit);
+              int dp = Math.round((float)((double) p * doitsu));
+              sb.append(" doitsu = "+dp);
+              p += dp;
               int pp = p;
               if (spArea) {
                 p = p + Math.round((float)((double) p * spRate));
@@ -1203,7 +1213,8 @@ public class QkanHouKanData {
                 case 3 : break;
               }
               int hiyou =(int)((double) p * unitRate);
-              int futan = hiyou - (int)((double)hiyou/100.0*(double)insRate);
+              //int futan = hiyou - (int)((double)hiyou/100.0*(double)insRate);
+              int futan = hiyou - (int)Math.round((double)hiyou/100.0*(double)insRate);
               //if (hiyou%10>0) futan +=1;
               sb.append(" unitRate = "+unitRate+ " hiyou = "+hiyou+" futan = "+futan); 
               System.out.println(sb.toString());
@@ -1349,7 +1360,7 @@ public class QkanHouKanData {
       fieldName.addElement("ター");
       fieldName.addElement("日減");
       fieldName.addElement("2超");
-      fieldName.addElement("同住");
+      fieldName.addElement("同建");
       fieldName.addElement("中山間");
       fieldName.addElement("小規模");
       if (td==0) {
@@ -1414,7 +1425,7 @@ public class QkanHouKanData {
       usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32);
       usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
-      usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32);
+      usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(60);
       usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(60);
       usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
@@ -1440,7 +1451,7 @@ public class QkanHouKanData {
       usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(40);
       usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
-      usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32);
+      usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(40);
       usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(40);
       usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
@@ -1547,7 +1558,7 @@ public class QkanHouKanData {
       ctype[cid] = 7;
       width[cid++] = Float.parseFloat("3.2"); //サー
       ctype[cid] = 7;
-      width[cid++] = Float.parseFloat("3.6"); //人数
+      width[cid++] = Float.parseFloat("6.0"); //人数
       ctype[cid] = 7;
       width[cid++] = Float.parseFloat("6.8"); //二人目時間
       ctype[cid] = 7;
@@ -1565,7 +1576,7 @@ public class QkanHouKanData {
       ctype[cid] = 7;
       width[cid++] = Float.parseFloat("3.0"); //特管
       ctype[cid] = 7;
-      width[cid++] = Float.parseFloat("3.0"); //体制強化
+      width[cid++] = Float.parseFloat("4.0"); //体制強化
       ctype[cid] = 7;
       width[cid++] = Float.parseFloat("3.0"); //ターミナル
       ctype[cid] = 7;
@@ -1573,7 +1584,7 @@ public class QkanHouKanData {
       ctype[cid] = 7;
       width[cid++] = Float.parseFloat("3.0"); //2回越え
       ctype[cid] = 7;
-      width[cid++] = Float.parseFloat("3.0"); //同住
+      width[cid++] = Float.parseFloat("4.0"); //同住
       ctype[cid] = 7;
       width[cid++] = Float.parseFloat("4.5"); //中山間
       ctype[cid] = 7;

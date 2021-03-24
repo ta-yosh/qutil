@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.FileChannel;
+import java.nio.file.Files;
 
 public class DngFileUtil {
 
@@ -19,7 +20,18 @@ public class DngFileUtil {
     else if (ost.equals("Fre")) fileCopy3(src,dest);
     else if (ost.equals("Lin")) fileCopy3(src,dest);
     else if (ost.equals("Mac")) fileCopy3(src,dest);
-    else fileCopy2(src,dest);
+/*
+    else if (ost.equals("Mac")) {
+      File sf = new File(src);
+      File df = new File(dest);
+      fileCopy2(sf,df);
+    }
+*/
+    else {
+      File spt = new File(src);
+      File dpt = new File(dest);
+      fileCopy2(spt,dpt);
+    }
     }
     catch (Exception e) {
       System.out.println(e.toString());
@@ -59,7 +71,7 @@ public class DngFileUtil {
     }
   }
 
-  public void fileCopy2(String src, String dest) throws IOException {
+  public void fileCopy2(File src, File dest) throws IOException {
     FileInputStream in = null;
     FileOutputStream out = null;
     try {
@@ -140,6 +152,21 @@ public class DngFileUtil {
     if (ost.equals("Win")) return;
 
     String execStr = "chmod "+modStr+" "+fPath;
+    try {
+      Runtime runtime = Runtime.getRuntime();
+      Process process = runtime.exec(execStr);
+      int tmpI = process.waitFor();
+    } catch (Exception e) {
+      System.out.println(e.toString());
+    }
+  }
+
+  public void chOwn(String owner,String group,String fPath) {
+    String ost = System.getProperty("os.name").substring(0,3);
+    //if (ost.equals("Win") || ost.equals("Mac")) return;
+    if (ost.equals("Win")) return;
+
+    String execStr = "chown "+owner+":"+group+" "+fPath;
     try {
       Runtime runtime = Runtime.getRuntime();
       Process process = runtime.exec(execStr);

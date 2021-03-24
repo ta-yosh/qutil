@@ -12,6 +12,7 @@ public class DngGenericCombo {
   public DngGenericCombo(String[] obj) {
     this.values = new String[obj.length][1];
     for (int i=0;i<obj.length;i++) {
+      System.out.println(obj[i]);
       this.values[i][0] = obj[i];
     }
     cBox = new JComboBox(obj);

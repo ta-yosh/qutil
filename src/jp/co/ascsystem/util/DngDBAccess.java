@@ -9,6 +9,8 @@ import java.sql.*;
 import java.util.*;
 import java.io.*;
 
+import org.firebirdsql.pool.*;
+
 public class DngDBAccess {
 
     public int Cols;
@@ -17,6 +19,7 @@ public class DngDBAccess {
     public Vector usrValue;
 
     private Connection con;
+/*
     private String drv[] = { 
                              "org.firebirdsql.jdbc.FBDriver", 
                              "org.postgresql.Driver", 
@@ -27,12 +30,17 @@ public class DngDBAccess {
                    "jdbc:postgresql:",
                    "jdbc:odbc:"
     };
-
     private int drv_no;
-    private String url,driver,user,passwd;
+*/
+    private String url,user,passwd;
+    //private String driver;
     private int fetchCount = 0;
 
     public DngDBAccess(String rdbms,String uri,String usr,String pass) {
+      url = uri;
+      this.user = usr;
+      this.passwd = pass;
+     /*
       try {         
 	 drv_no = 0;
          if (rdbms=="firebird") drv_no = 0; 
@@ -40,19 +48,40 @@ public class DngDBAccess {
          if (rdbms=="msaccess") drv_no = 2; 
 
 	 driver = drv[drv_no];
-         url = dbPrefix[drv_no] + uri;
+         //url = dbPrefix[drv_no] + uri;
+         url = uri;
          this.user = usr;
          this.passwd = pass;
       } catch (Exception e) {
          System.err.println("データベースエラー"+e);
 	 System.exit(1);
       }
+      */
     }
     
     public boolean connect() {
       try {
-        Class.forName(driver);
-        con = DriverManager.getConnection(url ,user, passwd);
+        //FBWrappingDataSource ds = new FBWrappingDataSource ();
+        FBSimpleDataSource ds = new FBSimpleDataSource ();
+        ds.setDatabase (url);
+        ds.setUserName (user);
+        ds.setPassword (passwd);
+        ds.setCharSet ("MS932");
+        ds.setEncoding("SJIS_0208");
+        con = ds.getConnection ();
+        // /* Statement stm = c.createStatement ();
+        //ResultSet rs = stm.executeQuery ("SELECT 1 FROM rdb$database");
+        //rs.next ();
+        // */
+       
+        //Class.forName(driver);
+        //Properties props = new Properties();
+        //props.setProperty("user", user);
+        //props.setProperty("password", passwd);
+        //props.setProperty("encoding", "SJIS_0208");
+        //props.setProperty("charset", "MS932");
+        //con = DriverManager.getConnection(url ,props);
+        //con = DriverManager.getConnection(url+"?lc_ctype=SJIS_0208" ,user, passwd);
         return true;
       } catch (Exception e) {
         System.err.println("データベース接続エラー"+e);

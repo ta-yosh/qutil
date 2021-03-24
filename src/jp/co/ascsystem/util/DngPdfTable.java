@@ -163,9 +163,9 @@ public class DngPdfTable {
               }
             }
 
-            Font font =(ctype[j]==6)? mincho8:mincho9;
+            Font font =(ctype[j]==6)? mincho6:mincho7;
             if (ctype[j]>7) {
-               if (cval.length()>ctype[j]/2) font = mincho7;
+               if (cval.length()>ctype[j]/2) font = mincho6;
             }
             cell = new PdfPCell(new Phrase(cval,font));
           }

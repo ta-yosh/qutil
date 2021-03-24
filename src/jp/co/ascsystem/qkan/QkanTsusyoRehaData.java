@@ -153,7 +153,7 @@ public class QkanTsusyoRehaData {
         int COLU = 0;
         dbm.execQuery(buf.toString());
         taUnit.put("1160105",(new int[] {0,0,Integer.parseInt(dbm.getData(1,0).toString())})); //入浴
-        taUnit.put("1160111",(new int[] {0,0,Integer.parseInt(dbm.getData(1,1).toString()),Integer.parseInt(dbm.getData(1,4).toString()),Integer.parseInt(dbm.getData(1,5).toString())})); //リハマネ
+        taUnit.put("1160111",(new int[] {0,0,Integer.parseInt(dbm.getData(1,1).toString()),Integer.parseInt(dbm.getData(1,4).toString()),Integer.parseInt(dbm.getData(1,5).toString()),Integer.parseInt(dbm.getData(1,12).toString()),Integer.parseInt(dbm.getData(1,13).toString()),Integer.parseInt(dbm.getData(1,14).toString()),Integer.parseInt(dbm.getData(1,15).toString())})); //リハマネ
         taUnit.put("1160114",(new int[] {0,0,Integer.parseInt(dbm.getData(1,2).toString())})); //栄養
         taUnit.put("1160115",(new int[] {0,0,Integer.parseInt(dbm.getData(1,3).toString())})); //口腔
         taUnit.put("1160123",(new int[] {0,0,Integer.parseInt(dbm.getData(1,6).toString())})); //重度
@@ -161,44 +161,38 @@ public class QkanTsusyoRehaData {
         taUnit.put("18",(new int[] {0,0,Integer.parseInt(dbm.getData(1,8).toString()),Integer.parseInt(dbm.getData(1,9).toString())*2})); //送迎
         taUnit.put("1160112",(new int[] {0,0,Integer.parseInt(dbm.getData(1,10).toString())})); //短期
         taUnit.put("1160125",(new int[] {0,0,Integer.parseInt(dbm.getData(1,11).toString())})); //中重度
-        taUnit.put("1160122",(new int[] {0,0,Integer.parseInt(dbm.getData(1,13).toString()),Integer.parseInt(dbm.getData(1,14).toString()),Integer.parseInt(dbm.getData(1,12).toString())})); //サービス
-        COLU = 15;
+        taUnit.put("1160122",(new int[] {0,0,Integer.parseInt(dbm.getData(1,17).toString()),Integer.parseInt(dbm.getData(1,18).toString()),Integer.parseInt(dbm.getData(1,16).toString())})); //サービス
+        COLU = 19;
         taUnit.put("KAIZEN", (new int[] {0,0,
                      Integer.parseInt(dbm.getData(1,COLU++).toString()),     //処遇改善III(2017以前はII)
                      Integer.parseInt(dbm.getData(1,COLU++).toString()),    //処遇改善IV(2017以前はIII)
                      Integer.parseInt(dbm.getData(1,COLU++).toString()),    //処遇改善V(2017以前はIV)
                      Integer.parseInt(dbm.getData(1,COLU++).toString()),    //処遇改善II(2017以前はI)
-          (!KAI17) ? 0:Integer.parseInt(dbm.getData(1,COLU++).toString())})); //処遇改善I
-        COLU = (!KAI17) ? 19:20;
+                     Integer.parseInt(dbm.getData(1,COLU++).toString())})); //処遇改善I
         taUnit.put("1160121",(new int[] {0,0,Integer.parseInt(dbm.getData(1,COLU++).toString())})); //若年
         taUnit.put("1160126",(new int[] {0,0,Integer.parseInt(dbm.getData(1,COLU++).toString())})); //社会参加
         taUnit.put("1160119",(new int[] {0,0,Integer.parseInt(dbm.getData(1,COLU++).toString())})); //理学
+        taUnit.put("1160128",(new int[] {0,0,Integer.parseInt(dbm.getData(1,COLU++).toString()),Integer.parseInt(dbm.getData(1,COLU++).toString()),Integer.parseInt(dbm.getData(1,COLU++).toString()),Integer.parseInt(dbm.getData(1,COLU++).toString()),Integer.parseInt(dbm.getData(1,COLU++).toString())})); //提供体制
+        taUnit.put("1160129",(new int[] {0,0,Integer.parseInt(dbm.getData(1,COLU++).toString())})); //栄養スクリーニング
         taUnit.put("1160120",(new int[] {0,0,Integer.parseInt(dbm.getData(1,COLU++).toString()),Integer.parseInt(dbm.getData(1,COLU++).toString())})); //認知症
         taUnit.put("1160124",(new int[] {0,0,Integer.parseInt(dbm.getData(1,COLU++).toString()),Integer.parseInt(dbm.getData(1,COLU++).toString())})); //生活向上
         taUnit.put("12",(new int[] {0,0,Integer.parseInt(dbm.getData(1,COLU++).toString())})); //中山間
-        if (!KAI17) taKaizenCode = new String[] {"","",dbm.getData(3,15).toString(),dbm.getData(3,16).toString(),dbm.getData(3,17).toString(),dbm.getData(3,18).toString(),""};
-        else taKaizenCode = new String[] {"","",dbm.getData(3,15).toString(),dbm.getData(3,16).toString(),dbm.getData(3,17).toString(),dbm.getData(3,18).toString(),dbm.getData(3,19).toString()};
-        yaUnit.put("1660103",(new int[] {0,0,Integer.parseInt(dbm.getData(1,COLU++).toString())}));
-        yaUnit.put("1660104",(new int[] {0,0,Integer.parseInt(dbm.getData(1,COLU++).toString())}));
-        yaUnit.put("1660105",(new int[] {0,0,Integer.parseInt(dbm.getData(1,COLU++).toString())}));
-        yaUnit.put("1660106",(new int[] {0,0,Integer.parseInt(dbm.getData(1,COLU++).toString())}));
-        yaUnit.put("MULTI",(new int[] {0,0,0,Integer.parseInt(dbm.getData(1,COLU++).toString()),0,Integer.parseInt(dbm.getData(1,COLU++).toString()),Integer.parseInt(dbm.getData(1,COLU++).toString()),Integer.parseInt(dbm.getData(1,COLU++).toString())}));
-        if (!KAI17) {
-          yaUnit.put("1660108",(new int[] {0,0,Integer.parseInt(dbm.getData(1,35).toString()),Integer.parseInt(dbm.getData(1,37).toString()),Integer.parseInt(dbm.getData(1,48).toString()),0,Integer.parseInt(dbm.getData(1,36).toString()),Integer.parseInt(dbm.getData(1,38).toString()),Integer.parseInt(dbm.getData(1,49).toString())}));
-          yaUnit.put("16",(new int[] {0,0,Integer.parseInt(dbm.getData(1,39).toString()),0,Integer.parseInt(dbm.getData(1,41).toString()),0,Integer.parseInt(dbm.getData(1,40).toString()),0,Integer.parseInt(dbm.getData(1,42).toString())}));
-          yaUnit.put("1660107",(new int[] {0,0,Integer.parseInt(dbm.getData(1,43).toString())}));
-          yaUnit.put("KAIZEN",(new int[] {0,0,Integer.parseInt(dbm.getData(1,45).toString()),Integer.parseInt(dbm.getData(1,46).toString()),Integer.parseInt(dbm.getData(1,47).toString()),Integer.parseInt(dbm.getData(1,44).toString()),0}));
-          yaUnit.put("12",(new int[] {0,0,Integer.parseInt(dbm.getData(1,50).toString()),0,Integer.parseInt(dbm.getData(1,51).toString())}));
-          yaKaizenCode = new String[] {"","",dbm.getData(3,45).toString(),dbm.getData(3,46).toString(),dbm.getData(3,47).toString(),dbm.getData(3,44).toString(),""};
-        }
-        else {
-          yaUnit.put("1660108",(new int[] {0,0,Integer.parseInt(dbm.getData(1,37).toString()),Integer.parseInt(dbm.getData(1,39).toString()),Integer.parseInt(dbm.getData(1,50).toString()),0,Integer.parseInt(dbm.getData(1,38).toString()),Integer.parseInt(dbm.getData(1,40).toString()),Integer.parseInt(dbm.getData(1,51).toString())}));
-          yaUnit.put("16",(new int[] {0,0,Integer.parseInt(dbm.getData(1,41).toString()),0,Integer.parseInt(dbm.getData(1,43).toString()),0,Integer.parseInt(dbm.getData(1,42).toString()),0,Integer.parseInt(dbm.getData(1,44).toString())}));
-          yaUnit.put("1660107",(new int[] {0,0,Integer.parseInt(dbm.getData(1,45).toString())}));
-          yaUnit.put("KAIZEN",(new int[] {0,0,Integer.parseInt(dbm.getData(1,47).toString()),Integer.parseInt(dbm.getData(1,48).toString()),Integer.parseInt(dbm.getData(1,49).toString()),Integer.parseInt(dbm.getData(1,46).toString()),Integer.parseInt(dbm.getData(1,36).toString())}));
-          yaUnit.put("12",(new int[] {0,0,Integer.parseInt(dbm.getData(1,52).toString()),0,Integer.parseInt(dbm.getData(1,53).toString())}));
-          yaKaizenCode = new String[] {"","",dbm.getData(3,47).toString(),dbm.getData(3,48).toString(),dbm.getData(3,49).toString(),dbm.getData(3,46).toString(),dbm.getData(3,36).toString()};
-        }
+        taKaizenCode = new String[] {"","",dbm.getData(3,19).toString(),dbm.getData(3,20).toString(),dbm.getData(3,21).toString(),dbm.getData(3,22).toString(),dbm.getData(3,23).toString()};
+        yaUnit.put("1660103",(new int[] {0,0,Integer.parseInt(dbm.getData(1,COLU++).toString())})); //運動
+        yaUnit.put("1660104",(new int[] {0,0,Integer.parseInt(dbm.getData(1,COLU++).toString())})); //栄養改善
+        yaUnit.put("1660105",(new int[] {0,0,Integer.parseInt(dbm.getData(1,COLU++).toString())})); //口腔
+        yaUnit.put("1660106",(new int[] {0,0,Integer.parseInt(dbm.getData(1,COLU++).toString())})); //事業所評価
+        yaUnit.put("MULTI",(new int[] {0,0,0,Integer.parseInt(dbm.getData(1,COLU++).toString()),0,Integer.parseInt(dbm.getData(1,COLU++).toString()),Integer.parseInt(dbm.getData(1,COLU++).toString()),Integer.parseInt(dbm.getData(1,COLU++).toString())})); //複数
+        yaUnit.put("1660113",(new int[] {0,0,Integer.parseInt(dbm.getData(1,COLU++).toString())})); //リハマネ
+        COLU++; //処遇改善Iをすきっぷ
+          yaUnit.put("1660108",(new int[] {0,0,Integer.parseInt(dbm.getData(1,48).toString()),Integer.parseInt(dbm.getData(1,50).toString()),Integer.parseInt(dbm.getData(1,61).toString()),0,Integer.parseInt(dbm.getData(1,49).toString()),Integer.parseInt(dbm.getData(1,51).toString()),Integer.parseInt(dbm.getData(1,62).toString())}));
+          yaUnit.put("16",(new int[] {0,0,Integer.parseInt(dbm.getData(1,52).toString()),0,Integer.parseInt(dbm.getData(1,54).toString()),0,Integer.parseInt(dbm.getData(1,63).toString()),0,Integer.parseInt(dbm.getData(1,53).toString()),0,Integer.parseInt(dbm.getData(1,55).toString()),0,Integer.parseInt(dbm.getData(1,64).toString())}));
+          yaUnit.put("1660107",(new int[] {0,0,Integer.parseInt(dbm.getData(1,56).toString())}));
+        yaUnit.put("1660112",(new int[] {0,0,Integer.parseInt(dbm.getData(1,65).toString())})); //
+        yaUnit.put("1660114",(new int[] {0,0,Integer.parseInt(dbm.getData(1,66).toString()),Integer.parseInt(dbm.getData(1,67).toString())})); //
+          yaUnit.put("KAIZEN",(new int[] {0,0,Integer.parseInt(dbm.getData(1,58).toString()),Integer.parseInt(dbm.getData(1,59).toString()),Integer.parseInt(dbm.getData(1,60).toString()),Integer.parseInt(dbm.getData(1,57).toString()),Integer.parseInt(dbm.getData(1,47).toString())}));
+          yaUnit.put("12",(new int[] {0,0,Integer.parseInt(dbm.getData(1,68).toString()),0,Integer.parseInt(dbm.getData(1,69).toString())}));
+          yaKaizenCode = new String[] {"","",dbm.getData(3,58).toString(),dbm.getData(3,59).toString(),dbm.getData(3,60).toString(),dbm.getData(3,57).toString(),dbm.getData(3,47).toString()};
         buf.delete(0,buf.length());
         buf.append("select provider_id,system_service_kind_detail,");
         buf.append("system_bind_path,detail_value from ");
@@ -228,15 +222,15 @@ public class QkanTsusyoRehaData {
         }
       }
       String osn = System.getProperty("os.name").substring(0,3);
-      tValue.put("1160104",(new String[] {"","1\uff5e2hr","2\uff5e3hr","3\uff5e4hr","4\uff5e6hr","6\uff5e8hr","8\uff5e9hr","9\uff5e10hr","10\uff5e11hr","11\uff5e12hr","12\uff5e13hr","13\uff5e14hr"}));
+      tValue.put("1160104",(new String[] {"","1\uff5e2hr","2\uff5e3hr","3\uff5e4hr","4\uff5e5hr","5\uff5e6hr","6\uff5e7hr","7\uff5e8hr","8\uff5e9hr","9\uff5e10hr","10\uff5e11hr","11\uff5e12hr","12\uff5e13hr","13\uff5e14hr"}));
       tValue.put("1160105",(new String[] {"","無","有"}));
       tValue.put("1160109",(new String[] {"","無","超","欠"}));
-      tValue.put("1160111",(new String[] {"","無","I","II(<=6)","II(>6)"}));
+      tValue.put("1160111",(new String[] {"","無","I","II(6月以内)","II(6月超え)","III(6月以内)","III(6月超え)","IV(6月以内)","IV(6月超え)"}));
       tValue.put("1160112",(new String[] {"","無","有"}));
       tValue.put("1160113",(new String[] {"","無","有"}));
       tValue.put("1160114",(new String[] {"","無","有"}));
       tValue.put("1160115",(new String[] {"","無","有"}));
-      tValue.put("1160116",(new String[] {"","通常","通常老","大I","大I老","大II","大II老"}));
+      tValue.put("1160116",(new String[] {"","通常","通常老","大I","大I老","大II","大II老","通常介医","大I介医","大II介医"}));
       tValue.put("1160119",(new String[] {"","無","有"}));
       tValue.put("1160120",(new String[] {"","無","I","II"}));
       tValue.put("1160121",(new String[] {"","無","有"}));
@@ -246,6 +240,8 @@ public class QkanTsusyoRehaData {
       tValue.put("1160125",(new String[] {"","無","有"}));
       tValue.put("1160126",(new String[] {"","無","有"}));
       tValue.put("1160127",(new String[] {"","無","有"}));
+      tValue.put("1160128",(new String[] {"","無","有"}));
+      tValue.put("1160129",(new String[] {"","無","有"}));
       if (!KAI17) tValue.put("KAIZEN",(new String[] {"","無","II","III","IV","I","無"}));
       else tValue.put("KAIZEN",(new String[] {"","無","III","IV","V","II","I"}));
       tValue.put("12",(new String[] {"","無","有"}));
@@ -258,9 +254,13 @@ public class QkanTsusyoRehaData {
       yValue.put("1660105",(new String[] {"","無","有"}));
       yValue.put("1660106",(new String[] {"","無","有"}));
       yValue.put("1660107",(new String[] {"","無","有"}));
-      yValue.put("1660108",(new String[] {"","無","I21","II1","I11","無","I22","II2","I12"}));
+      yValue.put("1660108",(new String[] {"","無","Iロ","II","Iイ","無","Iロ","II","Iイ"}));
       yValue.put("1660109",(new String[] {"","無","有"}));
-      yValue.put("1660110",(new String[] {"","病/診","施設"}));
+      yValue.put("1660110",(new String[] {"","病/診","老健","介医"}));
+      yValue.put("1660112",(new String[] {"","無","有"}));
+      yValue.put("1660113",(new String[] {"","無","有"}));
+      yValue.put("1660114",(new String[] {"","無","3月以内","3超6月以内"}));
+      yValue.put("1660115",(new String[] {"","無","有"}));
       if (!KAI17) yValue.put("KAIZEN",(new String[] {"","無","II","III","IV","I","無"}));
       else yValue.put("KAIZEN",(new String[] {"","無","III","IV","V","II","I"}));
       yValue.put("MULTI",(new String[] {"","無","無","I1","無","I2","I3","II"}));
@@ -661,7 +661,7 @@ public class QkanTsusyoRehaData {
                 buf.delete(0,buf.length());
                 buf.append("select DETAIL_VALUE from CLAIM_DETAIL_TEXT_"+cYear);
                 buf.append(" where SYSTEM_BIND_PATH=301009 and CLAIM_ID = (");
-                buf.append("select CLAIM_ID from CLAIM_DETAIL_TEXT_"+cYear);
+                buf.append("select max(CLAIM_ID) from CLAIM_DETAIL_TEXT_"+cYear);
                 buf.append(" where CLAIM_ID in (select CLAIM_ID from ");
                 buf.append("CLAIM where PATIENT_ID=");
                 buf.append(pNo);
@@ -793,12 +793,14 @@ public class QkanTsusyoRehaData {
               if (ival==10) sval="A";
               if (ival==11) sval="B";
               if (ival==12) sval="C";
+              if (ival==13) sval="D";
+              if (ival==14) sval="E";
               String[] val;
               System.out.println("sbp = "+sbp0+" detailValu = "+ival);
               if (sbp0==15) continue;
               switch (sbp0) {
-                case 1160116 : ssCode[0] = (new Integer(ival/2+ival%2)).toString();
-                               ssCode[1] = (new Integer(2-ival%2)).toString();
+                case 1160116 : ssCode[0] = (ival>6) ? (new Integer(ival-6)).toString():(new Integer(ival/2+ival%2)).toString();
+                               ssCode[1] = (ival>6) ? "3":(new Integer(2-ival%2)).toString();
                                break;
                 case 1160104 : ssCode[2] = sval; break;
                 case 1160109 : ssCode[3] = sval; break;
@@ -850,6 +852,8 @@ public class QkanTsusyoRehaData {
             pline.addElement((String)tVal.get("18"));      //送迎
             pline.addElement("");                          //運動
             pline.addElement("");                          //評価
+            pline.addElement((String)tVal.get("1160128")); //リハ提供
+            pline.addElement((String)tVal.get("1160129")); //栄養スクリーニング
             pline.addElement((String)tVal.get("16"));      //同住
             pline.addElement("");                          //日割
             pline.addElement("");                          //選択複数
@@ -877,7 +881,7 @@ public class QkanTsusyoRehaData {
             yoVal.put("1660110","");
             yoVal.put("12","");
             yoVal.put("16","");
-            String[] ssCode = new String[] {"0",(String)careCode.get(cR),"0","0"};
+            String[] ssCode = new String[] {"0",(String)careCode.get(cR),"0","0","0"};
             int multi = 0;
             int multi_less = 0;
             for (int j=0;j<dbm2.Rows;j++) {
@@ -891,17 +895,19 @@ public class QkanTsusyoRehaData {
               switch (sbp0) {
                 case 1660110 : ssCode[0] = sval; break;
                 case 1660101 : ssCode[2] = sval; break;
-                case 1660102 : ssCode[3] = sval; break;
+                case 1660115 : ssCode[3] = sval; break;
+                case 1660102 : ssCode[4] = sval; break;
                 case 1660108 : ival += (cR.equals("13")) ? 4:0; break;
                 case 16 : ival += (cR.equals("13")) ? 2:0; 
-                          ival += (ssCode[0].equals("2")) ? 2:0; break;
-                case 12 : ival += (ssCode[3].equals("2")) ? 2:0; break;
+                          ival += (ssCode[0].equals("2")) ? 2:0;
+                          ival += (ssCode[0].equals("3")) ? 4:0; break;
+                case 12 : ival += (ssCode[4].equals("2")) ? 2:0; break;
               }
               System.out.println("sbp = "+sbp0+" detailValu = "+ival);
 
               if (sbp0==14) {
               }
-              else if (sbp0==1660110 || sbp0==1660102 || sbp0==1660101) {
+              else if (sbp0==1660110 || sbp0==1660102 || sbp0==1660101 || sbp0==1660115) {
                 val = (String[])yValue.get(ssbp0);
                 yoVal.put(ssbp0,val[ival]);
               }
@@ -949,7 +955,7 @@ public class QkanTsusyoRehaData {
             pline.addElement((String)yoVal.get("1660101")); //人員
             pline.addElement("");                           //理学
             pline.addElement("");                           //入浴
-            pline.addElement("");                           //リハマネ
+            pline.addElement((String)yoVal.get("1660113")); //リハマネ
             pline.addElement("");                           //短期
             pline.addElement((String)yoVal.get("1660107")); //若年
             pline.addElement((String)yoVal.get("1660104")); //栄養
@@ -957,19 +963,21 @@ public class QkanTsusyoRehaData {
             pline.addElement("");                           //認知症
             pline.addElement("");                           //重度
             pline.addElement((String)yoVal.get("1660108")); //サービス
-            pline.addElement("");                           //行為向上
+            pline.addElement((String)yoVal.get("1660114")); //行為向上
             pline.addElement("");                           //中重度
             pline.addElement("");                           //参加支援
-            pline.addElement("");                           //リハ後継続
+            pline.addElement((String)yoVal.get("1660115")); //リハ後継続
             pline.addElement((String)yoVal.get("12"));      //中山間
             pline.addElement("");      //送迎
             pline.addElement((String)yoVal.get("1660103")); //運動
             pline.addElement((String)yoVal.get("1660106")); //評価
+            pline.addElement("");      //提供
+            pline.addElement((String)yoVal.get("1660112")); //栄養スクリーニング
             pline.addElement((String)yoVal.get("16"));      //同住
             pline.addElement((String)yoVal.get("1660102")); //日割
             pline.addElement((String)yoVal.get("MULTI"));   //選択複数
             pline.addElement((String)yoVal.get("KAIZEN")); //処遇改善
-            for (int k=0;k<4;k++) pointCode += ssCode[k];
+            for (int k=0;k<5;k++) pointCode += ssCode[k];
             System.out.println("pointCode : "+pointCode);
             int[] add = (int[])yaUnit.get("KAIZEN");
             kaizenRate = (double)add[kaizen]/1000.0;
@@ -1266,8 +1274,8 @@ public class QkanTsusyoRehaData {
               System.out.println(" kaizen = "+kp);
               p += kp;
               int hiyou =(int)((double) p * unitRate);
-              //int futan = hiyou - (int)((double)hiyou/100.0*(double)insRate);
-              int futan = (int)((double)hiyou/100.0*(double)(100-insRate));
+              int futan = hiyou - (int)Math.round((double)hiyou/100.0*(double)insRate);
+              //int futan = (int)((double)hiyou/100.0*(double)(100-insRate));
               //if (hiyou%10>0) futan +=1;
               System.out.println("hiyou = "+hiyou+" futan = "+futan);
               if (hiyou>0) totalFee1 += hiyou;
@@ -1418,7 +1426,9 @@ public class QkanTsusyoRehaData {
       fieldName.addElement("送迎");
       fieldName.addElement("運動");
       fieldName.addElement("評価");
-      fieldName.addElement("同住");
+      fieldName.addElement("体制");
+      fieldName.addElement("スク");
+      fieldName.addElement("同建");
       fieldName.addElement("日割");
       fieldName.addElement("複数");
       fieldName.addElement("処遇改善");
@@ -1486,7 +1496,7 @@ public class QkanTsusyoRehaData {
       usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(65); //時区
       usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
-      usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(40); //施設
+      usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(60); //施設
       usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32); //人員
       usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
@@ -1494,7 +1504,7 @@ public class QkanTsusyoRehaData {
       usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32); //入浴
       usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
-      usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(46); //マネ
+      usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(60); //マネ
       usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32); //短期
       usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
@@ -1510,7 +1520,7 @@ public class QkanTsusyoRehaData {
       usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32); //サー
       usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
-      usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32); //向上
+      usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(65); //向上
       usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32); //中重度
       usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
@@ -1525,6 +1535,10 @@ public class QkanTsusyoRehaData {
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32); //運動
       usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32); //評価
+      usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
+      usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32); //提供体制
+      usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
+      usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32); //スク
       usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
       usrTbl.getColumnModel().getColumn(cid++).setPreferredWidth(32); //同住
       usrTbl.getColumnModel().getColumn(cid).setCellRenderer(cen);
@@ -1627,7 +1641,7 @@ public class QkanTsusyoRehaData {
       ctype[cid] = 7; // 0 - normal 1 - add comma 2 - align right
       width[cid++] = Float.parseFloat("6.0"); //時間区分
       ctype[cid] = 7; // 0 - normal 1 - add comma 2 - align right
-      width[cid++] = Float.parseFloat("5.2"); //施設区分
+      width[cid++] = Float.parseFloat("6.5"); //施設区分
       ctype[cid] = 7; // 0 - normal 1 - add comma 2 - align right
       width[cid++] = Float.parseFloat("2.5"); //人員
       ctype[cid] = 7; // 0 - normal 1 - add comma 2 - align right
@@ -1651,7 +1665,7 @@ public class QkanTsusyoRehaData {
       ctype[cid] = 7; // 0 - normal 1 - add comma 2 - align right
       width[cid++] = Float.parseFloat("3.0"); //サービス
       ctype[cid] = 7; // 0 - normal 1 - add comma 2 - align right
-      width[cid++] = Float.parseFloat("3.0"); //向上
+      width[cid++] = Float.parseFloat("6.0"); //向上
       ctype[cid] = 7; // 0 - normal 1 - add comma 2 - align right
       width[cid++] = Float.parseFloat("3.0"); //中重度
       ctype[cid] = 7; // 0 - normal 1 - add comma 2 - align right
@@ -1666,6 +1680,10 @@ public class QkanTsusyoRehaData {
       width[cid++] = Float.parseFloat("3.0"); //運動
       ctype[cid] = 7; // 0 - normal 1 - add comma 2 - align right
       width[cid++] = Float.parseFloat("3.0"); //評価
+      ctype[cid] = 7; // 0 - normal 1 - add comma 2 - align right
+      width[cid++] = Float.parseFloat("3.0"); //提供体制
+      ctype[cid] = 7; // 0 - normal 1 - add comma 2 - align right
+      width[cid++] = Float.parseFloat("3.0"); //スク
       ctype[cid] = 7; // 0 - normal 1 - add comma 2 - align right
       width[cid++] = Float.parseFloat("3.0"); //同住
       ctype[cid] = 7; // 0 - normal 1 - add comma 2 - align right

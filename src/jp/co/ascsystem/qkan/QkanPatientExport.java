@@ -35,6 +35,8 @@ public class QkanPatientExport extends QkanPatientImport {
     String dbOutPath=null;
     String realOutPath=null;
     String realInPath=null;
+    File srcFile=null;
+    File destFile=null;
     boolean isMbOutPath;
 
     public QkanPatientExport() {
@@ -302,14 +304,17 @@ public class QkanPatientExport extends QkanPatientImport {
             finalizeExportDB();
             if (isMbOutPath) {
               try {
-                new DngFileUtil().fileCopy(dbOutPath,realOutPath);
-              } catch(IOException er) {
+                //new DngFileUtil().fileCopy(dbOutPath,realOutPath);
+                new File(dbOutPath).renameTo(destFile);
+                destFile.setReadable(true,false);
+                destFile.setWritable(true,false);
+              } catch(NullPointerException er) {
                 er.printStackTrace();
                 statMessage(STATE_ERROR,"書き出し先ファイルの保存に失敗しました。");
                 return;
               }
               finally {
-                new File(dbOutPath).delete();
+                //new File(dbOutPath).delete();
                 dbOutPath = realOutPath;
               }
             }
@@ -406,6 +411,7 @@ public class QkanPatientExport extends QkanPatientImport {
       chooser.setTitle("書き出し用FDBファイルの保存場所を指定して下さい。");
       chooser.setMBPathEnable(true);
       File file = chooser.saveFile(outPath,fname);
+      destFile = file;
       path = file.getPath();
       isMbOutPath = chooser.isMbPath;
     } catch(Exception e) {
@@ -495,6 +501,7 @@ public class QkanPatientExport extends QkanPatientImport {
                          ,"M_MENU","M_NO_CONTROL","M_PARAMETER","M_POST"
                          ,"M_QKAN_VERSION","M_RESIDENCE_FOOD_COST","M_RYOYOHI"
                          ,"M_SERVICE","M_SERVICE_CODE","M_SPECIAL_CLINIC"
+                         ,"M_SJ_SERVICE_CODE","M_SJ_SERVICE_CODE_HISTORY"
                          ,"PROVIDER_MENU","PROVIDER_SERVICE"
                          ,"PROVIDER_SERVICE_DETAIL_DATE"
                          ,"PROVIDER_SERVICE_DETAIL_INTEGER"
@@ -525,7 +532,7 @@ public class QkanPatientExport extends QkanPatientImport {
         String sql;
         for(int i=0;i<tables.length;i++) {
           sql = "drop table "+tables[i];        
-          //System.out.println(sql);
+          System.out.println(sql);
           dbm.execUpdate(sql);
           if (tables[i].matches("^[^M][^_]*_DETAIL.*")) {
             int minYear = (tables[i].matches("^S.*")) ? iTable.sdMinYear:iTable.cdMinYear;
@@ -533,14 +540,17 @@ public class QkanPatientExport extends QkanPatientImport {
 
             for (int y=minYear;y<=maxYear;y++) {
               sql = "delete from "+tables[i]+"_"+y;        
-              //System.out.println(sql);
+              System.out.println(sql);
               try {dbm.execUpdate(sql);} catch(Exception e){};
             }
+            sql = "delete from "+tables[i]+"_2006";        
+            System.out.println(sql);
+            try {dbm.execUpdate(sql);} catch(Exception e){};
           }
         }
         for(int i=0;i<pTable.length;i++) {
           sql = "delete from "+pTable[i];        
-          //System.out.println(sql);
+          System.out.println(sql);
           dbm.execUpdate(sql);
         }
         dbm.Close();
@@ -634,13 +644,18 @@ public class QkanPatientExport extends QkanPatientImport {
              //  cmd[7] = quot+dbTmpPath+quot;
              //  cmd[8] = quot+dbOutPath+quot;
              //} else {
+               System.out.println("gbak -b end.");
                cmd[1] = "-rep";
                cmd[6] = quot+dbTmpPath+quot;
                cmd[7] = quot+dbServer+":"+dbOutPath+quot;
              //}
              process = runtime.exec(cmd,null);
              tmpI = process.waitFor();
-             if (!osn.equals("Win") && !osn.equals("Mac")) new DngFileUtil().chMod("666",cmd[7]);
+             if (tmpI==0) {
+               System.out.println("gbak -rep complete.");
+             }
+             if (osn.equals("Mac")) new DngFileUtil().chOwn("$USER","firebird",cmd[7]);
+             if (!osn.equals("Win")) new DngFileUtil().chMod("660",cmd[7]);
              //new File(dbTmpPath).delete();
              //process = runtime.exec(rmc);
              //tmpI = process.waitFor();
