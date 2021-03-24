@@ -48,7 +48,7 @@ public class QkanPatientSelect {
       try {
         BufferedReader reader = new BufferedReader(new FileReader(csvFile));
         while ((line=reader.readLine()) !=null) {
-          String[] ritems = new String[15];
+          String[] ritems = new String[19];
           String[] items = line.split(",");
           int skip=0;
           int col=0;
@@ -98,7 +98,10 @@ public class QkanPatientSelect {
     }
 
     public QkanPatientSelect(String dbUri,String dbUser,String dbPass) {
+      careRate.put("1","非該当");
+      careRate.put("6","事業対象者");
       careRate.put("01","非該当");
+      careRate.put("06","事業対象者");
       careRate.put("11","経過的要介護");
       careRate.put("12","要支援1");
       careRate.put("13","要支援2");
@@ -122,8 +125,11 @@ public class QkanPatientSelect {
       buf.append("PATIENT_NINTEI_HISTORY.INSURE_VALID_START,");
       buf.append("PATIENT_NINTEI_HISTORY.INSURE_VALID_END,");
       buf.append("PATIENT_NINTEI_HISTORY.PLANNER,");
+      buf.append("PATIENT_NINTEI_HISTORY.PROVIDER_ID,");
       buf.append("PROVIDER.PROVIDER_NAME,");
-      buf.append("PATIENT_NINTEI_HISTORY.INSURED_ID from PATIENT ");
+      buf.append("PATIENT_NINTEI_HISTORY.INSURE_RATE,");
+      buf.append("PATIENT_NINTEI_HISTORY.INSURED_ID,");
+      buf.append("PATIENT_NINTEI_HISTORY.INSURER_ID from PATIENT ");
       buf.append("left outer join PATIENT_NINTEI_HISTORY on ");
       buf.append("(PATIENT_NINTEI_HISTORY.PATIENT_ID=PATIENT.PATIENT_ID) and ");
       buf.append("PATIENT_NINTEI_HISTORY.NINTEI_HISTORY_ID=");
@@ -139,7 +145,7 @@ public class QkanPatientSelect {
         dbm.Close();
         Rows = dbm.Rows;
         System.out.println("Rows = "+Rows);
-        Object data[][] = new Object[15][Rows];
+        Object data[][] = new Object[19][Rows];
         for (int i=0;i<Rows;i++) {
           StringBuffer sb = new StringBuffer();
           data[0][i] = dbm.getData("PATIENT_ID",i);
@@ -199,15 +205,19 @@ public class QkanPatientSelect {
           //if (dbm.getData("INSURE_VALID_END",i)!=null)
           data[12][i] = dbm.getData("INSURE_VALID_END",i);
           if (dbm.getData("PLANNER",i)!=null)
-          data[13][i] = (Integer.parseInt(dbm.getData("PLANNER",i).toString())==1) ? dbm.getData("PROVIDER_NAME",i):"";
+          data[13][i] = (Integer.parseInt(dbm.getData("PLANNER",i).toString())==1 || Integer.parseInt(dbm.getData("PLANNER",i).toString())==3) ? dbm.getData("PROVIDER_NAME",i):"";
           if (dbm.getData("INSURED_ID",i)!=null)
           data[14][i] = dbm.getData("INSURED_ID",i);
+          data[15][i] = dbm.getData("INSURER_ID",i);
+          data[16][i] = dbm.getData("INSURE_RATE",i);
+          data[17][i] = dbm.getData("PLANNER",i);
+          data[18][i] = dbm.getData("PROVIDER_ID",i);
         }
 
         for (int j=0;j<Rows;j++) {
-          int[] num = new int[] {0,1,2,3,4,5,6,10,11,12,13,7,8,9,14};
+          int[] num = new int[] {0,1,2,3,4,5,6,10,11,12,13,7,8,9,14,15,16,17,18};
           Vector rdat = new Vector();
-          for (int i=0;i<15;i++) {
+          for (int i=0;i<19;i++) {
             if (i==6) {
               String str;
               Integer age;
@@ -289,14 +299,14 @@ public class QkanPatientSelect {
     }
 
     public Vector getPatientByPno(int pno,int nno) {
-      int[] num = new int[] {0,1,2,3,4,5,6,11,12,13,7,8,9,10,14};
+      int[] num = new int[] {0,1,2,3,4,5,6,11,12,13,7,8,9,10,14,15,16,17,18};
       Vector dat = new Vector();
       int no = nno;
       for (int i=0;i<usrTbl.getRowCount();i++) {
         if (pno==Integer.parseInt((usrTbl.getValueAt(i,0)).toString())) {
           if (nno<0) dat.addElement(new Integer(-no));
           else dat.addElement(new Integer(nno));
-          for (int j=1;j<15;j++) {
+          for (int j=1;j<19;j++) {
              if (nno<0) {
                if (nno==-9999999 && j>6 && j<11) dat.addElement(" ");
                else dat.addElement(usrTbl.getValueAt(i,j));
@@ -312,7 +322,7 @@ public class QkanPatientSelect {
 
     public String getPatientBasicDataCsv(int pno) {
       StringBuffer csvRecord;
-      int[] num = new int[] {0,1,2,3,4,5,6,11,12,13,7,8,9,10,14};
+      int[] num = new int[] {0,1,2,3,4,5,6,11,12,13,7,8,9,10,14,15,16,17,18};
       for (int i=0;i<usrTbl.getRowCount();i++) {
         if (pno==Integer.parseInt((usrTbl.getValueAt(i,0)).toString())) {
            csvRecord = new StringBuffer();
@@ -640,6 +650,10 @@ public class QkanPatientSelect {
       fieldName.addElement("住所");
       fieldName.addElement("連絡先(Tel)");
       fieldName.addElement("被保険者番号");
+      fieldName.addElement("保険者番号");
+      fieldName.addElement("給付率");
+      fieldName.addElement("作成区分");
+      fieldName.addElement("事業所番号");
         dtm = new DefaultTableModel(data, fieldName);
         sorter = new TableSorter2(dtm);
         usrTbl = new JTable(sorter);
@@ -670,6 +684,14 @@ public class QkanPatientSelect {
         usrTbl.getColumnModel().getColumn(13).setPreferredWidth(100);
         usrTbl.getColumnModel().getColumn(14).setMinWidth(0);
         usrTbl.getColumnModel().getColumn(14).setMaxWidth(0);
+        usrTbl.getColumnModel().getColumn(15).setMinWidth(0);
+        usrTbl.getColumnModel().getColumn(15).setMaxWidth(0);
+        usrTbl.getColumnModel().getColumn(16).setMinWidth(0);
+        usrTbl.getColumnModel().getColumn(16).setMaxWidth(0);
+        usrTbl.getColumnModel().getColumn(17).setMinWidth(0);
+        usrTbl.getColumnModel().getColumn(17).setMaxWidth(0);
+        usrTbl.getColumnModel().getColumn(18).setMinWidth(0);
+        usrTbl.getColumnModel().getColumn(18).setMaxWidth(0);
         usrTbl.getTableHeader().setReorderingAllowed(false);
         JScrollPane scrPane = new JScrollPane();
         scrPane.getViewport().setView(usrTbl);

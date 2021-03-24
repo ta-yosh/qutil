@@ -48,7 +48,7 @@ public class QkanDBUtilMain {
     //final Color btnColor6 = new Color(246,246,250);
     final QkanDBUtilMain idm = new QkanDBUtilMain();
     final JFrame fr = new JFrame();
-    fr.setTitle("給管鳥 データユーティリティ ver4.1");
+    fr.setTitle("給管鳥 データユーティリティ ver4.3");
     fr.setIconImage(idm.icon);
     final Container contentPane = fr.getContentPane();
     contentPane.setLayout(new BorderLayout());
