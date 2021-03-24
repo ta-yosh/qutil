@@ -321,7 +321,12 @@ public class QkanTsusyoRehaData {
             String m = dbm.getData(1,i).toString();
             ymdata[i][0] = Integer.parseInt(y);
             ymdata[i][1] = Integer.parseInt(m);
-            ym[i] = "平成"+(new Integer(ymdata[i][0]-1988)).toString()+"年"+m+"月";
+            String ymc = y+ ((ymdata[i][1] <10)? "0":"") +  m;
+            if (Integer.parseInt(ymc) > 201904) {
+              ym[i] = "令和"+(new Integer(ymdata[i][0]-2018)).toString()+"年"+m+"月";
+            } else {
+              ym[i] = "平成"+(new Integer(ymdata[i][0]-1988)).toString()+"年"+m+"月";
+            }
             System.out.println(ym[i]);
           }
           targetYear = ymdata[0][0];

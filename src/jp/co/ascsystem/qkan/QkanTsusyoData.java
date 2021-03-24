@@ -340,7 +340,13 @@ public class QkanTsusyoData {
             String m = dbm.getData(1,i).toString();
             ymdata[i][0] = Integer.parseInt(y);
             ymdata[i][1] = Integer.parseInt(m);
-            ym[i] = "平成"+(new Integer(ymdata[i][0]-1988)).toString()+"年"+m+"月";
+            
+            String ymc = y+ ((ymdata[i][1] <10)? "0":"") +  m;
+            if (Integer.parseInt(ymc) > 201904) {
+              ym[i] = "令和"+(new Integer(ymdata[i][0]-2018)).toString()+"年"+m+"月";
+            } else {
+              ym[i] = "平成"+(new Integer(ymdata[i][0]-1988)).toString()+"年"+m+"月";
+            }
             System.out.println(ym[i]);
           }
           targetYear = ymdata[0][0];
@@ -569,7 +575,7 @@ public class QkanTsusyoData {
         buf.append("INSURE_RATE,SYSTEM_SERVICE_KIND_DETAIL");
         buf.append(",SERVICE.SERVICE_ID,LAST");
         buf.append(",STARTT,SERVICE_USE_TYPE,SERVICE_DATE,JOTAI_CODE");
-        buf.append(" order by SYSTEM_SERVICE_KIND_DETAIL,SERVICE.PATIENT_ID");
+        buf.append(" order by SYSTEM_SERVICE_KIND_DETAIL,SERVICE.PATIENT_ID,SERVICE_USE_TYPE desc");
         buf.append(",LAST desc,service_date asc,SID asc,STARTT asc");
 
         String sql = buf.toString();
@@ -616,6 +622,7 @@ public class QkanTsusyoData {
                 pNo = lastP;
                 sbp = lastSbp;
                 i--;
+                System.out.println("sids = "+sids+" monfina = "+ monfin + "lastPNO =" + lastP);
                 System.out.println("tbl Create start");
               } else {
                 sids = dbm.getData("SID",i).toString();
@@ -630,7 +637,7 @@ public class QkanTsusyoData {
               if (targetDay>0) continue;
               else if (monfin) continue;
               else i--;
-              System.out.println("tbl create start");
+              System.out.println("tbl create start sids = "+sids);
             } else {
               if (targetDay==0) {
                 sids += ","+dbm.getData("SID",i).toString();
@@ -805,6 +812,7 @@ public class QkanTsusyoData {
           if (targetDay==0) {
             buf.append("max(DETAIL_VALUE) as DETAIL_VALUE");
             buf.append(",sum(DETAIL_VALUE-1) as DETAIL_VALUE2");
+            buf.append(",sum(DETAIL_VALUE) as DETAIL_VALUE3");
           }
           else
             buf.append("DETAIL_VALUE");
@@ -912,6 +920,7 @@ public class QkanTsusyoData {
                 else {
                   if (targetDay==0) {
                     int kcn = Integer.parseInt(dbm2.getData("DETAIL_VALUE2",j).toString());
+                    System.out.println("sum(COUNT) = "+dbm2.getData("DETAIL_VALUE3",j));
                     if (kcn==1) { 
                       addUnit += add[key]; 
                       tVal.put(Integer.toString(sbp0),"1回");
